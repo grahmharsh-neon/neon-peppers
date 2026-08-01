@@ -1,13 +1,10 @@
-NEON PEPPERS RESEARCH VERIFICATION SITE
+NEON PEPPERS V2
 
-1. Unzip this package.
-2. In the empty GitHub neon-peppers repository, choose “uploading an existing file.”
-3. Upload ALL files and the assets folder from inside this package.
-4. Commit to main.
-5. Connect the repository to Netlify or trigger a deploy. No build command is needed. Publish directory: .
+1. Copy your existing Supabase URL and publishable key into config.js.
+2. Replace the files in your local GitHub neon-peppers folder with these files.
+3. Commit and push with GitHub Desktop.
+4. Run supabase-schema.sql once in Supabase SQL Editor.
+5. Wait for Netlify to publish.
+6. Open /admin.html and sign in with your Supabase admin user.
 
-SUPABASE
-Open config.js and paste only the Project URL and publishable/anon key. Never paste the secret or service-role key.
-
-LEGAL
-All legal text is a draft for qualified regulatory counsel review. A verification screen and research-use wording do not by themselves make a sale lawful.
+Do not place a secret key or service-role key in config.js.
