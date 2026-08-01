@@ -108,21 +108,76 @@ async function deleteProduct(i){
   flash("Product deleted");
 }
 
-async function uploadProductImage(event,i){
-  try{
-    const file=event.target.files?.[0];
-    if(!file)return;
-    const ext=file.name.split(".").pop().toLowerCase();
-    const path=`products/${crypto.randomUUID()}.${ext}`;
-    const {error}=await client.storage.from(window.NEON_CONFIG.storageBucket).upload(path,file,{cacheControl:"3600",upsert:false});
-    if(error) throw error;
-    const {data}=client.storage.from(window.NEON_CONFIG.storageBucket).getPublicUrl(path);
-    products[i].image_url=data.publicUrl;
-    renderProducts();
-    flash("Image uploaded. Click Save Product.");
-  }catch(error){alert(error.message)}
-}
+async function uploadProductImage(event, index) {
+  try {
+    const file = event.target.files?.[0];
 
+    if (!file) {
+      return;
+    }
+
+    const product = products[index];
+
+    if (!product) {
+      throw new Error("Product could not be found.");
+    }
+
+    const extension = file.name.includes(".")
+      ? file.name.split(".").pop().toLowerCase()
+      : "jpg";
+
+    const filePath = `products/${crypto.randomUUID()}.${extension}`;
+
+    const { error: uploadError } = await client.storage
+      .from(window.NEON_CONFIG.storageBucket)
+      .upload(filePath, file, {
+        cacheControl: "3600",
+        contentType: file.type,
+        upsert: false
+      });
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data: publicUrlData } = client.storage
+      .from(window.NEON_CONFIG.storageBucket)
+      .getPublicUrl(filePath);
+
+    const imageUrl = publicUrlData?.publicUrl;
+
+    if (!imageUrl) {
+      throw new Error("The image uploaded, but no public URL was created.");
+    }
+
+    product.image_url = imageUrl;
+
+    if (product.id) {
+      const { error: updateError } = await client
+        .from("products")
+        .update({
+          image_url: imageUrl,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", product.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+    }
+
+    renderProducts();
+
+    if (product.id) {
+      flash("Image uploaded and saved.");
+    } else {
+      flash("Image uploaded. Click Save Product.");
+    }
+  } catch (error) {
+    console.error(error);
+    alert(error.message || "Image upload failed.");
+  }
+}
 function flash(message){
   const box=el("status");
   if(!box){console.log(message);return}
