@@ -174,7 +174,6 @@ if (!originalFile) {
     return;
 }
 
-const optimizedFile = await optimizeProductImage(originalFile);
     const product = products[index];
 
     if (!product) {
