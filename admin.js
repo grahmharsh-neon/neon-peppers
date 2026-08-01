@@ -110,9 +110,9 @@ async function deleteProduct(i){
 
 async function uploadProductImage(event, index) {
   try {
-    const file = event.target.files?.[0];
+    const originalFile = event.target.files?.[0];
 
-    if (!file) {
+    if (!originalFile) {
       return;
     }
 
@@ -122,17 +122,18 @@ async function uploadProductImage(event, index) {
       throw new Error("Product could not be found.");
     }
 
-    const extension = file.name.includes(".")
-      ? file.name.split(".").pop().toLowerCase()
-      : "jpg";
+    flash("Resizing image...");
 
-    const filePath = `products/${crypto.randomUUID()}.${extension}`;
+    const optimizedFile = await optimizeProductImage(originalFile);
+
+    const filePath =
+      `products/${crypto.randomUUID()}.webp`;
 
     const { error: uploadError } = await client.storage
       .from(window.NEON_CONFIG.storageBucket)
-      .upload(filePath, file, {
+      .upload(filePath, optimizedFile, {
         cacheControl: "3600",
-        contentType: file.type,
+        contentType: "image/webp",
         upsert: false
       });
 
@@ -147,7 +148,9 @@ async function uploadProductImage(event, index) {
     const imageUrl = publicUrlData?.publicUrl;
 
     if (!imageUrl) {
-      throw new Error("The image uploaded, but no public URL was created.");
+      throw new Error(
+        "The image uploaded, but no public URL was created."
+      );
     }
 
     product.image_url = imageUrl;
@@ -168,11 +171,11 @@ async function uploadProductImage(event, index) {
 
     renderProducts();
 
-    if (product.id) {
-      flash("Image uploaded and saved.");
-    } else {
-      flash("Image uploaded. Click Save Product.");
-    }
+    flash(
+      product.id
+        ? "Image resized, uploaded, and saved."
+        : "Image resized and uploaded. Click Save Product."
+    );
   } catch (error) {
     console.error(error);
     alert(error.message || "Image upload failed.");
