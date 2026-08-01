@@ -1,4 +1,3 @@
-
 const VERIFY_KEY = "neonPeppersVerified";
 let products = [];
 
@@ -14,9 +13,11 @@ function esc(value){
 
 function getClient(){
   const config = window.NEON_CONFIG || {};
+
   if(!config.supabaseUrl || !config.supabasePublishableKey || !window.supabase){
     return null;
   }
+
   return window.supabase.createClient(
     config.supabaseUrl,
     config.supabasePublishableKey
@@ -25,7 +26,10 @@ function getClient(){
 
 function initGate(){
   const gate = document.getElementById("researchGate");
-  if(!gate) return;
+
+  if(!gate){
+    return;
+  }
 
   if(sessionStorage.getItem(VERIFY_KEY) !== "yes"){
     gate.classList.add("open");
@@ -77,7 +81,10 @@ async function loadProducts(){
 
 function renderFilters(){
   const box = document.getElementById("filters");
-  if(!box) return;
+
+  if(!box){
+    return;
+  }
 
   const categories = [
     "All",
@@ -101,15 +108,23 @@ function renderFilters(){
 
 function renderProducts(){
   const grid = document.getElementById("productGrid");
-  if(!grid) return;
+
+  if(!grid){
+    return;
+  }
 
   const query = (document.getElementById("searchInput")?.value || "").toLowerCase();
   const activeCategory = document.querySelector(".filter.active")?.dataset.cat || "All";
 
   const filtered = products.filter(product => {
-    const matchesCategory = activeCategory === "All" || product.category === activeCategory;
-    const haystack = `${product.name} ${product.category} ${product.description}`.toLowerCase();
-    return matchesCategory && haystack.includes(query);
+    const matchesCategory =
+      activeCategory === "All" ||
+      product.category === activeCategory;
+
+    const searchableText =
+      `${product.name} ${product.category} ${product.description}`.toLowerCase();
+
+    return matchesCategory && searchableText.includes(query);
   });
 
   if(!filtered.length){
@@ -133,7 +148,10 @@ function renderProducts(){
       : "";
 
     card.innerHTML = `
-      <div class="card-image" ${imageStyle}>${product.image_url ? "" : "⚗"}</div>
+      <div class="card-image" ${imageStyle}>
+        ${product.image_url ? "" : "⚗"}
+      </div>
+
       <div class="card-body">
         <div class="category">${esc(product.category || "Research Compound")}</div>
         <h3>${esc(product.name)}</h3>
@@ -158,13 +176,18 @@ function openProduct(product){
 
   document.getElementById("modalCategory").textContent =
     product.category || "Research Compound";
-  document.getElementById("modalName").textContent = product.name;
+
+  document.getElementById("modalName").textContent =
+    product.name;
+
   document.getElementById("modalDescription").textContent =
     product.description || "";
+
   document.getElementById("modalStrength").textContent =
     product.strength || "";
 
   const coa = document.getElementById("modalCoa");
+
   if(product.coa_url){
     coa.href = product.coa_url;
     coa.style.display = "inline-flex";

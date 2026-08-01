@@ -1,10 +1,10 @@
-NEON PEPPERS HOMEPAGE V3
+NEON PEPPERS SITE V4
 
-Replace these files in your local GitHub neon-peppers folder:
+Replace these files in your local neon-peppers GitHub folder:
 - index.html
 - styles.css
 - site.js
-- assets/neon-peppers-hero.png
+- assets/neon-peppers-hero-v4.png
 - assets/neon-peppers-logo.jpg
 
 Keep your existing:
@@ -14,9 +14,9 @@ Keep your existing:
 - config.js
 - Supabase setup
 
-Then use GitHub Desktop:
-1. Summary: Upgrade homepage design
+Publish with GitHub Desktop:
+1. Summary: Install homepage V4
 2. Commit to main
 3. Push origin
 4. Wait for Netlify to publish
-5. Refresh with Ctrl + F5
+5. Refresh the public site with Ctrl + F5

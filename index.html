@@ -3,46 +3,34 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Neon Peppers research catalog for qualified laboratory and analytical use.">
+  <meta name="description" content="Neon Peppers research materials for qualified laboratory and analytical applications.">
   <title>Neon Peppers Research</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="gate" id="researchGate">
-    <div class="gate-panel">
+    <div class="gate-card">
       <img src="assets/neon-peppers-logo.jpg" alt="Neon Peppers" class="gate-logo">
       <div class="eyebrow">Restricted research catalog</div>
       <h2>Researcher Verification</h2>
       <p>Confirm each statement before continuing.</p>
 
-      <label class="check-row">
-        <input type="checkbox">
-        <span>I am at least 21 years old.</span>
-      </label>
-      <label class="check-row">
-        <input type="checkbox">
-        <span>I am entering for legitimate laboratory, institutional, educational, or analytical research purposes.</span>
-      </label>
-      <label class="check-row">
-        <input type="checkbox">
-        <span>I understand products are not intended for human or veterinary use.</span>
-      </label>
-      <label class="check-row">
-        <input type="checkbox">
-        <span>I accept responsibility for compliance with applicable laws.</span>
-      </label>
+      <label class="check-row"><input type="checkbox"><span>I am at least 21 years old.</span></label>
+      <label class="check-row"><input type="checkbox"><span>I am entering for legitimate laboratory, institutional, educational, or analytical research purposes.</span></label>
+      <label class="check-row"><input type="checkbox"><span>I understand products are not intended for human or veterinary use.</span></label>
+      <label class="check-row"><input type="checkbox"><span>I accept responsibility for compliance with applicable laws.</span></label>
 
       <button class="btn pink full" id="enterSite" disabled>Enter Research Catalog</button>
     </div>
   </div>
 
   <header>
-    <div class="nav-wrap">
+    <div class="header-inner">
       <a class="brand" href="#home">
         <img src="assets/neon-peppers-logo.jpg" alt="Neon Peppers">
       </a>
 
-      <button class="menu" id="menuBtn" aria-label="Open menu">☰</button>
+      <button class="menu" id="menuBtn" aria-label="Open navigation">☰</button>
 
       <nav id="navLinks">
         <a class="active" href="#home">Home</a>
@@ -51,19 +39,21 @@
         <a href="#quality">Quality</a>
         <a href="#faq">FAQ</a>
         <a href="#contact">Contact</a>
-        <a class="icon-link" href="admin.html" aria-label="Admin">◎</a>
+        <a class="admin-link" href="admin.html">Admin</a>
       </nav>
     </div>
   </header>
 
   <main>
     <section class="hero" id="home">
-      <div class="hero-overlay"></div>
-      <div class="hero-inner">
+      <div class="hero-bg"></div>
+      <div class="hero-shade"></div>
+
+      <div class="hero-content">
         <div class="hero-copy">
           <div class="eyebrow">Premium research peptides</div>
-          <h1>EXCELLENCE<br>IN RESEARCH</h1>
-          <div class="accent-line"></div>
+          <h1>EXCELLENCE<br>IN <span>RESEARCH</span></h1>
+          <div class="accent"></div>
 
           <p>
             Neon Peppers provides documented research materials for qualified
@@ -76,39 +66,37 @@
             <a class="btn blue" href="#quality">⬡ Quality Assured</a>
           </div>
 
-          <div class="proof-grid">
+          <div class="proof-row">
             <div class="proof">
-              <span class="proof-icon pink-icon">✧</span>
+              <div class="proof-icon pink-text">✧</div>
               <div><strong>Lab Documentation</strong><small>Batch records available</small></div>
             </div>
             <div class="proof">
-              <span class="proof-icon blue-icon">◇</span>
+              <div class="proof-icon blue-text">◇</div>
               <div><strong>Identity Focused</strong><small>Clear product records</small></div>
             </div>
             <div class="proof">
-              <span class="proof-icon green-icon">⚗</span>
+              <div class="proof-icon green-text">⚗</div>
               <div><strong>Research Use Only</strong><small>Not for human use</small></div>
             </div>
           </div>
         </div>
-
-        <div class="hero-art" aria-hidden="true"></div>
       </div>
     </section>
 
-    <section class="research-banner">
-      <div class="research-banner-inner">
-        <div class="banner-label">⚗ For research purposes only</div>
-        <div class="banner-copy">
+    <section class="research-strip">
+      <div class="strip-inner">
+        <div class="strip-label">⚗ For research purposes only</div>
+        <div class="strip-copy">
           Not for human consumption. Not for diagnostic or therapeutic use.<br>
           Catalog access does not establish purchaser eligibility.
         </div>
-        <a href="research-use-policy.html" class="btn green">Learn More</a>
+        <a class="btn green" href="research-use-policy.html">Learn More</a>
       </div>
     </section>
 
-    <section class="range" id="about">
-      <div class="section-heading">
+    <section class="category-section" id="about">
+      <div class="section-title">
         <div class="pink-kicker">Explore our range</div>
         <h2>RESEARCH CATEGORIES</h2>
         <div class="pink-rule"></div>
@@ -116,57 +104,57 @@
 
       <div class="category-grid">
         <article class="category-card">
-          <div class="category-icon pink-icon">⌬</div>
+          <div class="category-icon pink-text">⌬</div>
           <h3>Metabolic Research</h3>
           <p>Reference materials commonly discussed in laboratory metabolic studies.</p>
-          <a href="#products" class="arrow pink-arrow">›</a>
+          <a class="arrow pink-text" href="#products">›</a>
         </article>
 
         <article class="category-card">
-          <div class="category-icon blue-icon">◫</div>
+          <div class="category-icon blue-text">◫</div>
           <h3>Cellular Signaling</h3>
           <p>Research compounds used in controlled signaling and pathway studies.</p>
-          <a href="#products" class="arrow blue-arrow">›</a>
+          <a class="arrow blue-text" href="#products">›</a>
         </article>
 
         <article class="category-card">
-          <div class="category-icon green-icon">✚</div>
+          <div class="category-icon green-text">✚</div>
           <h3>Peptide Fragments</h3>
           <p>Short-sequence reference materials for laboratory and analytical work.</p>
-          <a href="#products" class="arrow green-arrow">›</a>
+          <a class="arrow green-text" href="#products">›</a>
         </article>
 
         <article class="category-card">
-          <div class="category-icon pink-icon">◉</div>
+          <div class="category-icon pink-text">◉</div>
           <h3>Endocrine Research</h3>
-          <p>Materials presented for qualified laboratory endocrine pathway research.</p>
-          <a href="#products" class="arrow pink-arrow">›</a>
+          <p>Materials presented for qualified endocrine pathway research.</p>
+          <a class="arrow pink-text" href="#products">›</a>
         </article>
 
         <article class="category-card">
-          <div class="category-icon blue-icon">⬡</div>
+          <div class="category-icon blue-text">⬡</div>
           <h3>Analytical Materials</h3>
           <p>Reference standards and supporting materials for analytical workflows.</p>
-          <a href="#products" class="arrow blue-arrow">›</a>
+          <a class="arrow blue-text" href="#products">›</a>
         </article>
       </div>
     </section>
 
-    <section class="catalog" id="products">
-      <div class="section-heading left">
+    <section class="catalog-section" id="products">
+      <div class="section-title left">
         <div class="pink-kicker">Live catalog</div>
         <h2>RESEARCH MATERIALS</h2>
       </div>
 
-      <div class="catalog-toolbar">
+      <div class="toolbar">
         <input id="searchInput" class="search" placeholder="Search products or categories...">
-        <div id="filters" class="filters"></div>
+        <div class="filters" id="filters"></div>
       </div>
 
-      <div id="productGrid" class="products"></div>
+      <div class="products" id="productGrid"></div>
     </section>
 
-    <section class="quality" id="quality">
+    <section class="quality-section" id="quality">
       <div class="quality-card">
         <div>
           <div class="eyebrow">Quality framework</div>
@@ -180,8 +168,8 @@
       </div>
     </section>
 
-    <section class="faq" id="faq">
-      <div class="section-heading">
+    <section class="faq-section" id="faq">
+      <div class="section-title">
         <div class="pink-kicker">Questions</div>
         <h2>FAQ</h2>
       </div>
@@ -202,7 +190,7 @@
       </div>
     </section>
 
-    <section class="contact" id="contact">
+    <section class="contact-section" id="contact">
       <div class="contact-card">
         <div class="eyebrow">Qualified inquiries</div>
         <h2>Request information</h2>
@@ -234,6 +222,7 @@
           <h2 id="modalName"></h2>
           <p id="modalDescription"></p>
           <p><strong>Strength:</strong> <span id="modalStrength"></span></p>
+
           <div class="modal-actions">
             <a class="btn blue" id="modalCoa" target="_blank">View COA</a>
             <a class="btn pink" href="mailto:support@neonpeppers.com">Request Information</a>
