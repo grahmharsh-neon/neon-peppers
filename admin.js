@@ -1,6 +1,82 @@
-let client=null,products=[];
-async function init(){const c=window.NEON_CONFIG||{};if(!c.supabaseUrl||!c.supabasePublishableKey){document.getElementById("setupWarning").style.display="block";return}client=window.supabase.createClient(c.supabaseUrl,c.supabasePublishableKey);const {data:{session}}=await client.auth.getSession();if(session)showAdmin()}
-async function login(){const {error}=await client.auth.signInWithPassword({email:email.value.trim(),password:password.value});if(error)return alert(error.message);showAdmin()}
+let client = null;
+let products = [];
+
+function getConfig() {
+  return window.NEON_CONFIG || {};
+}
+
+function createClient() {
+  const config = getConfig();
+
+  if (!config.supabaseUrl || !config.supabasePublishableKey) {
+    throw new Error("Supabase URL or publishable key is missing from config.js.");
+  }
+
+  if (!window.supabase) {
+    throw new Error("The Supabase library did not load.");
+  }
+
+  return window.supabase.createClient(
+    config.supabaseUrl,
+    config.supabasePublishableKey
+  );
+}
+
+async function init() {
+  try {
+    client = createClient();
+
+    const {
+      data: { session },
+    } = await client.auth.getSession();
+
+    if (session) {
+      await showAdmin();
+    }
+  } catch (error) {
+    console.error(error);
+
+    const warning = document.getElementById("setupWarning");
+    if (warning) {
+      warning.textContent = error.message;
+      warning.style.display = "block";
+    }
+  }
+}
+
+async function login() {
+  try {
+    if (!client) {
+      client = createClient();
+    }
+
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+
+    const { error } = await client.auth.signInWithPassword({
+      email: emailInput.value.trim(),
+      password: passwordInput.value,
+    });
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    await showAdmin();
+  } catch (error) {
+    console.error(error);
+    alert(error.message);
+  }
+}
+
+async function logout() {
+  if (client) {
+    await client.auth.signOut();
+  }
+
+  location.reload();
+}async function login(){const {error}=await client.auth.signInWithPassword({email:email.value.trim(),password:password.value});if(error)return alert(error.message);showAdmin()}
 async function logout(){await client.auth.signOut();location.reload()}
 async function showAdmin(){loginView.style.display="none";adminView.style.display="grid";await loadProducts()}
 async function loadProducts(){const {data,error}=await client.from("products").select("*").order("created_at",{ascending:false});if(error)return alert(error.message);products=data||[];renderProducts()}
