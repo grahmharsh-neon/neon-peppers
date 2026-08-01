@@ -1,0 +1,20 @@
+NEON PEPPERS PHASE 1
+
+1. Upload all files and the assets folder to the ROOT of your GitHub neon-peppers repository.
+2. Commit to main. Netlify will deploy automatically.
+3. In Supabase SQL Editor, run supabase-schema.sql once.
+4. Open config.js and add your Supabase project URL and publishable key. Never use the secret/service-role key.
+5. In Supabase Authentication > Users, create your admin email and password.
+6. Visit https://YOUR-SITE.netlify.app/admin.html to manage products.
+
+Phase 1 includes:
+- Research verification gate
+- Searchable catalog
+- Category filters
+- Product details and COA links
+- Responsive mobile design
+- Supabase admin login
+- Add/edit/delete products
+- Product image uploads
+
+Legal language remains a draft for review by qualified regulatory counsel.
