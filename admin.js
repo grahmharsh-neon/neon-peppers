@@ -108,9 +108,68 @@ async function deleteProduct(i){
   flash("Product deleted");
 }
 
+async function optimizeProductImage(file) {
+  const imageUrl = URL.createObjectURL(file);
+
+  try {
+    const img = await new Promise((resolve, reject) => {
+      const image = new Image();
+
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error("Unable to load image."));
+
+      image.src = imageUrl;
+    });
+
+    const MAX_SIZE = 1000;
+
+    let width = img.naturalWidth;
+    let height = img.naturalHeight;
+
+    // Resize while keeping aspect ratio
+    if (width > height) {
+      if (width > MAX_SIZE) {
+        height = Math.round(height * (MAX_SIZE / width));
+        width = MAX_SIZE;
+      }
+    } else {
+      if (height > MAX_SIZE) {
+        width = Math.round(width * (MAX_SIZE / height));
+        height = MAX_SIZE;
+      }
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d");
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+
+    ctx.drawImage(img, 0, 0, width, height);
+
+    const blob = await new Promise(resolve =>
+      canvas.toBlob(resolve, "image/webp", 0.85)
+    );
+
+    return new File(
+      [blob],
+      file.name.replace(/\.[^.]+$/, ".webp"),
+      {
+        type: "image/webp"
+      }
+    );
+
+  } finally {
+    URL.revokeObjectURL(imageUrl);
+  }
+}
 async function uploadProductImage(event, index) {
   try {
     const originalFile = event.target.files?.[0];
+const optimizedFile = await optimizeProductImage(originalFile);
 
     if (!originalFile) {
       return;
