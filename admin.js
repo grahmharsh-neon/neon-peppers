@@ -10,4 +10,18 @@ function addProduct(){products.unshift({name:"New Product",category:"Research Co
 async function saveProduct(i){const p=products[i],payload={name:p.name,category:p.category,description:p.description,strength:p.strength,image_url:p.image_url||null,coa_url:p.coa_url||null,visible:p.visible!==false,updated_at:new Date().toISOString()};const q=p.id?client.from("products").update(payload).eq("id",p.id):client.from("products").insert(payload).select().single();const {data,error}=await q;if(error)return alert(error.message);if(data)products[i]=data;flash("Product saved");await loadProducts()}
 async function deleteProduct(i){if(!confirm("Delete this product?"))return;const p=products[i];if(p.id){const {error}=await client.from("products").delete().eq("id",p.id);if(error)return alert(error.message)}products.splice(i,1);renderProducts();flash("Product deleted")}
 async function uploadProductImage(e,i){try{const file=e.target.files[0],ext=file.name.split(".").pop(),name=`products/${crypto.randomUUID()}.${ext}`;const {error}=await client.storage.from(window.NEON_CONFIG.storageBucket).upload(name,file);if(error)throw error;products[i].image_url=client.storage.from(window.NEON_CONFIG.storageBucket).getPublicUrl(name).data.publicUrl;flash("Image uploaded. Save the product.")}catch(x){alert(x.message)}}
-function flash(t){status.textContent=t;status.style.display="block";setTimeout(()=>status.style.display="none",1800)}document.addEventListener("DOMContentLoaded",init);
+function flash(message) {
+  const statusBox = document.getElementById("status");
+
+  if (!statusBox) {
+    console.log(message);
+    return;
+  }
+
+  statusBox.textContent = message;
+  statusBox.style.display = "block";
+
+  setTimeout(() => {
+    statusBox.style.display = "none";
+  }, 1800);
+}
