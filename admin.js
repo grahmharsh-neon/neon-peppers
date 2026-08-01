@@ -168,7 +168,6 @@ async function optimizeProductImage(file) {
 }
 async function uploadProductImage(event, index) {
   try {
-    const originalFile = event.target.files?.[0];
 const optimizedFile = await optimizeProductImage(originalFile);
 
     if (!originalFile) {
