@@ -44,7 +44,17 @@ background-color:#080b10;
 .callout{border:1px solid var(--line);border-radius:28px;padding:48px;background:linear-gradient(120deg,rgba(36,199,255,.06),rgba(255,61,159,.05));text-align:center}
 footer{border-top:1px solid var(--line);padding:36px 0 48px;color:#8f99a7;font-size:.8rem}.footer-grid{display:grid;grid-template-columns:1.45fr 1fr;gap:35px}.footer-links{display:flex;flex-wrap:wrap;gap:13px 20px}
 .modal{position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.84);display:none;place-items:center;padding:22px;overflow:auto}.modal.open{display:grid}.modal-card{width:min(880px,100%);background:#090d13;border:1px solid var(--line);border-radius:24px;overflow:hidden}
-.modal-grid{display:grid;grid-template-columns:.9fr 1.1fr}.modal-image{min-height:420px;background:linear-gradient(145deg,rgba(36,199,255,.13),rgba(255,61,159,.12));background-size:cover;background-position:center;display:grid;place-items:center;font-size:4rem}.modal-body{padding:32px}.close{float:right;background:none;border:0;color:#fff;font-size:1.5rem;cursor:pointer}
+.modal-grid{display:grid;grid-template-columns:.9fr 1.1fr}.modal-image{
+min-height:420px;
+background:linear-gradient(145deg,rgba(36,199,255,.13),rgba(255,61,159,.12));
+background-size:contain;
+background-repeat:no-repeat;
+background-position:center;
+background-color:#080b10;
+display:grid;
+place-items:center;
+font-size:4rem;
+}.modal-body{padding:32px}.close{float:right;background:none;border:0;color:#fff;font-size:1.5rem;cursor:pointer}
 .gate{position:fixed;inset:0;z-index:1000;display:none;overflow:auto;background:radial-gradient(circle at 10% 10%,rgba(36,199,255,.16),transparent 24rem),radial-gradient(circle at 90% 20%,rgba(255,61,159,.16),transparent 27rem),#05080d;padding:28px}.gate.open{display:grid;place-items:center}
 .gate-content{width:min(620px,100%);text-align:center}.gate-logo{width:min(410px,82%);max-height:115px;object-fit:contain;margin-bottom:20px}.verify-card{text-align:left;background:#0d1118;border:1px solid var(--line);border-radius:23px;padding:32px}
 .check-row{display:flex;gap:13px;align-items:flex-start;border:1px solid var(--line);border-radius:13px;padding:16px;margin:12px 0}.check-row input{width:20px;height:20px;accent-color:var(--pink)}
