@@ -1,10 +1,22 @@
-NEON PEPPERS V2
+NEON PEPPERS HOMEPAGE V3
 
-1. Copy your existing Supabase URL and publishable key into config.js.
-2. Replace the files in your local GitHub neon-peppers folder with these files.
-3. Commit and push with GitHub Desktop.
-4. Run supabase-schema.sql once in Supabase SQL Editor.
-5. Wait for Netlify to publish.
-6. Open /admin.html and sign in with your Supabase admin user.
+Replace these files in your local GitHub neon-peppers folder:
+- index.html
+- styles.css
+- site.js
+- assets/neon-peppers-hero.png
+- assets/neon-peppers-logo.jpg
 
-Do not place a secret key or service-role key in config.js.
+Keep your existing:
+- admin.html
+- admin.js
+- admin.css
+- config.js
+- Supabase setup
+
+Then use GitHub Desktop:
+1. Summary: Upgrade homepage design
+2. Commit to main
+3. Push origin
+4. Wait for Netlify to publish
+5. Refresh with Ctrl + F5

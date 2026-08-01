@@ -1,18 +1,250 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Neon Peppers Research</title><link rel="stylesheet" href="styles.css"></head><body>
-<div class="gate" id="researchGate"><div class="gate-content"><img class="gate-logo" src="assets/neon-peppers-logo.jpg"><div class="verify-card"><div class="eyebrow">Restricted research catalog</div><h2>Researcher Verification</h2><p>Confirm each statement before continuing.</p>
-<label class="check-row"><input type="checkbox"><span>I am at least 21 years old.</span></label>
-<label class="check-row"><input type="checkbox"><span>I am entering for legitimate laboratory, institutional, educational, or analytical research purposes.</span></label>
-<label class="check-row"><input type="checkbox"><span>I understand products are not intended for human or veterinary use.</span></label>
-<label class="check-row"><input type="checkbox"><span>I accept responsibility for compliance with applicable laws.</span></label>
-<button class="btn pink" id="enterSite" style="width:100%;margin-top:16px" disabled>Enter Research Catalog</button></div></div></div>
-<div class="notice">FOR LABORATORY RESEARCH USE ONLY · NOT FOR HUMAN OR VETERINARY USE</div>
-<header><div class="wrap"><nav><a class="brand" href="#"><img src="assets/neon-peppers-logo.jpg"></a><button class="menu" id="menuBtn">☰</button><div class="nav-links" id="navLinks"><a href="#products">Catalog</a><a href="#contact">Contact</a><a class="btn" href="admin.html">Admin</a></div></nav></div></header>
-<main>
-<section class="hero"><div class="wrap hero-grid"><div><div class="eyebrow">Precision compounds · Clear documentation</div><h1>RESEARCH WITHOUT NOISE.</h1><p class="lead">A restricted catalog of research materials for qualified laboratory and analytical applications.</p><div class="actions"><a class="btn pink" href="#products">Explore Catalog</a></div></div>
-<div class="hero-visual"><div class="orbit"></div><div class="vial"><div class="cap"></div><div class="vial-label"><strong>NEON PEPPERS</strong><small>RESEARCH</small><em>NOT FOR HUMAN USE</em></div></div></div></div></section>
-<section id="products"><div class="wrap"><div class="section-head"><div><div class="eyebrow">Research catalog</div><h2>Reference materials</h2></div><p>Search products, review documentation, and view available COAs.</p></div><div class="toolbar"><input id="searchInput" class="search" placeholder="Search products..."><div class="filters" id="filters"></div></div><div class="products" id="productGrid"></div></div></section>
-<section id="contact"><div class="wrap"><div class="callout"><div class="eyebrow">Qualified inquiries</div><h2>Request information.</h2><p class="lead" style="margin:0 auto 25px">Do not submit personal medical information.</p><a class="btn pink" href="mailto:support@neonpeppers.com">support@neonpeppers.com</a></div></div></section>
-</main>
-<footer><div class="wrap footer-grid"><div>Neon Peppers Research<br>Research use only. Not for human or veterinary use.</div><div class="footer-links"><a href="research-use-policy.html">Research Policy</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a></div></div></footer>
-<div class="modal" id="productModal"><div class="modal-card"><div class="modal-grid"><div class="modal-image" id="modalImage">⚗</div><div class="modal-body"><button class="close" onclick="closeProduct()">×</button><div class="category" id="modalCategory"></div><h2 id="modalName"></h2><p id="modalDescription"></p><p><strong>Strength:</strong> <span id="modalStrength"></span></p><div class="actions"><a class="btn blue" id="modalCoa" target="_blank">View COA</a><a class="btn pink" href="mailto:support@neonpeppers.com">Request Information</a></div></div></div></div></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="site.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Neon Peppers research catalog for qualified laboratory and analytical use.">
+  <title>Neon Peppers Research</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="gate" id="researchGate">
+    <div class="gate-panel">
+      <img src="assets/neon-peppers-logo.jpg" alt="Neon Peppers" class="gate-logo">
+      <div class="eyebrow">Restricted research catalog</div>
+      <h2>Researcher Verification</h2>
+      <p>Confirm each statement before continuing.</p>
+
+      <label class="check-row">
+        <input type="checkbox">
+        <span>I am at least 21 years old.</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox">
+        <span>I am entering for legitimate laboratory, institutional, educational, or analytical research purposes.</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox">
+        <span>I understand products are not intended for human or veterinary use.</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox">
+        <span>I accept responsibility for compliance with applicable laws.</span>
+      </label>
+
+      <button class="btn pink full" id="enterSite" disabled>Enter Research Catalog</button>
+    </div>
+  </div>
+
+  <header>
+    <div class="nav-wrap">
+      <a class="brand" href="#home">
+        <img src="assets/neon-peppers-logo.jpg" alt="Neon Peppers">
+      </a>
+
+      <button class="menu" id="menuBtn" aria-label="Open menu">☰</button>
+
+      <nav id="navLinks">
+        <a class="active" href="#home">Home</a>
+        <a href="#products">Products</a>
+        <a href="#about">About</a>
+        <a href="#quality">Quality</a>
+        <a href="#faq">FAQ</a>
+        <a href="#contact">Contact</a>
+        <a class="icon-link" href="admin.html" aria-label="Admin">◎</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="hero-overlay"></div>
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <div class="eyebrow">Premium research peptides</div>
+          <h1>EXCELLENCE<br>IN RESEARCH</h1>
+          <div class="accent-line"></div>
+
+          <p>
+            Neon Peppers provides documented research materials for qualified
+            laboratory and analytical applications. Product information is
+            presented for identification, handling, and research reference only.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn pink" href="#products">⚗ Browse Products</a>
+            <a class="btn blue" href="#quality">⬡ Quality Assured</a>
+          </div>
+
+          <div class="proof-grid">
+            <div class="proof">
+              <span class="proof-icon pink-icon">✧</span>
+              <div><strong>Lab Documentation</strong><small>Batch records available</small></div>
+            </div>
+            <div class="proof">
+              <span class="proof-icon blue-icon">◇</span>
+              <div><strong>Identity Focused</strong><small>Clear product records</small></div>
+            </div>
+            <div class="proof">
+              <span class="proof-icon green-icon">⚗</span>
+              <div><strong>Research Use Only</strong><small>Not for human use</small></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-art" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <section class="research-banner">
+      <div class="research-banner-inner">
+        <div class="banner-label">⚗ For research purposes only</div>
+        <div class="banner-copy">
+          Not for human consumption. Not for diagnostic or therapeutic use.<br>
+          Catalog access does not establish purchaser eligibility.
+        </div>
+        <a href="research-use-policy.html" class="btn green">Learn More</a>
+      </div>
+    </section>
+
+    <section class="range" id="about">
+      <div class="section-heading">
+        <div class="pink-kicker">Explore our range</div>
+        <h2>RESEARCH CATEGORIES</h2>
+        <div class="pink-rule"></div>
+      </div>
+
+      <div class="category-grid">
+        <article class="category-card">
+          <div class="category-icon pink-icon">⌬</div>
+          <h3>Metabolic Research</h3>
+          <p>Reference materials commonly discussed in laboratory metabolic studies.</p>
+          <a href="#products" class="arrow pink-arrow">›</a>
+        </article>
+
+        <article class="category-card">
+          <div class="category-icon blue-icon">◫</div>
+          <h3>Cellular Signaling</h3>
+          <p>Research compounds used in controlled signaling and pathway studies.</p>
+          <a href="#products" class="arrow blue-arrow">›</a>
+        </article>
+
+        <article class="category-card">
+          <div class="category-icon green-icon">✚</div>
+          <h3>Peptide Fragments</h3>
+          <p>Short-sequence reference materials for laboratory and analytical work.</p>
+          <a href="#products" class="arrow green-arrow">›</a>
+        </article>
+
+        <article class="category-card">
+          <div class="category-icon pink-icon">◉</div>
+          <h3>Endocrine Research</h3>
+          <p>Materials presented for qualified laboratory endocrine pathway research.</p>
+          <a href="#products" class="arrow pink-arrow">›</a>
+        </article>
+
+        <article class="category-card">
+          <div class="category-icon blue-icon">⬡</div>
+          <h3>Analytical Materials</h3>
+          <p>Reference standards and supporting materials for analytical workflows.</p>
+          <a href="#products" class="arrow blue-arrow">›</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="catalog" id="products">
+      <div class="section-heading left">
+        <div class="pink-kicker">Live catalog</div>
+        <h2>RESEARCH MATERIALS</h2>
+      </div>
+
+      <div class="catalog-toolbar">
+        <input id="searchInput" class="search" placeholder="Search products or categories...">
+        <div id="filters" class="filters"></div>
+      </div>
+
+      <div id="productGrid" class="products"></div>
+    </section>
+
+    <section class="quality" id="quality">
+      <div class="quality-card">
+        <div>
+          <div class="eyebrow">Quality framework</div>
+          <h2>Clear identity. Clear records. Clear limits.</h2>
+        </div>
+        <p>
+          Product naming, strength, storage references, batch documentation,
+          and research-use restrictions should remain consistent across the
+          catalog, labels, COAs, and fulfillment process.
+        </p>
+      </div>
+    </section>
+
+    <section class="faq" id="faq">
+      <div class="section-heading">
+        <div class="pink-kicker">Questions</div>
+        <h2>FAQ</h2>
+      </div>
+
+      <div class="faq-grid">
+        <article>
+          <h3>Who is this catalog for?</h3>
+          <p>Qualified businesses, institutions, laboratories, educational facilities, and analytical researchers.</p>
+        </article>
+        <article>
+          <h3>Are these products intended for people?</h3>
+          <p>No. Products are not intended for human or veterinary use.</p>
+        </article>
+        <article>
+          <h3>Are COAs available?</h3>
+          <p>Where available, batch documentation can be linked from the product record.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="contact" id="contact">
+      <div class="contact-card">
+        <div class="eyebrow">Qualified inquiries</div>
+        <h2>Request information</h2>
+        <p>Do not submit personal medical information.</p>
+        <a class="btn pink" href="mailto:support@neonpeppers.com">support@neonpeppers.com</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div>
+      <strong>Neon Peppers Research</strong><br>
+      Research use only. Not for human or veterinary use.
+    </div>
+    <div class="footer-links">
+      <a href="research-use-policy.html">Research Policy</a>
+      <a href="terms.html">Terms</a>
+      <a href="privacy.html">Privacy</a>
+    </div>
+  </footer>
+
+  <div class="modal" id="productModal">
+    <div class="modal-card">
+      <div class="modal-grid">
+        <div class="modal-image" id="modalImage">⚗</div>
+        <div class="modal-body">
+          <button class="close" onclick="closeProduct()">×</button>
+          <div class="category" id="modalCategory"></div>
+          <h2 id="modalName"></h2>
+          <p id="modalDescription"></p>
+          <p><strong>Strength:</strong> <span id="modalStrength"></span></p>
+          <div class="modal-actions">
+            <a class="btn blue" id="modalCoa" target="_blank">View COA</a>
+            <a class="btn pink" href="mailto:support@neonpeppers.com">Request Information</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="site.js"></script>
+</body>
+</html>
