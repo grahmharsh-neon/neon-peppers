@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Neon Peppers merchandise catalog.">
+  <title>Merch | Neon Peppers</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/merch.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a class="brand" href="/#home">
+        <img src="/assets/neon-peppers-logo.jpg" alt="Neon Peppers">
+      </a>
+
+      <button class="menu" id="menuBtn" aria-label="Open navigation">☰</button>
+
+      <nav id="navLinks">
+        <a href="/#home">Home</a>
+        <a href="/#products">Products</a>
+        <a href="/order.html">Order Request</a>
+        <a class="active" href="/merch.html">Merch</a>
+        <a href="/#contact">Contact</a>
+        <a class="admin-link" href="/admin.html">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="merch-page">
+    <section class="merch-hero">
+      <div>
+        <div class="eyebrow">Neon Peppers gear</div>
+        <h1>MERCH</h1>
+        <p>Apparel and accessories from Neon Peppers. Availability, sizes, and colors are managed from the Admin dashboard.</p>
+      </div>
+    </section>
+
+    <section class="merch-catalog">
+      <div class="merch-toolbar">
+        <div class="search-wrap">
+          <span class="search-icon">⌕</span>
+          <input id="merchSearch" class="search" placeholder="Search merch...">
+        </div>
+
+        <select id="merchCategory">
+          <option value="all">All categories</option>
+        </select>
+      </div>
+
+      <div id="merchGrid" class="merch-grid">
+        <div class="merch-loading">Loading merch…</div>
+      </div>
+    </section>
+  </main>
+
+  <div id="merchModal" class="modal">
+    <div class="modal-card merch-modal-card">
+      <button class="modal-close" type="button" onclick="closeMerchModal()">×</button>
+
+      <div id="merchModalImage" class="merch-modal-image">NP</div>
+
+      <div class="merch-modal-content">
+        <div id="merchModalCategory" class="category"></div>
+        <h2 id="merchModalName"></h2>
+        <p id="merchModalDescription"></p>
+
+        <div class="merch-option-grid">
+          <div>
+            <label for="merchModalVariant">Option</label>
+            <select id="merchModalVariant"></select>
+          </div>
+
+          <div>
+            <label for="merchModalQuantity">Quantity</label>
+            <input id="merchModalQuantity" type="number" min="1" max="25" value="1">
+          </div>
+        </div>
+
+        <div id="merchModalPrice" class="merch-price"></div>
+
+        <button id="merchRequestButton" class="btn pink white-text-button" type="button">
+          Request This Item
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div>
+      <strong>Neon Peppers</strong><br>
+      Apparel and accessories.
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/config.js"></script>
+  <script src="/merch.js"></script>
+</body>
+</html>

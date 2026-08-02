@@ -7,6 +7,8 @@ let orderRequests = [];
 let orderRequestItems = [];
 let orderFormItems = [];
 let orderFormItemVariants = [];
+let merchItems = [];
+let merchVariants = [];
 
 function el(id){
   return document.getElementById(id);
@@ -70,6 +72,22 @@ function bindEvents(){
   el("adminProductFilter").addEventListener("change", renderProducts);
 
 
+
+
+  const addMerchItemButton = el("addMerchItemButton");
+  if(addMerchItemButton){
+    addMerchItemButton.addEventListener("click", addMerchItem);
+  }
+
+  const merchAdminSearch = el("merchAdminSearch");
+  if(merchAdminSearch){
+    merchAdminSearch.addEventListener("input", renderMerchAdmin);
+  }
+
+  const merchAdminFilter = el("merchAdminFilter");
+  if(merchAdminFilter){
+    merchAdminFilter.addEventListener("change", renderMerchAdmin);
+  }
 
   const addOrderItemButton = el("addOrderItemButton");
   if(addOrderItemButton){
@@ -152,7 +170,8 @@ async function refreshAll(){
     loadInquiries(),
     loadProductVariants(),
     loadOrderRequests(),
-    loadOrderFormItems()
+    loadOrderFormItems(),
+    loadMerchAdmin()
   ]);
   updateStats();
   flash("Dashboard refreshed");
@@ -773,6 +792,504 @@ async function deleteVariant(id){
   const {error}=await client.from("product_variants").delete().eq("id",id);
   if(error){alert(error.message);return}
   productVariants=productVariants.filter(x=>String(x.id)!==String(id));renderProducts();flash("Strength deleted")
+}
+
+
+
+async function loadMerchAdmin(){
+  if(!client) return;
+
+  const [itemsResult,variantsResult]=await Promise.all([
+    client
+      .from("merch_items")
+      .select("*")
+      .order("sort_order",{ascending:true})
+      .order("created_at",{ascending:false}),
+
+    client
+      .from("merch_variants")
+      .select("*")
+      .order("sort_order",{ascending:true})
+  ]);
+
+  if(itemsResult.error){
+    console.warn(itemsResult.error);
+    return;
+  }
+
+  merchItems=itemsResult.data||[];
+  merchVariants=variantsResult.error?[]:(variantsResult.data||[]);
+  renderMerchAdmin();
+}
+
+function merchVariantsForItem(itemId){
+  return merchVariants.filter(
+    variant=>variant.merch_item_id===itemId
+  );
+}
+
+function renderMerchAdmin(){
+  const box=el("merchAdminItems");
+  if(!box) return;
+
+  const query=
+    (el("merchAdminSearch")?.value||"").trim().toLowerCase();
+
+  const filter=el("merchAdminFilter")?.value||"all";
+
+  const filtered=merchItems.filter(item=>{
+    const text=
+      `${item.name} ${item.category||""} ${item.description||""}`
+        .toLowerCase();
+
+    const matchesSearch=text.includes(query);
+
+    const matchesFilter=
+      filter==="all" ||
+      (filter==="visible" && item.visible!==false) ||
+      (filter==="hidden" && item.visible===false);
+
+    return matchesSearch && matchesFilter;
+  });
+
+  if(!filtered.length){
+    box.innerHTML='<p class="muted">No merch items yet.</p>';
+    return;
+  }
+
+  box.innerHTML=filtered.map(item=>{
+    const variants=merchVariantsForItem(item.id);
+
+    return `
+      <article class="product merch-admin-item">
+        <div class="product-head">
+          <div>
+            <h3>${escapeHtml(item.name||"New Merch Item")}</h3>
+            <div class="muted">
+              ${item.visible!==false?"Visible":"Hidden"}
+            </div>
+          </div>
+        </div>
+
+        <div class="grid two">
+          <div>
+            <label>Name</label>
+            <input
+              data-merch-id="${escapeHtml(item.id)}"
+              data-merch-key="name"
+              value="${escapeHtml(item.name||"")}"
+            >
+          </div>
+
+          <div>
+            <label>Category</label>
+            <input
+              data-merch-id="${escapeHtml(item.id)}"
+              data-merch-key="category"
+              value="${escapeHtml(item.category||"")}"
+            >
+          </div>
+        </div>
+
+        <label>Description</label>
+        <textarea
+          data-merch-id="${escapeHtml(item.id)}"
+          data-merch-key="description"
+        >${escapeHtml(item.description||"")}</textarea>
+
+        <div class="grid two">
+          <div>
+            <label>Base Price</label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              data-merch-id="${escapeHtml(item.id)}"
+              data-merch-key="base_price"
+              value="${Number(item.base_price||0)}"
+            >
+          </div>
+
+          <div>
+            <label>Sort Order</label>
+            <input
+              type="number"
+              data-merch-id="${escapeHtml(item.id)}"
+              data-merch-key="sort_order"
+              value="${Number(item.sort_order||0)}"
+            >
+          </div>
+        </div>
+
+        <label>Image URL</label>
+        <input
+          data-merch-id="${escapeHtml(item.id)}"
+          data-merch-key="image_url"
+          value="${escapeHtml(item.image_url||"")}"
+        >
+
+        <div class="upload-row">
+          <input id="merchImage-${escapeHtml(item.id)}" type="file" accept="image/*">
+          <button
+            class="btn blue"
+            type="button"
+            onclick="uploadMerchImage('${escapeHtml(item.id)}')"
+          >
+            Upload Merch Image
+          </button>
+        </div>
+
+        <label>Visible</label>
+        <select
+          data-merch-id="${escapeHtml(item.id)}"
+          data-merch-key="visible"
+        >
+          <option value="true" ${item.visible!==false?"selected":""}>Yes</option>
+          <option value="false" ${item.visible===false?"selected":""}>No</option>
+        </select>
+
+        <div class="variant-admin">
+          <div class="variant-admin-head">
+            <h4>Sizes, Colors & Stock</h4>
+            <button
+              class="btn green"
+              type="button"
+              onclick="addMerchVariant('${escapeHtml(item.id)}')"
+            >
+              + Add Option
+            </button>
+          </div>
+
+          <div class="variant-list">
+            ${
+              variants.length
+                ? variants.map(variant=>`
+                    <div class="merch-variant-editor">
+                      <input
+                        data-merch-variant-id="${escapeHtml(variant.id)}"
+                        data-merch-variant-key="label"
+                        value="${escapeHtml(variant.label||"")}"
+                        placeholder="Option label"
+                      >
+
+                      <input
+                        data-merch-variant-id="${escapeHtml(variant.id)}"
+                        data-merch-variant-key="size"
+                        value="${escapeHtml(variant.size||"")}"
+                        placeholder="Size"
+                      >
+
+                      <input
+                        data-merch-variant-id="${escapeHtml(variant.id)}"
+                        data-merch-variant-key="color"
+                        value="${escapeHtml(variant.color||"")}"
+                        placeholder="Color"
+                      >
+
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        data-merch-variant-id="${escapeHtml(variant.id)}"
+                        data-merch-variant-key="price"
+                        value="${Number(variant.price||0)}"
+                        placeholder="Price"
+                      >
+
+                      <select
+                        data-merch-variant-id="${escapeHtml(variant.id)}"
+                        data-merch-variant-key="stock_status"
+                      >
+                        <option value="available" ${variant.stock_status==="available"?"selected":""}>Available</option>
+                        <option value="low_stock" ${variant.stock_status==="low_stock"?"selected":""}>Low Stock</option>
+                        <option value="out_of_stock" ${variant.stock_status==="out_of_stock"?"selected":""}>Out of Stock</option>
+                        <option value="coming_soon" ${variant.stock_status==="coming_soon"?"selected":""}>Coming Soon</option>
+                      </select>
+
+                      <select
+                        data-merch-variant-id="${escapeHtml(variant.id)}"
+                        data-merch-variant-key="visible"
+                      >
+                        <option value="true" ${variant.visible!==false?"selected":""}>Visible</option>
+                        <option value="false" ${variant.visible===false?"selected":""}>Hidden</option>
+                      </select>
+
+                      <button
+                        class="btn blue"
+                        type="button"
+                        onclick="saveMerchVariant('${escapeHtml(variant.id)}')"
+                      >
+                        Save
+                      </button>
+
+                      <button
+                        class="btn danger"
+                        type="button"
+                        onclick="deleteMerchVariant('${escapeHtml(variant.id)}')"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  `).join("")
+                : '<p class="muted">No options added yet.</p>'
+            }
+          </div>
+        </div>
+
+        <div class="actions">
+          <button
+            class="btn pink"
+            type="button"
+            onclick="saveMerchItem('${escapeHtml(item.id)}')"
+          >
+            Save Merch Item
+          </button>
+
+          <button
+            class="btn danger"
+            type="button"
+            onclick="deleteMerchItem('${escapeHtml(item.id)}')"
+          >
+            Delete
+          </button>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  box.querySelectorAll("[data-merch-id]").forEach(node=>{
+    const update=event=>{
+      const item=merchItems.find(
+        current=>String(current.id)===event.target.dataset.merchId
+      );
+
+      if(!item) return;
+
+      const key=event.target.dataset.merchKey;
+      let value=event.target.value;
+
+      if(key==="visible"){
+        value=value==="true";
+      }
+
+      if(key==="base_price" || key==="sort_order"){
+        value=Number(value||0);
+      }
+
+      item[key]=value;
+    };
+
+    node.addEventListener("input",update);
+    node.addEventListener("change",update);
+  });
+
+  box.querySelectorAll("[data-merch-variant-id]").forEach(node=>{
+    const update=event=>{
+      const variant=merchVariants.find(
+        current=>
+          String(current.id)===event.target.dataset.merchVariantId
+      );
+
+      if(!variant) return;
+
+      const key=event.target.dataset.merchVariantKey;
+      let value=event.target.value;
+
+      if(key==="visible"){
+        value=value==="true";
+      }
+
+      if(key==="price" || key==="sort_order"){
+        value=Number(value||0);
+      }
+
+      variant[key]=value;
+    };
+
+    node.addEventListener("input",update);
+    node.addEventListener("change",update);
+  });
+}
+
+async function addMerchItem(){
+  const {data,error}=await client
+    .from("merch_items")
+    .insert({
+      name:"New Merch Item",
+      category:"Apparel",
+      description:"",
+      image_url:null,
+      base_price:0,
+      visible:true,
+      sort_order:merchItems.length
+    })
+    .select()
+    .single();
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  merchItems.push(data);
+  renderMerchAdmin();
+  showPanel("merchPanel");
+  flash("Merch item added");
+}
+
+async function saveMerchItem(id){
+  const item=merchItems.find(
+    current=>String(current.id)===String(id)
+  );
+
+  if(!item) return;
+
+  const {error}=await client
+    .from("merch_items")
+    .update({
+      name:item.name,
+      category:item.category||"Merch",
+      description:item.description||"",
+      image_url:item.image_url||null,
+      base_price:Number(item.base_price||0),
+      visible:item.visible!==false,
+      sort_order:Number(item.sort_order||0),
+      updated_at:new Date().toISOString()
+    })
+    .eq("id",item.id);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  flash("Merch item saved");
+  await loadMerchAdmin();
+}
+
+async function deleteMerchItem(id){
+  if(!confirm("Delete this merch item?")) return;
+
+  const {error}=await client
+    .from("merch_items")
+    .delete()
+    .eq("id",id);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  await loadMerchAdmin();
+  flash("Merch item deleted");
+}
+
+async function addMerchVariant(itemId){
+  const {data,error}=await client
+    .from("merch_variants")
+    .insert({
+      merch_item_id:itemId,
+      label:"Standard",
+      size:"",
+      color:"",
+      price:0,
+      stock_status:"available",
+      visible:true,
+      sort_order:merchVariantsForItem(itemId).length
+    })
+    .select()
+    .single();
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  merchVariants.push(data);
+  renderMerchAdmin();
+  flash("Merch option added");
+}
+
+async function saveMerchVariant(id){
+  const variant=merchVariants.find(
+    current=>String(current.id)===String(id)
+  );
+
+  if(!variant) return;
+
+  const {error}=await client
+    .from("merch_variants")
+    .update({
+      label:variant.label||"Standard",
+      size:variant.size||null,
+      color:variant.color||null,
+      price:Number(variant.price||0),
+      stock_status:variant.stock_status||"available",
+      visible:variant.visible!==false,
+      sort_order:Number(variant.sort_order||0),
+      updated_at:new Date().toISOString()
+    })
+    .eq("id",variant.id);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  flash("Merch option saved");
+  await loadMerchAdmin();
+}
+
+async function deleteMerchVariant(id){
+  if(!confirm("Delete this merch option?")) return;
+
+  const {error}=await client
+    .from("merch_variants")
+    .delete()
+    .eq("id",id);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  await loadMerchAdmin();
+  flash("Merch option deleted");
+}
+
+async function uploadMerchImage(itemId){
+  try{
+    const input=el(`merchImage-${itemId}`);
+    const file=input?.files?.[0];
+
+    if(!file){
+      throw new Error("Choose an image first.");
+    }
+
+    flash("Optimizing merch image...");
+
+    const optimized=await optimizeImage(file,1400,0.86);
+    const path=`merch/${itemId}-${crypto.randomUUID()}.webp`;
+    const publicUrl=await uploadFile(path,optimized,"image/webp");
+
+    const {error}=await client
+      .from("merch_items")
+      .update({
+        image_url:publicUrl,
+        updated_at:new Date().toISOString()
+      })
+      .eq("id",itemId);
+
+    if(error){
+      throw error;
+    }
+
+    await loadMerchAdmin();
+    flash("Merch image uploaded");
+  }catch(error){
+    console.error(error);
+    alert(error.message||"Merch image upload failed.");
+  }
 }
 
 

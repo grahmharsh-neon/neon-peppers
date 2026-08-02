@@ -31,6 +31,7 @@
       <button data-panel="dashboardPanel">Dashboard</button>
       <button data-panel="homepagePanel">Homepage</button>
       <button data-panel="productsPanel">Products</button>
+      <button data-panel="merchPanel">Merch</button>
       <button data-panel="orderItemsPanel">Order Form</button>
       <button data-panel="ordersPanel">Order Requests</button>
       <button data-panel="inquiriesPanel">Inquiries</button>
@@ -159,6 +160,35 @@
 
       
             
+      
+      <section id="merchPanel" class="panel-view">
+        <div class="page-head">
+          <div>
+            <div class="eyebrow">Apparel and accessories</div>
+            <h1>Merch</h1>
+            <p class="muted">Manage merch items, sizes, colors, prices, stock, images, and visibility.</p>
+          </div>
+
+          <button class="btn green" id="addMerchItemButton" type="button">
+            + Add Merch Item
+          </button>
+        </div>
+
+        <div class="panel">
+          <div class="product-toolbar">
+            <input id="merchAdminSearch" placeholder="Search merch...">
+
+            <select id="merchAdminFilter">
+              <option value="all">All merch</option>
+              <option value="visible">Visible</option>
+              <option value="hidden">Hidden</option>
+            </select>
+          </div>
+
+          <div id="merchAdminItems"></div>
+        </div>
+      </section>
+
       <section id="orderItemsPanel" class="panel-view">
         <div class="page-head">
           <div>
