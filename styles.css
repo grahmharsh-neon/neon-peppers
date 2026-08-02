@@ -780,3 +780,22 @@ footer{
     padding:13px;
   }
 }
+/* Force all pink CTA buttons to use white text */
+.btn.pink,
+.btn-primary,
+.request-info-btn,
+#requestInformationButton,
+#requestInfoButton,
+button[type="submit"] {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
+
+.btn.pink:hover,
+.btn-primary:hover,
+.request-info-btn:hover,
+#requestInformationButton:hover,
+#requestInfoButton:hover {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
