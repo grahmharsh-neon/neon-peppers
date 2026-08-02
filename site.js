@@ -156,84 +156,9 @@ async function loadProducts(client){
 
 function renderAll(){
   renderFilters();
-  renderFeatured();
   renderProducts();
 }
 
-function renderFeatured(){
-  const track = document.getElementById("featuredTrack");
-  const section = document.getElementById("featured");
-  if(!track || !section) return;
-
-  let featured = products.filter(product => product.featured === true);
-  if(!featured.length) featured = products.slice(0, 5);
-
-  if(!featured.length){
-    section.style.display = "none";
-    return;
-  }
-
-  section.style.display = "";
-  track.innerHTML = featured.map(product => {
-    const image = product.image_url
-      ? `style="background-image:url('${String(product.image_url).replace(/'/g,"%27")}')"`
-      : "";
-
-    return `
-      <article class="featured-card" data-product-id="${esc(product.id)}">
-        <div class="featured-image" ${image}>${product.image_url ? "" : "⚗"}</div>
-        <div class="featured-content">
-          <div class="featured-label">✦ Featured research</div>
-          <div class="category">${esc(product.category || "Research Compound")}</div>
-          <h3>${esc(product.name)}</h3>
-          <p>${esc(product.description || "")}</p>
-          <div class="featured-footer">
-            <span class="featured-strength">${esc(product.strength || "")}</span>
-            <span class="featured-open">›</span>
-          </div>
-        </div>
-      </article>
-    `;
-  }).join("");
-
-  track.querySelectorAll(".featured-card").forEach(card => {
-    card.addEventListener("click", () => {
-      const product = products.find(item => String(item.id) === card.dataset.productId);
-      if(product) openProductPage(product);
-    });
-  });
-
-  featuredIndex = 0;
-  updateFeaturedSlider();
-}
-
-function visibleFeaturedCards(){
-  if(window.innerWidth <= 650) return 1;
-  if(window.innerWidth <= 900) return 2;
-  return 3;
-}
-
-function updateFeaturedSlider(){
-  const track = document.getElementById("featuredTrack");
-  if(!track) return;
-
-  const card = track.querySelector(".featured-card");
-  if(!card) return;
-
-  const gap = 22;
-  const step = card.getBoundingClientRect().width + gap;
-  track.style.transform = `translateX(-${featuredIndex * step}px)`;
-}
-
-function moveFeatured(direction){
-  const track = document.getElementById("featuredTrack");
-  if(!track) return;
-
-  const total = track.querySelectorAll(".featured-card").length;
-  const maxIndex = Math.max(0, total - visibleFeaturedCards());
-  featuredIndex = Math.max(0, Math.min(maxIndex, featuredIndex + direction));
-  updateFeaturedSlider();
-}
 
 function renderFilters(){
   const box = document.getElementById("filters");
@@ -420,8 +345,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderProducts();
   });
 
-  document.getElementById("featuredPrev")?.addEventListener("click", () => moveFeatured(-1));
-  document.getElementById("featuredNext")?.addEventListener("click", () => moveFeatured(1));
 
   document.getElementById("menuBtn")?.addEventListener("click", () => {
     document.getElementById("navLinks").classList.toggle("open");
@@ -431,5 +354,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     if(event.target.id === "productModal") closeProduct();
   });
 
-  window.addEventListener("resize", updateFeaturedSlider);
 });
