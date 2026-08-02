@@ -1,2 +1,7 @@
 [build]
   publish = "."
+
+[[redirects]]
+  from = "/products/*"
+  to = "/product.html"
+  status = 200

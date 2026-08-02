@@ -199,7 +199,7 @@ function renderFeatured(){
   track.querySelectorAll(".featured-card").forEach(card => {
     card.addEventListener("click", () => {
       const product = products.find(item => String(item.id) === card.dataset.productId);
-      if(product) openProduct(product);
+      if(product) openProductPage(product);
     });
   });
 
@@ -312,7 +312,7 @@ function renderProducts(){
   filtered.forEach(product => {
     const card = document.createElement("article");
     card.className = "card";
-    card.addEventListener("click", () => openProduct(product));
+    card.addEventListener("click", () => openProductPage(product));
 
     const image = product.image_url
       ? `style="background-image:url('${String(product.image_url).replace(/'/g,"%27")}')"`
@@ -361,6 +361,20 @@ function renderProducts(){
 
     grid.appendChild(card);
   });
+}
+
+
+function productSlug(product){
+  return String(product.name || "product")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function openProductPage(product){
+  const slug = productSlug(product);
+  window.location.href = `/products/${encodeURIComponent(slug)}`;
 }
 
 function openProduct(product){
