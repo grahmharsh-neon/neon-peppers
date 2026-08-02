@@ -330,3 +330,44 @@ textarea{min-height:95px;resize:vertical}
 .order-form-admin-item textarea{
   min-height:100px;
 }
+
+
+/* ORDER SYSTEM V9 */
+#addOrderItemButton{
+  color:#fff !important;
+}
+
+.order-form-admin-item{
+  margin-bottom:18px;
+}
+
+.order-form-admin-item textarea{
+  min-height:100px;
+}
+
+.order-item-position{
+  color:var(--muted);
+  font-size:.8rem;
+}
+
+.variant-editor{
+  grid-template-columns:
+    minmax(140px,1.2fr)
+    minmax(130px,1fr)
+    minmax(100px,.8fr)
+    90px
+    auto
+    auto;
+}
+
+@media(max-width:1050px){
+  .variant-editor{
+    grid-template-columns:1fr 1fr;
+  }
+}
+
+@media(max-width:560px){
+  .variant-editor{
+    grid-template-columns:1fr;
+  }
+}

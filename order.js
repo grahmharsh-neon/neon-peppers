@@ -1,212 +1,457 @@
-const VERIFY_KEY="neonPeppersVerified";let client=null,products=[],variants=[],formItems=[],formItemVariants=[],cart=[];const el=id=>document.getElementById(id);function esc(v){return String(v||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}function getClient(){const c=window.NEON_CONFIG||{};return window.supabase&&c.supabaseUrl&&c.supabasePublishableKey?window.supabase.createClient(c.supabaseUrl,c.supabasePublishableKey):null}function initGate(){const g=el("researchGate");if(!g)return;if(sessionStorage.getItem(VERIFY_KEY)!=="yes"){g.classList.add("open");document.body.classList.add("gated")}const boxes=[...g.querySelectorAll('input[type="checkbox"]')],b=el("enterSite");const u=()=>b.disabled=!boxes.every(x=>x.checked);boxes.forEach(x=>x.addEventListener("change",u));b.addEventListener("click",()=>{sessionStorage.setItem(VERIFY_KEY,"yes");g.classList.remove("open");document.body.classList.remove("gated")})}async function loadCatalog(){
+const VERIFY_KEY="neonPeppersVerified";
+
+let client=null;
+let orderItems=[];
+let orderVariants=[];
+let cart=[];
+
+function el(id){
+  return document.getElementById(id);
+}
+
+function esc(value){
+  return String(value||"").replace(/[&<>"']/g,c=>({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#039;"
+  }[c]));
+}
+
+function getClient(){
+  const config=window.NEON_CONFIG||{};
+
+  if(
+    !window.supabase ||
+    !config.supabaseUrl ||
+    !config.supabasePublishableKey
+  ){
+    return null;
+  }
+
+  return window.supabase.createClient(
+    config.supabaseUrl,
+    config.supabasePublishableKey
+  );
+}
+
+function initGate(){
+  const gate=el("researchGate");
+  if(!gate) return;
+
+  if(sessionStorage.getItem(VERIFY_KEY)!=="yes"){
+    gate.classList.add("open");
+    document.body.classList.add("gated");
+  }
+
+  const boxes=[...gate.querySelectorAll('input[type="checkbox"]')];
+  const button=el("enterSite");
+
+  const update=()=>{
+    button.disabled=!boxes.every(box=>box.checked);
+  };
+
+  boxes.forEach(box=>box.addEventListener("change",update));
+
+  button.addEventListener("click",()=>{
+    sessionStorage.setItem(VERIFY_KEY,"yes");
+    gate.classList.remove("open");
+    document.body.classList.remove("gated");
+  });
+}
+
+async function loadOrderForm(){
   client=getClient();
 
   if(!client){
-    el("orderProducts").innerHTML=
-      '<div class="order-loading">Catalog connection is not configured.</div>';
+    el("orderItemsList").innerHTML=
+      '<div class="order-loading">Order form connection is not configured.</div>';
     return;
   }
 
-  const [p,v,f,fv]=await Promise.all([
-    client.from("products")
+  const [itemsResult,variantsResult]=await Promise.all([
+    client
+      .from("order_form_items")
       .select("*")
       .eq("visible",true)
+      .order("sort_order",{ascending:true})
       .order("name",{ascending:true}),
-    client.from("product_variants")
-      .select("*")
-      .eq("visible",true)
-      .order("sort_order",{ascending:true}),
-    client.from("order_form_items")
-      .select("*")
-      .eq("visible",true)
-      .order("sort_order",{ascending:true}),
-    client.from("order_form_item_variants")
+
+    client
+      .from("order_form_item_variants")
       .select("*")
       .eq("visible",true)
       .order("sort_order",{ascending:true})
   ]);
 
-  if(p.error){
-    el("orderProducts").innerHTML=
-      '<div class="order-loading">The catalog could not be loaded.</div>';
+  if(itemsResult.error){
+    console.error(itemsResult.error);
+    el("orderItemsList").innerHTML=
+      '<div class="order-loading">The order form could not be loaded.</div>';
     return;
   }
 
-  products=p.data||[];
-  variants=v.error?[]:(v.data||[]);
-  formItems=f.error?[]:(f.data||[]);
-  formItemVariants=fv.error?[]:(fv.data||[]);
+  orderItems=itemsResult.data||[];
+  orderVariants=variantsResult.error?[]:(variantsResult.data||[]);
 
   renderCategories();
-  renderProducts();
-}function renderCategories(){
-  const s=el("orderCategory");
-  const cats=[...new Set([
-    ...products.map(p=>p.category||"Research Compound"),
-    ...formItems.map(i=>i.category||"Research Material")
-  ])];
+  renderOrderItems();
+}
 
-  s.innerHTML=
-    '<option value="all">All categories</option>'+
-    cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
-}">${esc(c)}</option>`).join("")}function productVariants(p){const list=variants.filter(v=>v.product_id===p.id);return list.length?list:[{id:`fallback-${p.id}`,product_id:p.id,strength:p.strength||"Standard",stock_status:p.status||"available",visible:true,sort_order:0}]}function formVariantsForItem(item){
-  const list=formItemVariants.filter(
-    variant=>variant.order_form_item_id===item.id
+function variantsForItem(itemId){
+  return orderVariants.filter(
+    variant=>variant.order_form_item_id===itemId
   );
-
-  return list.length
-    ? list
-    : [{
-        id:`form-fallback-${item.id}`,
-        order_form_item_id:item.id,
-        strength:"Standard",
-        stock_status:"available",
-        visible:true,
-        sort_order:0
-      }];
 }
 
-function combinedOrderItems(){
-  const publicProducts=products.map(product=>({
-    source_type:"product",
-    id:product.id,
-    name:product.name,
-    category:product.category||"Research Compound",
-    description:product.description||"",
-    image_url:product.image_url||"",
-    variants:productVariants(product)
-  }));
-
-  const adminOnlyItems=formItems.map(item=>({
-    source_type:"form_item",
-    id:item.id,
-    name:item.name,
-    category:item.category||"Research Material",
-    description:item.description||"",
-    image_url:item.image_url||"",
-    variants:formVariantsForItem(item)
-  }));
-
-  return [...publicProducts,...adminOnlyItems];
+function stockLabel(status){
+  if(status==="low_stock") return "Low stock";
+  if(status==="out_of_stock") return "Out of stock";
+  if(status==="coming_soon") return "Coming soon";
+  return "Available";
 }
 
-function stockLabel(s){return s==="out_of_stock"?"Out of stock":s==="coming_soon"?"Coming soon":s==="low_stock"?"Low stock":"Available"}function renderProducts(){
-  const box=el("orderProducts");
-  const q=el("orderSearch").value.trim().toLowerCase();
-  const cat=el("orderCategory").value;
+function renderCategories(){
+  const select=el("orderCategory");
 
-  const filtered=combinedOrderItems().filter(item=>{
+  const categories=[
+    ...new Set(orderItems.map(item=>item.category||"Research Material"))
+  ];
+
+  select.innerHTML=
+    '<option value="all">All categories</option>'+
+    categories.map(category=>`
+      <option value="${esc(category)}">${esc(category)}</option>
+    `).join("");
+}
+
+function renderOrderItems(){
+  const box=el("orderItemsList");
+  const query=el("orderSearch").value.trim().toLowerCase();
+  const category=el("orderCategory").value;
+
+  const filtered=orderItems.filter(item=>{
     const text=
-      `${item.name} ${item.category} ${item.description}`.toLowerCase();
+      `${item.name} ${item.category||""} ${item.description||""}`.toLowerCase();
 
-    return (cat==="all"||item.category===cat) && text.includes(q);
+    const matchesSearch=text.includes(query);
+    const matchesCategory=
+      category==="all" || item.category===category;
+
+    return matchesSearch && matchesCategory;
   });
 
   if(!filtered.length){
-    box.innerHTML='<div class="order-loading">No matching items.</div>';
+    box.innerHTML='<div class="order-loading">No matching order items.</div>';
     return;
   }
 
   box.innerHTML=filtered.map(item=>{
-    const options=item.variants.map(variant=>`
-      <option value="${esc(variant.id)}">
-        ${esc(variant.strength)} — ${esc(stockLabel(variant.stock_status))}
-      </option>
-    `).join("");
+    const variants=variantsForItem(item.id);
 
-    const image=item.image_url
+    const options=variants.length
+      ? variants.map(variant=>`
+          <option
+            value="${esc(variant.id)}"
+            data-status="${esc(variant.stock_status)}"
+          >
+            ${esc(variant.strength)} — ${esc(stockLabel(variant.stock_status))}
+          </option>
+        `).join("")
+      : '<option value="">No strengths available</option>';
+
+    const imageStyle=item.image_url
       ? `style="background-image:url('${String(item.image_url).replace(/'/g,"%27")}')"`
       : "";
 
+    const firstStatus=variants[0]?.stock_status||"out_of_stock";
+
     return `
-      <article class="order-product">
-        <div class="order-product-image" ${image}>
-          ${item.image_url?"":"⚗"}
+      <article class="quick-order-row">
+        <div class="quick-order-product">
+          <div class="quick-order-thumb" ${imageStyle}>
+            ${item.image_url?"":"⚗"}
+          </div>
+
+          <div class="quick-order-copy">
+            <div class="quick-order-category">
+              ${esc(item.category||"Research Material")}
+            </div>
+
+            <strong>${esc(item.name)}</strong>
+            <small>${esc(item.description||"")}</small>
+          </div>
         </div>
 
-        <div class="order-product-body">
-          <div class="category">${esc(item.category)}</div>
-          <h3>${esc(item.name)}</h3>
-          <p>${esc(item.description)}</p>
+        <div>
+          <select
+            id="strength-${esc(item.id)}"
+            onchange="updateRowStatus('${esc(item.id)}')"
+            ${variants.length?"":"disabled"}
+          >
+            ${options}
+          </select>
 
-          <div class="variant-row">
-            <select id="variant-${item.source_type}-${esc(item.id)}">
-              ${options}
-            </select>
+          <span
+            id="status-${esc(item.id)}"
+            class="stock-badge ${esc(firstStatus)}"
+          >
+            ${esc(stockLabel(firstStatus))}
+          </span>
+        </div>
 
-            <input
-              id="qty-${item.source_type}-${esc(item.id)}"
-              type="number"
-              min="1"
-              max="99"
-              value="1"
-            >
+        <div class="quick-order-qty">
+          <button
+            type="button"
+            onclick="changeRowQuantity('${esc(item.id)}',-1)"
+          >
+            −
+          </button>
 
-            <button
-              class="btn blue"
-              type="button"
-              onclick="addToCart('${item.source_type}','${esc(item.id)}')"
-            >
-              Add
-            </button>
-          </div>
+          <input
+            id="qty-${esc(item.id)}"
+            type="number"
+            min="0"
+            max="99"
+            value="0"
+            onchange="syncCartFromRow('${esc(item.id)}')"
+          >
+
+          <button
+            type="button"
+            onclick="changeRowQuantity('${esc(item.id)}',1)"
+          >
+            +
+          </button>
         </div>
       </article>
     `;
   }).join("");
 }
 
-function addToCart(sourceType,id){
-  const item=combinedOrderItems().find(
-    current=>
-      current.source_type===sourceType &&
-      String(current.id)===String(id)
+function selectedVariant(itemId){
+  const select=el(`strength-${itemId}`);
+  if(!select || !select.value) return null;
+
+  return orderVariants.find(
+    variant=>String(variant.id)===String(select.value)
+  )||null;
+}
+
+function updateRowStatus(itemId){
+  const variant=selectedVariant(itemId);
+  const badge=el(`status-${itemId}`);
+
+  if(!variant || !badge) return;
+
+  badge.className=`stock-badge ${variant.stock_status}`;
+  badge.textContent=stockLabel(variant.stock_status);
+
+  syncCartFromRow(itemId);
+}
+
+function changeRowQuantity(itemId,amount){
+  const input=el(`qty-${itemId}`);
+  if(!input) return;
+
+  const next=Math.max(
+    0,
+    Math.min(99,Number(input.value||0)+amount)
   );
 
-  const select=el(`variant-${sourceType}-${id}`);
-  const quantityInput=el(`qty-${sourceType}-${id}`);
+  input.value=next;
+  syncCartFromRow(itemId);
+}
 
-  if(!item||!select)return;
-
-  const variant=item.variants.find(
-    current=>String(current.id)===String(select.value)
+function syncCartFromRow(itemId){
+  const item=orderItems.find(
+    current=>String(current.id)===String(itemId)
   );
 
-  const quantity=Math.max(1,Number(quantityInput.value||1));
+  const variant=selectedVariant(itemId);
+  const input=el(`qty-${itemId}`);
 
-  if(!variant)return;
+  if(!item || !variant || !input) return;
 
-  if(variant.stock_status==="out_of_stock"){
-    alert("That strength is currently out of stock.");
+  const quantity=Math.max(
+    0,
+    Math.min(99,Number(input.value||0))
+  );
+
+  if(
+    quantity>0 &&
+    (variant.stock_status==="out_of_stock" ||
+     variant.stock_status==="coming_soon")
+  ){
+    alert(
+      variant.stock_status==="out_of_stock"
+        ? "That strength is currently out of stock."
+        : "That strength is marked coming soon."
+    );
+
+    input.value=0;
+    removeCartCombination(itemId,variant.id);
+    renderCart();
     return;
   }
 
-  if(variant.stock_status==="coming_soon"){
-    alert("That strength is marked coming soon.");
-    return;
-  }
+  removeCartItemByItemId(itemId);
 
-  const existing=cart.find(current=>
-    current.source_type===sourceType &&
-    String(current.item_id)===String(item.id) &&
-    String(current.variant_id)===String(variant.id)
-  );
-
-  if(existing){
-    existing.quantity+=quantity;
-  }else{
+  if(quantity>0){
     cart.push({
-      source_type:sourceType,
-      item_id:item.id,
-      product_id:sourceType==="product" ? item.id : null,
-      order_form_item_id:sourceType==="form_item" ? item.id : null,
-      product_name:item.name,
+      order_form_item_id:item.id,
+      product_id:null,
       variant_id:variant.id,
+      product_name:item.name,
       strength:variant.strength,
       quantity
     });
   }
 
-  quantityInput.value=1;
   renderCart();
-}function renderCart(){const box=el("orderCart"),total=cart.reduce((s,i)=>s+i.quantity,0);el("orderItemCount").textContent=`${total} ${total===1?"item":"items"}`;if(!cart.length){box.innerHTML='<p class="empty-cart">No products selected.</p>';return}box.innerHTML=cart.map((i,n)=>`<div class="cart-item"><div class="cart-item-head"><div><strong>${esc(i.product_name)}</strong><small>${esc(i.strength)}</small></div><strong>×${i.quantity}</strong></div><div class="cart-controls"><button type="button" onclick="changeQuantity(${n},-1)">−</button><span>${i.quantity}</span><button type="button" onclick="changeQuantity(${n},1)">+</button><button type="button" class="cart-remove" onclick="removeCartItem(${n})">×</button></div></div>`).join("")}function changeQuantity(i,a){if(!cart[i])return;cart[i].quantity+=a;if(cart[i].quantity<=0)cart.splice(i,1);renderCart()}function removeCartItem(i){cart.splice(i,1);renderCart()}function setStatus(m,t=""){const s=el("orderStatus");s.textContent=m;s.className=`form-status ${t}`.trim()}async function submitOrder(e){e.preventDefault();if(!cart.length){setStatus("Add at least one item.","error");return}if(!e.currentTarget.reportValidity())return;const b=el("submitOrderButton");b.disabled=true;b.textContent="Submitting…";setStatus("");try{const r=await fetch("/.netlify/functions/submit-order-request",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:el("orderName").value.trim(),email:el("orderEmail").value.trim(),company:el("orderCompany").value.trim(),phone:el("orderPhone").value.trim(),notes:el("orderNotes").value.trim(),research_acknowledged:el("orderConsent").checked,website:el("orderWebsite").value,source_url:location.href,items:cart})}),j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||"The request could not be submitted.");e.currentTarget.reset();cart=[];renderCart();setStatus("Thank you. Your order request was submitted.","success")}catch(err){setStatus(err.message||"The request could not be submitted.","error")}finally{b.disabled=false;b.textContent="Submit Order Request"}}document.addEventListener("DOMContentLoaded",()=>{initGate();loadCatalog();el("orderSearch").addEventListener("input",renderProducts);el("orderCategory").addEventListener("change",renderProducts);el("orderRequestForm").addEventListener("submit",submitOrder);el("menuBtn")?.addEventListener("click",()=>el("navLinks").classList.toggle("open"))});
+}
+
+function removeCartCombination(itemId,variantId){
+  cart=cart.filter(item=>!(
+    String(item.order_form_item_id)===String(itemId) &&
+    String(item.variant_id)===String(variantId)
+  ));
+}
+
+function removeCartItemByItemId(itemId){
+  cart=cart.filter(
+    item=>String(item.order_form_item_id)!==String(itemId)
+  );
+}
+
+function removeCartItem(index){
+  const item=cart[index];
+  if(!item) return;
+
+  const input=el(`qty-${item.order_form_item_id}`);
+  if(input) input.value=0;
+
+  cart.splice(index,1);
+  renderCart();
+}
+
+function renderCart(){
+  const box=el("orderCart");
+  const count=cart.reduce((sum,item)=>sum+item.quantity,0);
+
+  el("orderItemCount").textContent=
+    `${count} ${count===1?"item":"items"}`;
+
+  if(!cart.length){
+    box.innerHTML='<p class="empty-cart">No items selected.</p>';
+    return;
+  }
+
+  box.innerHTML=cart.map((item,index)=>`
+    <div class="cart-item">
+      <div>
+        <strong>${esc(item.product_name)}</strong>
+        <small>${esc(item.strength)} × ${item.quantity}</small>
+      </div>
+
+      <button
+        type="button"
+        class="cart-remove"
+        onclick="removeCartItem(${index})"
+        aria-label="Remove item"
+      >
+        ×
+      </button>
+    </div>
+  `).join("");
+}
+
+function setStatus(message,type=""){
+  const status=el("orderStatus");
+  status.textContent=message;
+  status.className=`form-status ${type}`.trim();
+}
+
+async function submitOrder(event){
+  event.preventDefault();
+
+  if(!cart.length){
+    setStatus("Select at least one item.","error");
+    return;
+  }
+
+  if(!event.currentTarget.reportValidity()) return;
+
+  const button=el("submitOrderButton");
+  button.disabled=true;
+  button.textContent="Sending…";
+  setStatus("");
+
+  const payload={
+    name:el("orderName").value.trim(),
+    email:el("orderEmail").value.trim(),
+    phone:el("orderPhone").value.trim(),
+    company:el("orderCompany").value.trim(),
+    notes:el("orderNotes").value.trim(),
+    research_acknowledged:el("orderConsent").checked,
+    website:el("orderWebsite").value,
+    source_url:window.location.href,
+    items:cart
+  };
+
+  try{
+    const response=await fetch(
+      "/.netlify/functions/submit-order-request",
+      {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(payload)
+      }
+    );
+
+    const result=await response.json().catch(()=>({}));
+
+    if(!response.ok){
+      throw new Error(
+        result.error||"The request could not be submitted."
+      );
+    }
+
+    event.currentTarget.reset();
+
+    document
+      .querySelectorAll('[id^="qty-"]')
+      .forEach(input=>input.value=0);
+
+    cart=[];
+    renderCart();
+
+    setStatus(
+      "Thank you. Your order request was sent.",
+      "success"
+    );
+  }catch(error){
+    console.error(error);
+    setStatus(
+      error.message||"The request could not be submitted.",
+      "error"
+    );
+  }finally{
+    button.disabled=false;
+    button.textContent="Send Order Request";
+  }
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  initGate();
+  loadOrderForm();
+
+  el("orderSearch").addEventListener("input",renderOrderItems);
+  el("orderCategory").addEventListener("change",renderOrderItems);
+  el("orderRequestForm").addEventListener("submit",submitOrder);
+
+  el("menuBtn")?.addEventListener("click",()=>{
+    el("navLinks").classList.toggle("open");
+  });
+});

@@ -775,19 +775,21 @@ async function deleteVariant(id){
   productVariants=productVariants.filter(x=>String(x.id)!==String(id));renderProducts();flash("Strength deleted")
 }
 
+
 async function loadOrderFormItems(){
   if(!client) return;
 
-  const [itemsResult, variantsResult] = await Promise.all([
+  const [itemsResult,variantsResult]=await Promise.all([
     client
       .from("order_form_items")
       .select("*")
-      .order("sort_order", { ascending:true })
-      .order("created_at", { ascending:false }),
+      .order("sort_order",{ascending:true})
+      .order("created_at",{ascending:false}),
+
     client
       .from("order_form_item_variants")
       .select("*")
-      .order("sort_order", { ascending:true })
+      .order("sort_order",{ascending:true})
   ]);
 
   if(itemsResult.error){
@@ -795,55 +797,66 @@ async function loadOrderFormItems(){
     return;
   }
 
-  orderFormItems = itemsResult.data || [];
-  orderFormItemVariants = variantsResult.error ? [] : (variantsResult.data || []);
+  orderFormItems=itemsResult.data||[];
+  orderFormItemVariants=
+    variantsResult.error?[]:(variantsResult.data||[]);
+
   renderOrderFormItems();
 }
 
 function orderVariantsForItem(itemId){
   return orderFormItemVariants.filter(
-    variant => variant.order_form_item_id === itemId
+    variant=>variant.order_form_item_id===itemId
   );
 }
 
 function renderOrderFormItems(){
-  const box = el("orderFormItems");
+  const box=el("orderFormItems");
   if(!box) return;
 
-  const query = (el("orderItemSearch")?.value || "")
-    .trim()
-    .toLowerCase();
+  const query=
+    (el("orderItemSearch")?.value||"").trim().toLowerCase();
 
-  const filter = el("orderItemFilter")?.value || "all";
+  const filter=
+    el("orderItemFilter")?.value||"all";
 
-  const filtered = orderFormItems.filter(item => {
-    const searchable =
-      `${item.name} ${item.category || ""} ${item.description || ""}`
+  const filtered=orderFormItems.filter(item=>{
+    const text=
+      `${item.name} ${item.category||""} ${item.description||""}`
         .toLowerCase();
 
-    const matchesSearch = searchable.includes(query);
+    const matchesSearch=text.includes(query);
 
-    const matchesFilter =
-      filter === "all" ||
-      (filter === "visible" && item.visible !== false) ||
-      (filter === "hidden" && item.visible === false);
+    const matchesFilter=
+      filter==="all" ||
+      (filter==="visible" && item.visible!==false) ||
+      (filter==="hidden" && item.visible===false);
 
     return matchesSearch && matchesFilter;
   });
 
   if(!filtered.length){
-    box.innerHTML = '<p class="muted">No matching form-only items.</p>';
+    box.innerHTML=
+      '<p class="muted">No order form items yet.</p>';
     return;
   }
 
-  box.innerHTML = filtered.map(item => {
-    const variants = orderVariantsForItem(item.id);
+  box.innerHTML=filtered.map(item=>{
+    const variants=orderVariantsForItem(item.id);
 
     return `
       <article class="product order-form-admin-item">
         <div class="product-head">
-          <h3>${escapeHtml(item.name || "New Form Item")}</h3>
-          <span class="muted">Form-only item</span>
+          <div>
+            <h3>${escapeHtml(item.name||"New Order Item")}</h3>
+            <div class="muted">
+              ${item.visible!==false ? "Visible on order form" : "Hidden"}
+            </div>
+          </div>
+
+          <div class="order-item-position">
+            Sort: ${Number(item.sort_order||0)}
+          </div>
         </div>
 
         <div class="grid two">
@@ -852,7 +865,7 @@ function renderOrderFormItems(){
             <input
               data-order-item-id="${escapeHtml(item.id)}"
               data-order-item-key="name"
-              value="${escapeHtml(item.name)}"
+              value="${escapeHtml(item.name||"")}"
             >
           </div>
 
@@ -861,7 +874,7 @@ function renderOrderFormItems(){
             <input
               data-order-item-id="${escapeHtml(item.id)}"
               data-order-item-key="category"
-              value="${escapeHtml(item.category || "")}"
+              value="${escapeHtml(item.category||"")}"
             >
           </div>
         </div>
@@ -870,34 +883,38 @@ function renderOrderFormItems(){
         <textarea
           data-order-item-id="${escapeHtml(item.id)}"
           data-order-item-key="description"
-        >${escapeHtml(item.description || "")}</textarea>
+        >${escapeHtml(item.description||"")}</textarea>
 
         <label>Image URL</label>
         <input
           data-order-item-id="${escapeHtml(item.id)}"
           data-order-item-key="image_url"
-          value="${escapeHtml(item.image_url || "")}"
+          value="${escapeHtml(item.image_url||"")}"
         >
 
         <div class="grid two">
           <div>
-            <label>Visible on Order Form</label>
+            <label>Visible</label>
             <select
               data-order-item-id="${escapeHtml(item.id)}"
               data-order-item-key="visible"
             >
-              <option value="true" ${item.visible !== false ? "selected" : ""}>Yes</option>
-              <option value="false" ${item.visible === false ? "selected" : ""}>No</option>
+              <option value="true" ${item.visible!==false?"selected":""}>
+                Yes
+              </option>
+              <option value="false" ${item.visible===false?"selected":""}>
+                No
+              </option>
             </select>
           </div>
 
           <div>
-            <label>Sort Order</label>
+            <label>Sort order</label>
             <input
               type="number"
               data-order-item-id="${escapeHtml(item.id)}"
               data-order-item-key="sort_order"
-              value="${Number(item.sort_order || 0)}"
+              value="${Number(item.sort_order||0)}"
             >
           </div>
         </div>
@@ -905,6 +922,7 @@ function renderOrderFormItems(){
         <div class="variant-admin">
           <div class="variant-admin-head">
             <h4>Strengths & Stock</h4>
+
             <button
               class="btn green"
               type="button"
@@ -917,50 +935,58 @@ function renderOrderFormItems(){
           <div class="variant-list">
             ${
               variants.length
-                ? variants.map(variant => `
-                  <div class="variant-editor">
-                    <input
-                      data-order-form-variant-id="${escapeHtml(variant.id)}"
-                      data-order-form-variant-key="strength"
-                      value="${escapeHtml(variant.strength)}"
-                      placeholder="Strength"
-                    >
+                ? variants.map(variant=>`
+                    <div class="variant-editor">
+                      <input
+                        data-order-form-variant-id="${escapeHtml(variant.id)}"
+                        data-order-form-variant-key="strength"
+                        value="${escapeHtml(variant.strength||"")}"
+                        placeholder="Strength"
+                      >
 
-                    <select
-                      data-order-form-variant-id="${escapeHtml(variant.id)}"
-                      data-order-form-variant-key="stock_status"
-                    >
-                      <option value="available" ${variant.stock_status === "available" ? "selected" : ""}>Available</option>
-                      <option value="low_stock" ${variant.stock_status === "low_stock" ? "selected" : ""}>Low Stock</option>
-                      <option value="out_of_stock" ${variant.stock_status === "out_of_stock" ? "selected" : ""}>Out of Stock</option>
-                      <option value="coming_soon" ${variant.stock_status === "coming_soon" ? "selected" : ""}>Coming Soon</option>
-                    </select>
+                      <select
+                        data-order-form-variant-id="${escapeHtml(variant.id)}"
+                        data-order-form-variant-key="stock_status"
+                      >
+                        <option value="available" ${variant.stock_status==="available"?"selected":""}>Available</option>
+                        <option value="low_stock" ${variant.stock_status==="low_stock"?"selected":""}>Low Stock</option>
+                        <option value="out_of_stock" ${variant.stock_status==="out_of_stock"?"selected":""}>Out of Stock</option>
+                        <option value="coming_soon" ${variant.stock_status==="coming_soon"?"selected":""}>Coming Soon</option>
+                      </select>
 
-                    <select
-                      data-order-form-variant-id="${escapeHtml(variant.id)}"
-                      data-order-form-variant-key="visible"
-                    >
-                      <option value="true" ${variant.visible !== false ? "selected" : ""}>Visible</option>
-                      <option value="false" ${variant.visible === false ? "selected" : ""}>Hidden</option>
-                    </select>
+                      <select
+                        data-order-form-variant-id="${escapeHtml(variant.id)}"
+                        data-order-form-variant-key="visible"
+                      >
+                        <option value="true" ${variant.visible!==false?"selected":""}>Visible</option>
+                        <option value="false" ${variant.visible===false?"selected":""}>Hidden</option>
+                      </select>
 
-                    <button
-                      class="btn blue"
-                      type="button"
-                      onclick="saveOrderFormItemVariant('${escapeHtml(variant.id)}')"
-                    >
-                      Save
-                    </button>
+                      <input
+                        type="number"
+                        data-order-form-variant-id="${escapeHtml(variant.id)}"
+                        data-order-form-variant-key="sort_order"
+                        value="${Number(variant.sort_order||0)}"
+                        title="Sort order"
+                      >
 
-                    <button
-                      class="btn danger"
-                      type="button"
-                      onclick="deleteOrderFormItemVariant('${escapeHtml(variant.id)}')"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                `).join("")
+                      <button
+                        class="btn blue"
+                        type="button"
+                        onclick="saveOrderFormItemVariant('${escapeHtml(variant.id)}')"
+                      >
+                        Save
+                      </button>
+
+                      <button
+                        class="btn danger"
+                        type="button"
+                        onclick="deleteOrderFormItemVariant('${escapeHtml(variant.id)}')"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  `).join("")
                 : '<p class="muted">No strengths added yet.</p>'
             }
           </div>
@@ -987,137 +1013,171 @@ function renderOrderFormItems(){
     `;
   }).join("");
 
-  box.querySelectorAll("[data-order-item-id]").forEach(node => {
-    const update = event => {
-      const item = orderFormItems.find(
-        current => String(current.id) === event.target.dataset.orderItemId
+  box.querySelectorAll("[data-order-item-id]").forEach(node=>{
+    const update=event=>{
+      const item=orderFormItems.find(
+        current=>
+          String(current.id)===event.target.dataset.orderItemId
       );
 
       if(!item) return;
 
-      const key = event.target.dataset.orderItemKey;
-      let value = event.target.value;
+      const key=event.target.dataset.orderItemKey;
+      let value=event.target.value;
 
-      if(key === "visible"){
-        value = value === "true";
+      if(key==="visible"){
+        value=value==="true";
       }
 
-      if(key === "sort_order"){
-        value = Number(value || 0);
+      if(key==="sort_order"){
+        value=Number(value||0);
       }
 
-      item[key] = value;
+      item[key]=value;
     };
 
-    node.addEventListener("input", update);
-    node.addEventListener("change", update);
+    node.addEventListener("input",update);
+    node.addEventListener("change",update);
   });
 
-  box.querySelectorAll("[data-order-form-variant-id]").forEach(node => {
-    const update = event => {
-      const variant = orderFormItemVariants.find(
-        current =>
-          String(current.id) ===
-          event.target.dataset.orderFormVariantId
-      );
+  box
+    .querySelectorAll("[data-order-form-variant-id]")
+    .forEach(node=>{
+      const update=event=>{
+        const variant=orderFormItemVariants.find(
+          current=>
+            String(current.id)===
+            event.target.dataset.orderFormVariantId
+        );
 
-      if(!variant) return;
+        if(!variant) return;
 
-      const key = event.target.dataset.orderFormVariantKey;
-      let value = event.target.value;
+        const key=event.target.dataset.orderFormVariantKey;
+        let value=event.target.value;
 
-      if(key === "visible"){
-        value = value === "true";
-      }
+        if(key==="visible"){
+          value=value==="true";
+        }
 
-      variant[key] = value;
-    };
+        if(key==="sort_order"){
+          value=Number(value||0);
+        }
 
-    node.addEventListener("input", update);
-    node.addEventListener("change", update);
-  });
+        variant[key]=value;
+      };
+
+      node.addEventListener("input",update);
+      node.addEventListener("change",update);
+    });
 }
 
 async function addOrderFormItem(){
-  const { data, error } = await client
-    .from("order_form_items")
-    .insert({
-      name:"New Form Item",
-      category:"Research Material",
-      description:"",
-      image_url:null,
-      visible:true,
-      sort_order:orderFormItems.length
-    })
-    .select()
-    .single();
+  try{
+    if(!client){
+      client=createClient();
+    }
 
-  if(error){
-    alert(error.message);
-    return;
+    const {data,error}=await client
+      .from("order_form_items")
+      .insert({
+        name:"New Order Item",
+        category:"Research Material",
+        description:"",
+        image_url:null,
+        visible:true,
+        sort_order:orderFormItems.length
+      })
+      .select()
+      .single();
+
+    if(error){
+      throw error;
+    }
+
+    orderFormItems.push(data);
+
+    const variantResult=await client
+      .from("order_form_item_variants")
+      .insert({
+        order_form_item_id:data.id,
+        strength:"Standard",
+        stock_status:"available",
+        visible:true,
+        sort_order:0
+      })
+      .select()
+      .single();
+
+    if(!variantResult.error && variantResult.data){
+      orderFormItemVariants.push(variantResult.data);
+    }
+
+    renderOrderFormItems();
+    showPanel("orderItemsPanel");
+    flash("Order item added");
+  }catch(error){
+    console.error(error);
+    alert(error.message||"Order item could not be added.");
   }
-
-  orderFormItems.push(data);
-  renderOrderFormItems();
-  showPanel("orderItemsPanel");
-  flash("Form item added");
 }
 
 async function saveOrderFormItem(id){
-  const item = orderFormItems.find(
-    current => String(current.id) === String(id)
+  const item=orderFormItems.find(
+    current=>String(current.id)===String(id)
   );
 
   if(!item) return;
 
-  const { error } = await client
+  const {error}=await client
     .from("order_form_items")
     .update({
       name:item.name,
-      category:item.category || "Research Material",
-      description:item.description || "",
-      image_url:item.image_url || null,
-      visible:item.visible !== false,
-      sort_order:Number(item.sort_order || 0),
+      category:item.category||"Research Material",
+      description:item.description||"",
+      image_url:item.image_url||null,
+      visible:item.visible!==false,
+      sort_order:Number(item.sort_order||0),
       updated_at:new Date().toISOString()
     })
-    .eq("id", item.id);
+    .eq("id",item.id);
 
   if(error){
     alert(error.message);
     return;
   }
 
-  flash("Form item saved");
+  flash("Order item saved");
+  await loadOrderFormItems();
 }
 
 async function deleteOrderFormItem(id){
-  if(!confirm("Delete this form-only item?")) return;
+  if(!confirm("Delete this order item?")) return;
 
-  const { error } = await client
+  const {error}=await client
     .from("order_form_items")
     .delete()
-    .eq("id", id);
+    .eq("id",id);
 
   if(error){
     alert(error.message);
     return;
   }
 
-  orderFormItems = orderFormItems.filter(
-    item => String(item.id) !== String(id)
+  orderFormItems=orderFormItems.filter(
+    item=>String(item.id)!==String(id)
   );
 
-  orderFormItemVariants = orderFormItemVariants.filter(
-    variant => String(variant.order_form_item_id) !== String(id)
+  orderFormItemVariants=orderFormItemVariants.filter(
+    variant=>
+      String(variant.order_form_item_id)!==String(id)
   );
 
   renderOrderFormItems();
-  flash("Form item deleted");
+  flash("Order item deleted");
 }
 
 async function addOrderFormItemVariant(itemId){
-  const { data, error } = await client
+  const {data,error}=await client
     .from("order_form_item_variants")
     .insert({
       order_form_item_id:itemId,
@@ -1140,22 +1200,22 @@ async function addOrderFormItemVariant(itemId){
 }
 
 async function saveOrderFormItemVariant(id){
-  const variant = orderFormItemVariants.find(
-    current => String(current.id) === String(id)
+  const variant=orderFormItemVariants.find(
+    current=>String(current.id)===String(id)
   );
 
   if(!variant) return;
 
-  const { error } = await client
+  const {error}=await client
     .from("order_form_item_variants")
     .update({
       strength:variant.strength,
       stock_status:variant.stock_status,
-      visible:variant.visible !== false,
-      sort_order:Number(variant.sort_order || 0),
+      visible:variant.visible!==false,
+      sort_order:Number(variant.sort_order||0),
       updated_at:new Date().toISOString()
     })
-    .eq("id", variant.id);
+    .eq("id",variant.id);
 
   if(error){
     alert(error.message);
@@ -1163,23 +1223,24 @@ async function saveOrderFormItemVariant(id){
   }
 
   flash("Strength saved");
+  await loadOrderFormItems();
 }
 
 async function deleteOrderFormItemVariant(id){
   if(!confirm("Delete this strength?")) return;
 
-  const { error } = await client
+  const {error}=await client
     .from("order_form_item_variants")
     .delete()
-    .eq("id", id);
+    .eq("id",id);
 
   if(error){
     alert(error.message);
     return;
   }
 
-  orderFormItemVariants = orderFormItemVariants.filter(
-    variant => String(variant.id) !== String(id)
+  orderFormItemVariants=orderFormItemVariants.filter(
+    variant=>String(variant.id)!==String(id)
   );
 
   renderOrderFormItems();

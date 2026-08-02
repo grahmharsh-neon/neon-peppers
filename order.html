@@ -15,18 +15,41 @@
       <div class="eyebrow">Restricted research catalog</div>
       <h2>Researcher Verification</h2>
       <p>Confirm each statement before continuing.</p>
-      <label class="check-row"><input type="checkbox"><span>I am at least 21 years old.</span></label>
-      <label class="check-row"><input type="checkbox"><span>I am entering for legitimate laboratory, institutional, educational, or analytical research purposes.</span></label>
-      <label class="check-row"><input type="checkbox"><span>I understand products are not intended for human or veterinary use.</span></label>
-      <label class="check-row"><input type="checkbox"><span>I accept responsibility for compliance with applicable laws.</span></label>
-      <button class="btn pink full" id="enterSite" disabled>Enter Research Request Form</button>
+
+      <label class="check-row">
+        <input type="checkbox">
+        <span>I am at least 21 years old.</span>
+      </label>
+
+      <label class="check-row">
+        <input type="checkbox">
+        <span>I am entering for legitimate laboratory, institutional, educational, or analytical research purposes.</span>
+      </label>
+
+      <label class="check-row">
+        <input type="checkbox">
+        <span>I understand products are not intended for human or veterinary use.</span>
+      </label>
+
+      <label class="check-row">
+        <input type="checkbox">
+        <span>I accept responsibility for compliance with applicable laws.</span>
+      </label>
+
+      <button class="btn pink full white-text-button" id="enterSite" disabled>
+        Enter Research Request Form
+      </button>
     </div>
   </div>
 
   <header>
     <div class="header-inner">
-      <a class="brand" href="/#home"><img src="/assets/neon-peppers-logo.jpg" alt="Neon Peppers"></a>
+      <a class="brand" href="/#home">
+        <img src="/assets/neon-peppers-logo.jpg" alt="Neon Peppers">
+      </a>
+
       <button class="menu" id="menuBtn" aria-label="Open navigation">☰</button>
+
       <nav id="navLinks">
         <a href="/#home">Home</a>
         <a href="/#products">Products</a>
@@ -39,42 +62,104 @@
     </div>
   </header>
 
-  <main class="order-page">
-    <section class="order-intro">
+  <main class="quick-order-page">
+    <section class="quick-order-hero">
       <div>
         <div class="eyebrow">Research materials</div>
-        <h1>ORDER REQUEST</h1>
-        <p>Select available research materials and submit a request. This form does not process payment or guarantee fulfillment. Availability, purchaser eligibility, documentation, and lawful use must be confirmed.</p>
+        <h1>QUICK ORDER REQUEST</h1>
+        <p>
+          Select a strength and quantity for each item. This form submits a request
+          only. It does not process payment or guarantee fulfillment.
+        </p>
       </div>
-      <div class="order-notice"><strong>Research use only</strong><span>Not for human or veterinary use.</span></div>
+
+      <div class="quick-order-notice">
+        <strong>Research use only</strong>
+        <span>Not for human or veterinary use.</span>
+      </div>
     </section>
 
-    <section class="order-layout">
-      <div class="order-catalog">
-        <div class="order-toolbar">
-          <div class="search-wrap"><span class="search-icon">⌕</span><input id="orderSearch" class="search" placeholder="Search products..."></div>
-          <select id="orderCategory"><option value="all">All categories</option></select>
+    <section class="quick-order-shell">
+      <div class="quick-order-list-panel">
+        <div class="quick-order-toolbar">
+          <div class="search-wrap">
+            <span class="search-icon">⌕</span>
+            <input id="orderSearch" class="search" placeholder="Search order items...">
+          </div>
+
+          <select id="orderCategory" aria-label="Filter by category">
+            <option value="all">All categories</option>
+          </select>
         </div>
-        <div id="orderProducts" class="order-products"><div class="order-loading">Loading available products…</div></div>
+
+        <div class="quick-order-table-head">
+          <span>Research Material</span>
+          <span>Strength</span>
+          <span>Quantity</span>
+        </div>
+
+        <div id="orderItemsList" class="quick-order-list">
+          <div class="order-loading">Loading order form…</div>
+        </div>
       </div>
 
-      <aside class="order-summary">
-        <div class="summary-head">
-          <div><div class="pink-kicker">Your request</div><h2>Selected Items</h2></div>
-          <span id="orderItemCount">0 items</span>
-        </div>
-        <div id="orderCart" class="order-cart"><p class="empty-cart">No products selected.</p></div>
+      <aside class="quick-order-sidebar">
+        <div class="order-summary-card">
+          <div class="summary-head">
+            <div>
+              <div class="pink-kicker">Your request</div>
+              <h2>Selected Items</h2>
+            </div>
+            <span id="orderItemCount">0 items</span>
+          </div>
 
-        <form id="orderRequestForm" class="order-form">
-          <h3>Request details</h3>
-          <label for="orderName">Name *</label><input id="orderName" required maxlength="100" autocomplete="name">
-          <label for="orderEmail">Email *</label><input id="orderEmail" type="email" required maxlength="180" autocomplete="email">
-          <label for="orderCompany">Company or institution</label><input id="orderCompany" maxlength="180" autocomplete="organization">
-          <label for="orderPhone">Phone</label><input id="orderPhone" maxlength="40" autocomplete="tel">
-          <label for="orderNotes">Notes</label><textarea id="orderNotes" maxlength="3000" placeholder="Documentation, quantity, shipping, or other research-related questions."></textarea>
-          <label class="consent-row"><input id="orderConsent" type="checkbox" required><span>I confirm this request is for legitimate research purposes only and not for human or veterinary use.</span></label>
+          <div id="orderCart" class="order-cart">
+            <p class="empty-cart">No items selected.</p>
+          </div>
+        </div>
+
+        <form id="orderRequestForm" class="order-request-form">
+          <h2>Contact Information</h2>
+
+          <div class="form-grid">
+            <div>
+              <label for="orderName">Name *</label>
+              <input id="orderName" required maxlength="100" autocomplete="name">
+            </div>
+
+            <div>
+              <label for="orderEmail">Email *</label>
+              <input id="orderEmail" type="email" required maxlength="180" autocomplete="email">
+            </div>
+
+            <div>
+              <label for="orderPhone">Phone</label>
+              <input id="orderPhone" maxlength="40" autocomplete="tel">
+            </div>
+
+            <div>
+              <label for="orderCompany">Company or institution</label>
+              <input id="orderCompany" maxlength="180" autocomplete="organization">
+            </div>
+          </div>
+
+          <label for="orderNotes">Notes</label>
+          <textarea id="orderNotes" maxlength="3000" placeholder="Documentation, quantity, shipping, or other research-related questions."></textarea>
+
+          <label class="order-confirmation">
+            <input id="orderConsent" type="checkbox" required>
+            <span>
+              I confirm this request is for legitimate research purposes only
+              and not for human or veterinary use.
+            </span>
+          </label>
+
           <input id="orderWebsite" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
-          <button id="submitOrderButton" class="btn pink full" type="submit">Submit Order Request</button>
+
+          <button id="submitOrderButton" class="btn pink full white-text-button" type="submit">
+            Send Order Request
+          </button>
+
           <div id="orderStatus" class="form-status" role="status"></div>
         </form>
       </aside>
@@ -82,8 +167,15 @@
   </main>
 
   <footer>
-    <div><strong>Neon Peppers Research</strong><br>Research use only. Not for human or veterinary use.</div>
-    <div class="footer-links"><a href="/research-use-policy.html">Research Policy</a><a href="/terms.html">Terms</a><a href="/privacy.html">Privacy</a></div>
+    <div>
+      <strong>Neon Peppers Research</strong><br>
+      Research use only. Not for human or veterinary use.
+    </div>
+    <div class="footer-links">
+      <a href="/research-use-policy.html">Research Policy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/privacy.html">Privacy</a>
+    </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
