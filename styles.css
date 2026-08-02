@@ -323,12 +323,29 @@ h1 span{
   grid-template-columns:repeat(3,1fr);
   gap:20px;
 }
-.card{
+.card p{
+  color:var(--muted);
+  font-size:.88rem;
+  line-height:1.55;
+  margin:10px 0 0;
+
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:3;
   overflow:hidden;
-  border:1px solid var(--line);
-  border-radius:12px;
-  background:linear-gradient(145deg,#11151d,#080a0f);
-  cursor:pointer;
+
+  min-height:4.1em;
+}
+.card-body{
+  padding:22px;
+  display:flex;
+  flex-direction:column;
+  min-height:245px;
+}
+
+.card-actions{
+  margin-top:auto;
+  padding-top:18px;
 }
 .card-image{
   height:260px;
