@@ -321,3 +321,12 @@ textarea{min-height:95px;resize:vertical}
   .inquiry-head{flex-direction:column}
 }
 .variant-admin{margin:20px 0;padding:16px;border:1px solid var(--line);border-radius:12px;background:#070a0f}.variant-admin-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.variant-admin-head h4{margin:0}.variant-editor{display:grid;grid-template-columns:1.2fr 1fr .8fr auto auto;gap:8px;margin:8px 0}.order-admin-item{margin:14px 0;padding:18px;border:1px solid var(--line);border-radius:14px;background:#0a0e14}.order-admin-products{margin:14px 0;border:1px solid rgba(255,255,255,.08);border-radius:9px;overflow:hidden}.order-admin-products div{display:flex;justify-content:space-between;gap:15px;padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.08)}.order-admin-products div:last-child{border-bottom:0}.order-admin-products span{color:var(--muted)}.inquiry-badge.contacted{color:var(--blue);border-color:var(--blue)}.inquiry-badge.approved{color:var(--green);border-color:var(--green)}@media(max-width:900px){.variant-editor{grid-template-columns:1fr 1fr}}@media(max-width:550px){.variant-editor{grid-template-columns:1fr}}
+
+/* ORDER FORM ITEM ADMIN */
+.order-form-admin-item{
+  margin-bottom:18px;
+}
+
+.order-form-admin-item textarea{
+  min-height:100px;
+}

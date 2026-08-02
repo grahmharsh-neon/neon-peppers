@@ -5,6 +5,8 @@ let inquiries = [];
 let productVariants = [];
 let orderRequests = [];
 let orderRequestItems = [];
+let orderFormItems = [];
+let orderFormItemVariants = [];
 
 function el(id){
   return document.getElementById(id);
@@ -67,6 +69,22 @@ function bindEvents(){
   el("adminProductSearch").addEventListener("input", renderProducts);
   el("adminProductFilter").addEventListener("change", renderProducts);
 
+
+
+  const addOrderItemButton = el("addOrderItemButton");
+  if(addOrderItemButton){
+    addOrderItemButton.addEventListener("click", addOrderFormItem);
+  }
+
+  const orderItemSearch = el("orderItemSearch");
+  if(orderItemSearch){
+    orderItemSearch.addEventListener("input", renderOrderFormItems);
+  }
+
+  const orderItemFilter = el("orderItemFilter");
+  if(orderItemFilter){
+    orderItemFilter.addEventListener("change", renderOrderFormItems);
+  }
 
   const refreshOrders = el("refreshOrdersButton");
   if(refreshOrders) refreshOrders.addEventListener("click", loadOrderRequests);
@@ -133,7 +151,8 @@ async function refreshAll(){
     loadSettings(),
     loadInquiries(),
     loadProductVariants(),
-    loadOrderRequests()
+    loadOrderRequests(),
+    loadOrderFormItems()
   ]);
   updateStats();
   flash("Dashboard refreshed");
@@ -755,6 +774,419 @@ async function deleteVariant(id){
   if(error){alert(error.message);return}
   productVariants=productVariants.filter(x=>String(x.id)!==String(id));renderProducts();flash("Strength deleted")
 }
+
+async function loadOrderFormItems(){
+  if(!client) return;
+
+  const [itemsResult, variantsResult] = await Promise.all([
+    client
+      .from("order_form_items")
+      .select("*")
+      .order("sort_order", { ascending:true })
+      .order("created_at", { ascending:false }),
+    client
+      .from("order_form_item_variants")
+      .select("*")
+      .order("sort_order", { ascending:true })
+  ]);
+
+  if(itemsResult.error){
+    console.warn(itemsResult.error);
+    return;
+  }
+
+  orderFormItems = itemsResult.data || [];
+  orderFormItemVariants = variantsResult.error ? [] : (variantsResult.data || []);
+  renderOrderFormItems();
+}
+
+function orderVariantsForItem(itemId){
+  return orderFormItemVariants.filter(
+    variant => variant.order_form_item_id === itemId
+  );
+}
+
+function renderOrderFormItems(){
+  const box = el("orderFormItems");
+  if(!box) return;
+
+  const query = (el("orderItemSearch")?.value || "")
+    .trim()
+    .toLowerCase();
+
+  const filter = el("orderItemFilter")?.value || "all";
+
+  const filtered = orderFormItems.filter(item => {
+    const searchable =
+      `${item.name} ${item.category || ""} ${item.description || ""}`
+        .toLowerCase();
+
+    const matchesSearch = searchable.includes(query);
+
+    const matchesFilter =
+      filter === "all" ||
+      (filter === "visible" && item.visible !== false) ||
+      (filter === "hidden" && item.visible === false);
+
+    return matchesSearch && matchesFilter;
+  });
+
+  if(!filtered.length){
+    box.innerHTML = '<p class="muted">No matching form-only items.</p>';
+    return;
+  }
+
+  box.innerHTML = filtered.map(item => {
+    const variants = orderVariantsForItem(item.id);
+
+    return `
+      <article class="product order-form-admin-item">
+        <div class="product-head">
+          <h3>${escapeHtml(item.name || "New Form Item")}</h3>
+          <span class="muted">Form-only item</span>
+        </div>
+
+        <div class="grid two">
+          <div>
+            <label>Name</label>
+            <input
+              data-order-item-id="${escapeHtml(item.id)}"
+              data-order-item-key="name"
+              value="${escapeHtml(item.name)}"
+            >
+          </div>
+
+          <div>
+            <label>Category</label>
+            <input
+              data-order-item-id="${escapeHtml(item.id)}"
+              data-order-item-key="category"
+              value="${escapeHtml(item.category || "")}"
+            >
+          </div>
+        </div>
+
+        <label>Description</label>
+        <textarea
+          data-order-item-id="${escapeHtml(item.id)}"
+          data-order-item-key="description"
+        >${escapeHtml(item.description || "")}</textarea>
+
+        <label>Image URL</label>
+        <input
+          data-order-item-id="${escapeHtml(item.id)}"
+          data-order-item-key="image_url"
+          value="${escapeHtml(item.image_url || "")}"
+        >
+
+        <div class="grid two">
+          <div>
+            <label>Visible on Order Form</label>
+            <select
+              data-order-item-id="${escapeHtml(item.id)}"
+              data-order-item-key="visible"
+            >
+              <option value="true" ${item.visible !== false ? "selected" : ""}>Yes</option>
+              <option value="false" ${item.visible === false ? "selected" : ""}>No</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Sort Order</label>
+            <input
+              type="number"
+              data-order-item-id="${escapeHtml(item.id)}"
+              data-order-item-key="sort_order"
+              value="${Number(item.sort_order || 0)}"
+            >
+          </div>
+        </div>
+
+        <div class="variant-admin">
+          <div class="variant-admin-head">
+            <h4>Strengths & Stock</h4>
+            <button
+              class="btn green"
+              type="button"
+              onclick="addOrderFormItemVariant('${escapeHtml(item.id)}')"
+            >
+              + Add Strength
+            </button>
+          </div>
+
+          <div class="variant-list">
+            ${
+              variants.length
+                ? variants.map(variant => `
+                  <div class="variant-editor">
+                    <input
+                      data-order-form-variant-id="${escapeHtml(variant.id)}"
+                      data-order-form-variant-key="strength"
+                      value="${escapeHtml(variant.strength)}"
+                      placeholder="Strength"
+                    >
+
+                    <select
+                      data-order-form-variant-id="${escapeHtml(variant.id)}"
+                      data-order-form-variant-key="stock_status"
+                    >
+                      <option value="available" ${variant.stock_status === "available" ? "selected" : ""}>Available</option>
+                      <option value="low_stock" ${variant.stock_status === "low_stock" ? "selected" : ""}>Low Stock</option>
+                      <option value="out_of_stock" ${variant.stock_status === "out_of_stock" ? "selected" : ""}>Out of Stock</option>
+                      <option value="coming_soon" ${variant.stock_status === "coming_soon" ? "selected" : ""}>Coming Soon</option>
+                    </select>
+
+                    <select
+                      data-order-form-variant-id="${escapeHtml(variant.id)}"
+                      data-order-form-variant-key="visible"
+                    >
+                      <option value="true" ${variant.visible !== false ? "selected" : ""}>Visible</option>
+                      <option value="false" ${variant.visible === false ? "selected" : ""}>Hidden</option>
+                    </select>
+
+                    <button
+                      class="btn blue"
+                      type="button"
+                      onclick="saveOrderFormItemVariant('${escapeHtml(variant.id)}')"
+                    >
+                      Save
+                    </button>
+
+                    <button
+                      class="btn danger"
+                      type="button"
+                      onclick="deleteOrderFormItemVariant('${escapeHtml(variant.id)}')"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                `).join("")
+                : '<p class="muted">No strengths added yet.</p>'
+            }
+          </div>
+        </div>
+
+        <div class="actions">
+          <button
+            class="btn pink"
+            type="button"
+            onclick="saveOrderFormItem('${escapeHtml(item.id)}')"
+          >
+            Save Item
+          </button>
+
+          <button
+            class="btn danger"
+            type="button"
+            onclick="deleteOrderFormItem('${escapeHtml(item.id)}')"
+          >
+            Delete Item
+          </button>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  box.querySelectorAll("[data-order-item-id]").forEach(node => {
+    const update = event => {
+      const item = orderFormItems.find(
+        current => String(current.id) === event.target.dataset.orderItemId
+      );
+
+      if(!item) return;
+
+      const key = event.target.dataset.orderItemKey;
+      let value = event.target.value;
+
+      if(key === "visible"){
+        value = value === "true";
+      }
+
+      if(key === "sort_order"){
+        value = Number(value || 0);
+      }
+
+      item[key] = value;
+    };
+
+    node.addEventListener("input", update);
+    node.addEventListener("change", update);
+  });
+
+  box.querySelectorAll("[data-order-form-variant-id]").forEach(node => {
+    const update = event => {
+      const variant = orderFormItemVariants.find(
+        current =>
+          String(current.id) ===
+          event.target.dataset.orderFormVariantId
+      );
+
+      if(!variant) return;
+
+      const key = event.target.dataset.orderFormVariantKey;
+      let value = event.target.value;
+
+      if(key === "visible"){
+        value = value === "true";
+      }
+
+      variant[key] = value;
+    };
+
+    node.addEventListener("input", update);
+    node.addEventListener("change", update);
+  });
+}
+
+async function addOrderFormItem(){
+  const { data, error } = await client
+    .from("order_form_items")
+    .insert({
+      name:"New Form Item",
+      category:"Research Material",
+      description:"",
+      image_url:null,
+      visible:true,
+      sort_order:orderFormItems.length
+    })
+    .select()
+    .single();
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  orderFormItems.push(data);
+  renderOrderFormItems();
+  showPanel("orderItemsPanel");
+  flash("Form item added");
+}
+
+async function saveOrderFormItem(id){
+  const item = orderFormItems.find(
+    current => String(current.id) === String(id)
+  );
+
+  if(!item) return;
+
+  const { error } = await client
+    .from("order_form_items")
+    .update({
+      name:item.name,
+      category:item.category || "Research Material",
+      description:item.description || "",
+      image_url:item.image_url || null,
+      visible:item.visible !== false,
+      sort_order:Number(item.sort_order || 0),
+      updated_at:new Date().toISOString()
+    })
+    .eq("id", item.id);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  flash("Form item saved");
+}
+
+async function deleteOrderFormItem(id){
+  if(!confirm("Delete this form-only item?")) return;
+
+  const { error } = await client
+    .from("order_form_items")
+    .delete()
+    .eq("id", id);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  orderFormItems = orderFormItems.filter(
+    item => String(item.id) !== String(id)
+  );
+
+  orderFormItemVariants = orderFormItemVariants.filter(
+    variant => String(variant.order_form_item_id) !== String(id)
+  );
+
+  renderOrderFormItems();
+  flash("Form item deleted");
+}
+
+async function addOrderFormItemVariant(itemId){
+  const { data, error } = await client
+    .from("order_form_item_variants")
+    .insert({
+      order_form_item_id:itemId,
+      strength:"New strength",
+      stock_status:"available",
+      visible:true,
+      sort_order:orderVariantsForItem(itemId).length
+    })
+    .select()
+    .single();
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  orderFormItemVariants.push(data);
+  renderOrderFormItems();
+  flash("Strength added");
+}
+
+async function saveOrderFormItemVariant(id){
+  const variant = orderFormItemVariants.find(
+    current => String(current.id) === String(id)
+  );
+
+  if(!variant) return;
+
+  const { error } = await client
+    .from("order_form_item_variants")
+    .update({
+      strength:variant.strength,
+      stock_status:variant.stock_status,
+      visible:variant.visible !== false,
+      sort_order:Number(variant.sort_order || 0),
+      updated_at:new Date().toISOString()
+    })
+    .eq("id", variant.id);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  flash("Strength saved");
+}
+
+async function deleteOrderFormItemVariant(id){
+  if(!confirm("Delete this strength?")) return;
+
+  const { error } = await client
+    .from("order_form_item_variants")
+    .delete()
+    .eq("id", id);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  orderFormItemVariants = orderFormItemVariants.filter(
+    variant => String(variant.id) !== String(id)
+  );
+
+  renderOrderFormItems();
+  flash("Strength deleted");
+}
+
+
 async function loadOrderRequests(){
   if(!client)return;
   const [r,i]=await Promise.all([client.from("order_requests").select("*").order("created_at",{ascending:false}),client.from("order_request_items").select("*").order("created_at",{ascending:true})]);

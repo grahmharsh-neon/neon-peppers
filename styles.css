@@ -732,3 +732,51 @@ footer{
   .form-grid{grid-template-columns:1fr}
   .inquiry-form{padding:17px}
 }
+
+
+/* ORDER REQUEST V8 FIXES */
+#enterSite,
+#submitOrderButton{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+}
+
+.order-form .consent-row{
+  display:grid !important;
+  grid-template-columns:22px minmax(0,1fr);
+  align-items:start;
+  gap:12px;
+  width:100%;
+  margin:16px 0;
+  padding:14px 16px;
+  box-sizing:border-box;
+}
+
+.order-form .consent-row input{
+  width:18px !important;
+  height:18px !important;
+  margin:2px 0 0 !important;
+  padding:0 !important;
+}
+
+.order-form .consent-row span{
+  display:block;
+  min-width:0;
+  width:auto;
+  margin:0;
+  text-align:left;
+  line-height:1.5;
+}
+
+@media(max-width:560px){
+  #enterSite,
+  #submitOrderButton{
+    width:100%;
+  }
+
+  .order-form .consent-row{
+    grid-template-columns:20px minmax(0,1fr);
+    gap:10px;
+    padding:13px;
+  }
+}
