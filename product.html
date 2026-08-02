@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Neon Peppers research material reference page.">
+  <title>Research Material | Neon Peppers</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/product.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a class="brand" href="/#home">
+        <img src="/assets/neon-peppers-logo.jpg" alt="Neon Peppers">
+      </a>
+
+      <button class="menu" id="menuBtn" aria-label="Open navigation">☰</button>
+
+      <nav id="navLinks">
+        <a href="/#home">Home</a>
+        <a class="active" href="/#products">Products</a>
+        <a href="/#about">About</a>
+        <a href="/#quality">Quality</a>
+        <a href="/#faq">FAQ</a>
+        <a href="/#contact">Contact</a>
+        <a class="admin-link" href="/admin.html">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div id="productLoading" class="product-loading">
+      Loading research material…
+    </div>
+
+    <section id="productPage" class="product-page" hidden>
+      <div class="product-breadcrumb">
+        <a href="/#products">Products</a>
+        <span>›</span>
+        <span id="breadcrumbName"></span>
+      </div>
+
+      <div class="product-hero-grid">
+        <div class="product-gallery">
+          <div id="productHeroImage" class="product-hero-image">⚗</div>
+          <div class="image-note">Image shown for product identification.</div>
+        </div>
+
+        <div class="product-info">
+          <div class="product-meta-row">
+            <div id="productCategory" class="category"></div>
+            <div id="productStatus" class="detail-status"></div>
+          </div>
+
+          <h1 id="productName"></h1>
+
+          <div class="product-strength-line">
+            <span>Strength</span>
+            <strong id="productStrength"></strong>
+          </div>
+
+          <p id="productDescription" class="product-description"></p>
+
+          <div class="research-notice">
+            <div class="research-notice-icon">⚗</div>
+            <div>
+              <strong>For laboratory research use only</strong>
+              <p>Not for human or veterinary use. Not for diagnostic or therapeutic use.</p>
+            </div>
+          </div>
+
+          <div class="product-actions">
+            <a id="productCoa" class="btn blue" target="_blank" rel="noopener">View COA</a>
+            <a id="productEmail" class="btn pink" href="#productInquiry">Request Information</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-details-grid">
+        <article class="detail-card">
+          <div class="detail-icon pink-text">◇</div>
+          <h2>Product Identity</h2>
+          <dl>
+            <div><dt>Name</dt><dd id="identityName"></dd></div>
+            <div><dt>Category</dt><dd id="identityCategory"></dd></div>
+            <div><dt>Strength</dt><dd id="identityStrength"></dd></div>
+            <div><dt>Availability</dt><dd id="identityStatus"></dd></div>
+          </dl>
+        </article>
+
+        <article class="detail-card">
+          <div class="detail-icon blue-text">▤</div>
+          <h2>Documentation</h2>
+          <p>
+            Where provided, the linked certificate of analysis should be reviewed
+            together with the product label and batch information.
+          </p>
+          <a id="detailCoa" class="text-link" target="_blank" rel="noopener">Open available documentation →</a>
+        </article>
+
+        <article class="detail-card">
+          <div class="detail-icon green-text">⚠</div>
+          <h2>Handling Notice</h2>
+          <p>
+            Store and handle according to the applicable label, supplier documentation,
+            institutional procedures, and relevant regulations.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    
+    <section id="productInquiry" class="product-inquiry-section">
+      <div class="contact-card inquiry-card">
+        <div class="eyebrow">Product inquiry</div>
+        <h2>Request information</h2>
+        <p id="productInquiryIntro">Send a research-related inquiry about this product. Do not submit personal medical information.</p>
+
+      <form id="inquiryForm" class="inquiry-form">
+        <div class="form-grid">
+          <div>
+            <label for="inquiryName">Name *</label>
+            <input id="inquiryName" name="name" required maxlength="100" autocomplete="name">
+          </div>
+
+          <div>
+            <label for="inquiryEmail">Email *</label>
+            <input id="inquiryEmail" name="email" type="email" required maxlength="180" autocomplete="email">
+          </div>
+
+          <div>
+            <label for="inquiryCompany">Company or institution</label>
+            <input id="inquiryCompany" name="company" maxlength="180" autocomplete="organization">
+          </div>
+
+          <div>
+            <label for="inquiryProduct">Product of interest</label>
+            <select id="inquiryProduct" name="product">
+              <option value="">General inquiry</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="inquiryMessage">Message *</label>
+        <textarea id="inquiryMessage" name="message" required maxlength="3000" placeholder="Describe your laboratory, institutional, business, or analytical research inquiry."></textarea>
+
+        <label class="consent-row">
+          <input id="inquiryConsent" name="research_acknowledged" type="checkbox" required>
+          <span>I understand these materials are offered only for legitimate research purposes and are not intended for human or veterinary use.</span>
+        </label>
+
+        <input id="inquiryWebsite" name="website" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+        <div class="form-actions">
+          <button id="sendInquiryButton" class="btn pink" type="submit">Send Inquiry</button>
+          <span id="inquiryStatus" class="form-status" role="status"></span>
+        </div>
+      </form>
+
+      </div>
+    </section>
+
+    <section id="relatedSection" class="related-section" hidden>
+      <div class="section-title left">
+        <div class="pink-kicker">Continue browsing</div>
+        <h2>RELATED RESEARCH</h2>
+      </div>
+      <div id="relatedProducts" class="products"></div>
+    </section>
+
+    <section id="productNotFound" class="not-found" hidden>
+      <div class="eyebrow">Product unavailable</div>
+      <h1>RESEARCH MATERIAL NOT FOUND</h1>
+      <p>The requested product may be hidden, renamed, or unavailable.</p>
+      <a class="btn pink" href="/#products">Return to Catalog</a>
+    </section>
+  </main>
+
+  <footer>
+    <div>
+      <strong>Neon Peppers Research</strong><br>
+      Research use only. Not for human or veterinary use.
+    </div>
+    <div class="footer-links">
+      <a href="/research-use-policy.html">Research Policy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/privacy.html">Privacy</a>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/config.js"></script>
+  <script src="/product.js"></script>
+  <script src="/inquiry.js"></script>
+</body>
+</html>

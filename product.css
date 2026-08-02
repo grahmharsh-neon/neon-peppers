@@ -1,0 +1,267 @@
+.product-loading,
+.not-found{
+  min-height:65vh;
+  display:grid;
+  place-content:center;
+  text-align:center;
+  padding:40px 20px;
+}
+
+.product-page{
+  max-width:1240px;
+  margin:auto;
+  padding:38px 3vw 70px;
+}
+
+.product-breadcrumb{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:28px;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.product-breadcrumb a{
+  color:var(--blue);
+}
+
+.product-hero-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:54px;
+  align-items:center;
+}
+
+.product-gallery{
+  min-width:0;
+}
+
+.product-hero-image{
+  min-height:590px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background-color:#07090c;
+  background-repeat:no-repeat;
+  background-size:contain;
+  background-position:center;
+  display:grid;
+  place-items:center;
+  font-size:5rem;
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.38),
+    inset 0 0 50px rgba(39,199,255,.04);
+}
+
+.image-note{
+  margin-top:10px;
+  text-align:center;
+  color:var(--muted);
+  font-size:.75rem;
+}
+
+.product-meta-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+}
+
+.product-info h1{
+  margin:18px 0 20px;
+  font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;
+  font-size:clamp(3.5rem,7vw,6.8rem);
+  line-height:.92;
+  letter-spacing:.02em;
+}
+
+.detail-status{
+  display:inline-flex;
+  padding:8px 12px;
+  border:1px solid var(--green);
+  border-radius:999px;
+  color:var(--green);
+  font-size:.7rem;
+  font-weight:900;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+}
+
+.detail-status.coming{
+  color:var(--blue);
+  border-color:var(--blue);
+}
+
+.detail-status.out{
+  color:#ff6572;
+  border-color:#ff6572;
+}
+
+.product-strength-line{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  padding:15px 0;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+
+.product-strength-line span{
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  font-size:.72rem;
+}
+
+.product-strength-line strong{
+  color:var(--green);
+  font-size:1.15rem;
+}
+
+.product-description{
+  margin:26px 0;
+  color:#d5dae2;
+  font-size:1.05rem;
+  line-height:1.75;
+}
+
+.research-notice{
+  display:flex;
+  gap:15px;
+  padding:18px;
+  border:1px solid var(--pink);
+  border-radius:12px;
+  background:rgba(255,63,159,.05);
+}
+
+.research-notice-icon{
+  color:var(--pink);
+  font-size:1.8rem;
+}
+
+.research-notice strong{
+  display:block;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+
+.research-notice p{
+  margin:5px 0 0;
+  color:var(--muted);
+  font-size:.86rem;
+}
+
+.product-actions{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:24px;
+}
+
+.product-details-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+  margin-top:65px;
+}
+
+.detail-card{
+  padding:25px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:linear-gradient(145deg,#10151e,#080b10);
+}
+
+.detail-icon{
+  font-size:2rem;
+  text-shadow:0 0 18px currentColor;
+}
+
+.detail-card h2{
+  margin:10px 0 15px;
+  font-size:1.35rem;
+}
+
+.detail-card p{
+  color:var(--muted);
+  line-height:1.65;
+}
+
+.detail-card dl{
+  margin:0;
+}
+
+.detail-card dl div{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  padding:11px 0;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.detail-card dt{
+  color:var(--muted);
+}
+
+.detail-card dd{
+  margin:0;
+  text-align:right;
+  font-weight:800;
+}
+
+.text-link{
+  color:var(--blue);
+  font-weight:800;
+}
+
+.related-section{
+  max-width:1240px;
+  margin:auto;
+  padding:25px 3vw 80px;
+}
+
+.not-found h1{
+  font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;
+  font-size:clamp(3rem,7vw,6rem);
+  margin:12px 0;
+}
+
+.not-found p{
+  color:var(--muted);
+  margin-bottom:25px;
+}
+
+@media(max-width:900px){
+  .product-hero-grid{
+    grid-template-columns:1fr;
+  }
+
+  .product-hero-image{
+    min-height:480px;
+  }
+
+  .product-details-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:560px){
+  .product-page{
+    padding-top:22px;
+  }
+
+  .product-hero-image{
+    min-height:360px;
+  }
+
+  .product-info h1{
+    font-size:3.6rem;
+  }
+
+  .product-meta-row{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+}
+
+.product-inquiry-section .contact-card{max-width:900px}

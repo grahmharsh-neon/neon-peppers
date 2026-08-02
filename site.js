@@ -299,7 +299,7 @@ function productSlug(product){
 
 function openProductPage(product){
   const slug = productSlug(product);
-  openProduct(product);
+  window.location.href = `/products/${encodeURIComponent(slug)}`;
 }
 
 function openProduct(product){

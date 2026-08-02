@@ -2,6 +2,9 @@ let client = null;
 let products = [];
 let siteSettings = null;
 let inquiries = [];
+let productVariants = [];
+let orderRequests = [];
+let orderRequestItems = [];
 
 function el(id){
   return document.getElementById(id);
@@ -65,6 +68,13 @@ function bindEvents(){
   el("adminProductFilter").addEventListener("change", renderProducts);
 
 
+  const refreshOrders = el("refreshOrdersButton");
+  if(refreshOrders) refreshOrders.addEventListener("click", loadOrderRequests);
+  const orderAdminSearch = el("orderAdminSearch");
+  if(orderAdminSearch) orderAdminSearch.addEventListener("input", renderOrderRequests);
+  const orderAdminFilter = el("orderAdminFilter");
+  if(orderAdminFilter) orderAdminFilter.addEventListener("change", renderOrderRequests);
+
   const refreshInquiries = el("refreshInquiriesButton");
   if(refreshInquiries) refreshInquiries.addEventListener("click", loadInquiries);
 
@@ -121,7 +131,9 @@ async function refreshAll(){
   await Promise.all([
     loadProducts(),
     loadSettings(),
-    loadInquiries()
+    loadInquiries(),
+    loadProductVariants(),
+    loadOrderRequests()
   ]);
   updateStats();
   flash("Dashboard refreshed");
@@ -309,6 +321,8 @@ function renderProducts(){
         : ""
       }
 
+      <div class="variant-admin"><div class="variant-admin-head"><h4>Strengths & Stock</h4><button class="btn green" type="button" onclick="addVariant(${index})">+ Add Strength</button></div><div id="variants-${index}" class="variant-list"></div></div>
+
       <label>COA URL</label>
       <input data-index="${index}" data-key="coa_url" value="${escapeHtml(product.coa_url)}">
 
@@ -324,6 +338,7 @@ function renderProducts(){
     `;
 
     box.appendChild(row);
+    renderVariantsForProduct(index);
   });
 
   box.querySelectorAll("[data-index]").forEach(node => {
@@ -515,86 +530,46 @@ async function uploadFile(path, file, contentType){
   return data.publicUrl;
 }
 
-async function uploadProductImage(index) {
-  try {
-    const product = products[index];
-
-    if (!product) {
-      throw new Error("Product could not be found.");
-    }
-
-    if (!product.id) {
-      throw new Error("Save the product before uploading an image.");
-    }
-
+async function uploadProductImage(index){
+  try{
     const input = el(`productImage-${index}`);
-    const originalFile = input?.files?.[0];
+    const originalFile = input.files?.[0];
 
-    if (!originalFile) {
+    if(!originalFile){
       throw new Error("Choose an image first.");
     }
 
     flash("Optimizing product image...");
+    const optimized = await optimizeImage(originalFile, 1200, 0.84);
+    const path = `products/${crypto.randomUUID()}.webp`;
+    const publicUrl = await uploadFile(path, optimized, "image/webp");
 
-    const optimizedFile = await optimizeImage(
-      originalFile,
-      1200,
-      0.84
-    );
+    products[index].image_url = publicUrl;
 
-    const filePath =
-      `products/${product.id}-${crypto.randomUUID()}.webp`;
-
-    const { error: uploadError } = await client.storage
-      .from(window.NEON_CONFIG.storageBucket)
-      .upload(filePath, optimizedFile, {
-        cacheControl: "3600",
-        contentType: "image/webp",
-        upsert: false
-      });
-
-    if (uploadError) {
-      throw uploadError;
-    }
-
-    const { data: publicUrlData } = client.storage
-      .from(window.NEON_CONFIG.storageBucket)
-      .getPublicUrl(filePath);
-
-    const imageUrl = publicUrlData?.publicUrl;
-
-    if (!imageUrl) {
-      throw new Error(
-        "The image uploaded, but no public URL was returned."
-      );
-    }
-
-    const { data: updatedProduct, error: updateError } =
-      await client
+    if(products[index].id){
+      const { error } = await client
         .from("products")
         .update({
-          image_url: imageUrl,
-          updated_at: new Date().toISOString()
+          image_url:publicUrl,
+          updated_at:new Date().toISOString()
         })
-        .eq("id", product.id)
-        .select("*")
-        .single();
+        .eq("id", products[index].id);
 
-    if (updateError) {
-      throw updateError;
+      if(error){
+        throw error;
+      }
     }
 
-    products[index] = updatedProduct;
-
     renderProducts();
-    updateStats();
-
-    flash("Product image uploaded and saved.");
-  } catch (error) {
-    console.error(error);
-    alert(error.message || "Product image upload failed.");
+    flash(products[index].id
+      ? "Product image uploaded and saved"
+      : "Product image uploaded. Save the product."
+    );
+  }catch(error){
+    alert(error.message);
   }
 }
+
 async function uploadCoa(index){
   try{
     const input = el(`coaFile-${index}`);
@@ -743,6 +718,58 @@ async function saveSettings(){
   flash("Settings saved");
 }
 
+
+
+async function loadProductVariants(){
+  if(!client) return;
+  const {data,error}=await client.from("product_variants").select("*").order("sort_order",{ascending:true});
+  if(error){console.warn(error);return}
+  productVariants=data||[];
+  renderProducts();
+}
+function variantsForProduct(productId){return productVariants.filter(v=>v.product_id===productId)}
+function renderVariantsForProduct(index){
+  const product=products[index],box=el(`variants-${index}`);
+  if(!product||!box)return;
+  if(!product.id){box.innerHTML='<p class="muted">Save the product before adding strengths.</p>';return}
+  const list=variantsForProduct(product.id);
+  if(!list.length){box.innerHTML='<p class="muted">No strengths added yet.</p>';return}
+  box.innerHTML=list.map(v=>`<div class="variant-editor"><input data-variant-id="${escapeHtml(v.id)}" data-variant-key="strength" value="${escapeHtml(v.strength)}"><select data-variant-id="${escapeHtml(v.id)}" data-variant-key="stock_status"><option value="available" ${v.stock_status==="available"?"selected":""}>Available</option><option value="low_stock" ${v.stock_status==="low_stock"?"selected":""}>Low Stock</option><option value="out_of_stock" ${v.stock_status==="out_of_stock"?"selected":""}>Out of Stock</option><option value="coming_soon" ${v.stock_status==="coming_soon"?"selected":""}>Coming Soon</option></select><select data-variant-id="${escapeHtml(v.id)}" data-variant-key="visible"><option value="true" ${v.visible!==false?"selected":""}>Visible</option><option value="false" ${v.visible===false?"selected":""}>Hidden</option></select><button class="btn blue" onclick="saveVariant('${escapeHtml(v.id)}')">Save</button><button class="btn danger" onclick="deleteVariant('${escapeHtml(v.id)}')">Delete</button></div>`).join("");
+  box.querySelectorAll("[data-variant-id]").forEach(node=>{const update=e=>{const v=productVariants.find(x=>String(x.id)===e.target.dataset.variantId);if(!v)return;let value=e.target.value;if(e.target.dataset.variantKey==="visible")value=value==="true";v[e.target.dataset.variantKey]=value};node.addEventListener("input",update);node.addEventListener("change",update)})
+}
+async function addVariant(index){
+  const product=products[index];
+  if(!product?.id){alert("Save the product before adding strengths.");return}
+  const {data,error}=await client.from("product_variants").insert({product_id:product.id,strength:"New strength",stock_status:"available",visible:true,sort_order:variantsForProduct(product.id).length}).select().single();
+  if(error){alert(error.message);return}
+  productVariants.push(data);renderVariantsForProduct(index);flash("Strength added")
+}
+async function saveVariant(id){
+  const v=productVariants.find(x=>String(x.id)===String(id));if(!v)return;
+  const {error}=await client.from("product_variants").update({strength:v.strength,stock_status:v.stock_status,visible:v.visible!==false,sort_order:v.sort_order||0,updated_at:new Date().toISOString()}).eq("id",v.id);
+  if(error){alert(error.message);return}flash("Strength saved")
+}
+async function deleteVariant(id){
+  if(!confirm("Delete this strength?"))return;
+  const {error}=await client.from("product_variants").delete().eq("id",id);
+  if(error){alert(error.message);return}
+  productVariants=productVariants.filter(x=>String(x.id)!==String(id));renderProducts();flash("Strength deleted")
+}
+async function loadOrderRequests(){
+  if(!client)return;
+  const [r,i]=await Promise.all([client.from("order_requests").select("*").order("created_at",{ascending:false}),client.from("order_request_items").select("*").order("created_at",{ascending:true})]);
+  if(r.error){console.warn(r.error);return}
+  orderRequests=r.data||[];orderRequestItems=i.error?[]:(i.data||[]);renderOrderRequests()
+}
+function renderOrderRequests(){
+  const box=el("adminOrders");if(!box)return;
+  const q=(el("orderAdminSearch")?.value||"").trim().toLowerCase(),f=el("orderAdminFilter")?.value||"all";
+  const list=orderRequests.filter(o=>{const items=orderRequestItems.filter(i=>i.order_request_id===o.id),text=`${o.name} ${o.email} ${o.company||""} ${o.phone||""} ${o.notes||""} ${items.map(i=>`${i.product_name} ${i.strength}`).join(" ")}`.toLowerCase();return text.includes(q)&&(f==="all"||o.status===f)});
+  if(!list.length){box.innerHTML='<p class="muted">No matching order requests.</p>';return}
+  box.innerHTML=list.map(o=>{const items=orderRequestItems.filter(i=>i.order_request_id===o.id),date=o.created_at?new Date(o.created_at).toLocaleString():"";return `<article class="order-admin-item"><div class="inquiry-head"><div><h3>${escapeHtml(o.name)}</h3><div class="inquiry-date">${escapeHtml(date)}</div></div><span class="inquiry-badge ${escapeHtml(o.status||"new")}">${escapeHtml(o.status||"new")}</span></div><div class="inquiry-meta"><div><span>Email</span><a href="mailto:${escapeHtml(o.email)}">${escapeHtml(o.email)}</a></div><div><span>Company</span>${escapeHtml(o.company||"Not provided")}</div><div><span>Phone</span>${escapeHtml(o.phone||"Not provided")}</div></div><div class="order-admin-products">${items.map(i=>`<div><strong>${escapeHtml(i.product_name)}</strong><span>${escapeHtml(i.strength)} × ${i.quantity}</span></div>`).join("")}</div>${o.notes?`<div class="inquiry-message">${escapeHtml(o.notes)}</div>`:""}<div class="actions"><a class="btn pink" href="mailto:${escapeHtml(o.email)}?subject=${encodeURIComponent("Re: Neon Peppers order request")}">Reply</a><button class="btn blue" onclick="updateOrderStatus('${escapeHtml(o.id)}','contacted')">Contacted</button><button class="btn green" onclick="updateOrderStatus('${escapeHtml(o.id)}','approved')">Approved</button><button class="btn" onclick="updateOrderStatus('${escapeHtml(o.id)}','closed')">Close</button><button class="btn danger" onclick="deleteOrderRequest('${escapeHtml(o.id)}')">Delete</button></div></article>`}).join("")
+}
+async function updateOrderStatus(id,status){const {error}=await client.from("order_requests").update({status,updated_at:new Date().toISOString()}).eq("id",id);if(error){alert(error.message);return}await loadOrderRequests();flash(`Order request marked ${status}`)}
+async function deleteOrderRequest(id){if(!confirm("Delete this order request?"))return;const {error}=await client.from("order_requests").delete().eq("id",id);if(error){alert(error.message);return}await loadOrderRequests();flash("Order request deleted")}
 
 async function loadInquiries(){
   if(!client) return;

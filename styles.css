@@ -323,29 +323,12 @@ h1 span{
   grid-template-columns:repeat(3,1fr);
   gap:20px;
 }
-.card p{
-  color:var(--muted);
-  font-size:.88rem;
-  line-height:1.55;
-  margin:10px 0 0;
-
-  display:-webkit-box;
-  -webkit-box-orient:vertical;
-  -webkit-line-clamp:3;
+.card{
   overflow:hidden;
-
-  min-height:4.1em;
-}
-.card-body{
-  padding:22px;
-  display:flex;
-  flex-direction:column;
-  min-height:245px;
-}
-
-.card-actions{
-  margin-top:auto;
-  padding-top:18px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:linear-gradient(145deg,#11151d,#080a0f);
+  cursor:pointer;
 }
 .card-image{
   height:260px;
@@ -465,20 +448,16 @@ footer{
   inset:0;
   z-index:1000;
   display:none;
-  place-items:start center;
+  place-items:center;
   padding:20px;
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
   background:
     radial-gradient(circle at 15% 10%,rgba(39,199,255,.16),transparent 25rem),
     radial-gradient(circle at 85% 15%,rgba(255,63,159,.16),transparent 28rem),
     #030507;
 }
-
 .gate.open{display:grid}
 .gate-card{
   width:min(620px,100%);
-  margin:20px 0 40px;
   padding:32px;
   border:1px solid var(--line);
   border-radius:18px;
@@ -752,19 +731,4 @@ footer{
 @media(max-width:650px){
   .form-grid{grid-template-columns:1fr}
   .inquiry-form{padding:17px}
-}
-
-@media(max-width:560px){
-  .gate{
-    padding:10px;
-  }
-
-  .gate-card{
-    margin:10px 0 30px;
-    padding:20px;
-  }
-
-  .gate-logo{
-    max-height:80px;
-  }
 }

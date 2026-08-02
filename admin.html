@@ -31,6 +31,7 @@
       <button data-panel="dashboardPanel">Dashboard</button>
       <button data-panel="homepagePanel">Homepage</button>
       <button data-panel="productsPanel">Products</button>
+      <button data-panel="ordersPanel">Order Requests</button>
       <button data-panel="inquiriesPanel">Inquiries</button>
       <button data-panel="settingsPanel">Contact & Settings</button>
       <button id="logoutButton">Log Out</button>
@@ -156,6 +157,11 @@
       </section>
 
       
+            <section id="ordersPanel" class="panel-view">
+        <div class="page-head"><div><div class="eyebrow">Research requests</div><h1>Order Requests</h1></div><button class="btn green" id="refreshOrdersButton">Refresh Orders</button></div>
+        <div class="panel"><div class="product-toolbar"><input id="orderAdminSearch" placeholder="Search requests..."><select id="orderAdminFilter"><option value="all">All requests</option><option value="new">New</option><option value="contacted">Contacted</option><option value="approved">Approved</option><option value="closed">Closed</option></select></div><div id="adminOrders"></div></div>
+      </section>
+
       <section id="inquiriesPanel" class="panel-view">
         <div class="page-head">
           <div>

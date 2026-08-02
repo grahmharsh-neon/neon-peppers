@@ -2,3 +2,7 @@
   publish = "."
   functions = "netlify/functions"
 
+[[redirects]]
+  from = "/products/*"
+  to = "/product.html"
+  status = 200
