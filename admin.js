@@ -1,249 +1,705 @@
-
 let client = null;
 let products = [];
+let siteSettings = null;
 
-function el(id){return document.getElementById(id)}
+function el(id){
+  return document.getElementById(id);
+}
 
 function createClient(){
   const config = window.NEON_CONFIG || {};
-  if(!config.supabaseUrl) throw new Error("Supabase URL is missing from config.js.");
-  if(!config.supabasePublishableKey) throw new Error("Supabase publishable key is missing from config.js.");
-  if(!window.supabase) throw new Error("Supabase library did not load.");
-  return window.supabase.createClient(config.supabaseUrl.trim(), config.supabasePublishableKey.trim());
+
+  if(!config.supabaseUrl){
+    throw new Error("Supabase URL is missing from config.js.");
+  }
+
+  if(!config.supabasePublishableKey){
+    throw new Error("Supabase publishable key is missing from config.js.");
+  }
+
+  if(!window.supabase){
+    throw new Error("Supabase library did not load.");
+  }
+
+  return window.supabase.createClient(
+    config.supabaseUrl.trim(),
+    config.supabasePublishableKey.trim()
+  );
 }
 
 async function init(){
+  bindEvents();
+
   try{
     client = createClient();
-    const {data:{session}} = await client.auth.getSession();
-    if(session) await showAdmin();
+
+    const {
+      data: { session }
+    } = await client.auth.getSession();
+
+    if(session){
+      await showAdmin();
+    }
   }catch(error){
-    const warning=el("setupWarning");
-    if(warning){warning.textContent=error.message;warning.style.display="block"}
+    const warning = el("setupWarning");
+    warning.textContent = error.message;
+    warning.hidden = false;
   }
+}
+
+function bindEvents(){
+  el("loginButton").addEventListener("click", login);
+  el("logoutButton").addEventListener("click", logout);
+  el("refreshButton").addEventListener("click", refreshAll);
+  el("quickAddProduct").addEventListener("click", () => {
+    showPanel("productsPanel");
+    addProduct();
+  });
+  el("addProductButton").addEventListener("click", addProduct);
+  el("saveHomepageButton").addEventListener("click", saveHomepage);
+  el("saveSettingsButton").addEventListener("click", saveSettings);
+  el("uploadHeroButton").addEventListener("click", uploadHeroImage);
+  el("uploadLogoButton").addEventListener("click", uploadLogo);
+  el("adminProductSearch").addEventListener("input", renderProducts);
+  el("adminProductFilter").addEventListener("change", renderProducts);
+
+  document.querySelectorAll("[data-panel]").forEach(button => {
+    button.addEventListener("click", () => showPanel(button.dataset.panel));
+  });
+
+  document.querySelectorAll("[data-panel-target]").forEach(button => {
+    button.addEventListener("click", () => showPanel(button.dataset.panelTarget));
+  });
 }
 
 async function login(){
   try{
-    if(!client) client=createClient();
-    const {error}=await client.auth.signInWithPassword({email:el("email").value.trim(),password:el("password").value});
-    if(error) throw error;
+    if(!client){
+      client = createClient();
+    }
+
+    const { error } = await client.auth.signInWithPassword({
+      email: el("email").value.trim(),
+      password: el("password").value
+    });
+
+    if(error){
+      throw error;
+    }
+
     await showAdmin();
-  }catch(error){alert(error.message)}
+  }catch(error){
+    alert(error.message);
+  }
 }
 
-async function logout(){if(client) await client.auth.signOut();location.reload()}
+async function logout(){
+  if(client){
+    await client.auth.signOut();
+  }
+  location.reload();
+}
 
 async function showAdmin(){
-  el("loginView").style.display="none";
-  el("adminView").style.display="grid";
-  await loadProducts();
+  el("loginView").hidden = true;
+  el("adminView").hidden = false;
+  await refreshAll();
+}
+
+async function refreshAll(){
+  await Promise.all([
+    loadProducts(),
+    loadSettings()
+  ]);
+  updateStats();
+  flash("Dashboard refreshed");
+}
+
+function showPanel(panelId){
+  document.querySelectorAll(".panel-view").forEach(panel => {
+    panel.classList.toggle("active", panel.id === panelId);
+  });
 }
 
 async function loadProducts(){
-  const {data,error}=await client.from("products").select("*").order("created_at",{ascending:false});
-  if(error){alert(error.message);return}
-  products=data||[];
+  const { data, error } = await client
+    .from("products")
+    .select("*")
+    .order("created_at", { ascending:false });
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  products = data || [];
   renderProducts();
 }
 
-function esc(v){return String(v||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;")}
+async function loadSettings(){
+  const { data, error } = await client
+    .from("site_settings")
+    .select("*")
+    .eq("id", 1)
+    .maybeSingle();
+
+  if(error && error.code !== "PGRST116"){
+    console.warn(error);
+    return;
+  }
+
+  siteSettings = data || {};
+
+  const fields = [
+    "hero_eyebrow",
+    "hero_title",
+    "hero_text",
+    "primary_button_text",
+    "secondary_button_text",
+    "hero_image_url",
+    "research_banner_title",
+    "research_banner_text",
+    "research_banner_button",
+    "announcement_text",
+    "announcement_visible",
+    "contact_email",
+    "footer_disclaimer",
+    "logo_url"
+  ];
+
+  fields.forEach(field => {
+    const node = el(field);
+    if(!node) return;
+
+    if(field === "announcement_visible"){
+      node.value = String(siteSettings[field] === true);
+    }else{
+      node.value = siteSettings[field] || "";
+    }
+  });
+
+  updateImagePreview("heroPreview", siteSettings.hero_image_url);
+  updateImagePreview("logoPreview", siteSettings.logo_url);
+}
+
+function updateStats(){
+  el("statTotal").textContent = products.length;
+  el("statVisible").textContent = products.filter(product => product.visible !== false).length;
+  el("statFeatured").textContent = products.filter(product => product.featured === true).length;
+  el("statCoa").textContent = products.filter(product => Boolean(product.coa_url)).length;
+}
+
+function escapeHtml(value){
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
 
 function renderProducts(){
-  const box=el("products");
-  box.innerHTML="";
-  if(!products.length){box.innerHTML='<p class="note">No products yet. Click + Add Product.</p>';return}
-  products.forEach((p,i)=>{
-    const row=document.createElement("div");
-    row.className="product";
-    row.innerHTML=`
-      <div class="grid">
-        <div><label>Name</label><input data-i="${i}" data-k="name" value="${esc(p.name)}"></div>
-        <div><label>Category</label><input data-i="${i}" data-k="category" value="${esc(p.category||"")}"></div>
-        <div><label>Strength</label><input data-i="${i}" data-k="strength" value="${esc(p.strength||"")}"></div>
-        <div><label>Product image</label><input type="file" accept="image/*" onchange="uploadProductImage(event,${i})"></div>
+  const box = el("products");
+  const query = el("adminProductSearch").value.trim().toLowerCase();
+  const filter = el("adminProductFilter").value;
+
+  const filtered = products.filter(product => {
+    const searchable = `${product.name} ${product.category} ${product.description}`.toLowerCase();
+    const matchesSearch = searchable.includes(query);
+
+    let matchesFilter = true;
+
+    if(filter === "visible"){
+      matchesFilter = product.visible !== false;
+    }else if(filter === "hidden"){
+      matchesFilter = product.visible === false;
+    }else if(filter === "featured"){
+      matchesFilter = product.featured === true;
+    }
+
+    return matchesSearch && matchesFilter;
+  });
+
+  box.innerHTML = "";
+
+  if(!filtered.length){
+    box.innerHTML = '<p class="muted">No matching products.</p>';
+    return;
+  }
+
+  filtered.forEach(product => {
+    const index = products.indexOf(product);
+    const row = document.createElement("article");
+    row.className = "product";
+
+    row.innerHTML = `
+      <div class="product-head">
+        <h3>${escapeHtml(product.name || "New Product")}</h3>
+        <span class="muted">${product.id ? "Saved product" : "Unsaved product"}</span>
       </div>
-      ${p.image_url?`<img src="${esc(p.image_url)}" style="max-width:180px;max-height:180px;margin-top:12px;border-radius:10px">`:""}
-      <label>Description</label><textarea data-i="${i}" data-k="description">${esc(p.description||"")}</textarea>
-      <div class="grid">
-        <div><label>COA URL</label><input data-i="${i}" data-k="coa_url" value="${esc(p.coa_url||"")}"></div>
-        <div><label>Visible</label><select data-i="${i}" data-k="visible"><option value="true" ${p.visible!==false?"selected":""}>Yes</option><option value="false" ${p.visible===false?"selected":""}>No</option></select></div>
+
+      <div class="grid two">
+        <div>
+          <label>Name</label>
+          <input data-index="${index}" data-key="name" value="${escapeHtml(product.name)}">
+        </div>
+
+        <div>
+          <label>Category</label>
+          <input data-index="${index}" data-key="category" value="${escapeHtml(product.category)}">
+        </div>
+
+        <div>
+          <label>Strength</label>
+          <input data-index="${index}" data-key="strength" value="${escapeHtml(product.strength)}">
+        </div>
+
+        <div>
+          <label>Status</label>
+          <select data-index="${index}" data-key="status">
+            <option value="available" ${product.status === "available" || !product.status ? "selected" : ""}>Available</option>
+            <option value="coming_soon" ${product.status === "coming_soon" ? "selected" : ""}>Coming Soon</option>
+            <option value="out_of_stock" ${product.status === "out_of_stock" ? "selected" : ""}>Out of Stock</option>
+          </select>
+        </div>
       </div>
-      <div class="actions"><button class="btn pink" onclick="saveProduct(${i})">Save Product</button><button class="btn danger" onclick="deleteProduct(${i})">Delete</button></div>`;
+
+      <label>Description</label>
+      <textarea data-index="${index}" data-key="description">${escapeHtml(product.description)}</textarea>
+
+      <div class="grid two">
+        <div>
+          <label>Visible</label>
+          <select data-index="${index}" data-key="visible">
+            <option value="true" ${product.visible !== false ? "selected" : ""}>Yes</option>
+            <option value="false" ${product.visible === false ? "selected" : ""}>No</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Featured</label>
+          <select data-index="${index}" data-key="featured">
+            <option value="false" ${product.featured !== true ? "selected" : ""}>No</option>
+            <option value="true" ${product.featured === true ? "selected" : ""}>Yes</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Product image URL</label>
+      <input data-index="${index}" data-key="image_url" value="${escapeHtml(product.image_url)}">
+
+      <div class="upload-row">
+        <input id="productImage-${index}" type="file" accept="image/*">
+        <button class="btn blue" onclick="uploadProductImage(${index})">Upload Product Image</button>
+      </div>
+
+      ${product.image_url
+        ? `<img class="product-image" src="${escapeHtml(product.image_url)}" alt="${escapeHtml(product.name)}">`
+        : ""
+      }
+
+      <label>COA URL</label>
+      <input data-index="${index}" data-key="coa_url" value="${escapeHtml(product.coa_url)}">
+
+      <div class="upload-row">
+        <input id="coaFile-${index}" type="file" accept="application/pdf">
+        <button class="btn blue" onclick="uploadCoa(${index})">Upload COA PDF</button>
+      </div>
+
+      <div class="actions">
+        <button class="btn pink" onclick="saveProduct(${index})">Save Product</button>
+        <button class="btn danger" onclick="deleteProduct(${index})">Delete</button>
+      </div>
+    `;
+
     box.appendChild(row);
   });
-  box.querySelectorAll("[data-i]").forEach(node=>{
-    const update=e=>{let value=e.target.value;if(e.target.dataset.k==="visible")value=value==="true";products[Number(e.target.dataset.i)][e.target.dataset.k]=value};
-    node.addEventListener("input",update);node.addEventListener("change",update);
+
+  box.querySelectorAll("[data-index]").forEach(node => {
+    const update = event => {
+      const index = Number(event.target.dataset.index);
+      const key = event.target.dataset.key;
+
+      if(!products[index]){
+        return;
+      }
+
+      let value = event.target.value;
+
+      if(key === "visible" || key === "featured"){
+        value = value === "true";
+      }
+
+      products[index][key] = value;
+    };
+
+    node.addEventListener("input", update);
+    node.addEventListener("change", update);
   });
 }
 
 function addProduct(){
-  products.unshift({id:null,name:"New Product",category:"Research Compound",description:"",strength:"",image_url:"",coa_url:"",visible:true,featured:false});
+  products.unshift({
+    id:null,
+    name:"New Product",
+    category:"Research Compound",
+    description:"",
+    strength:"",
+    image_url:"",
+    coa_url:"",
+    visible:true,
+    featured:false,
+    status:"available"
+  });
+
   renderProducts();
+  updateStats();
+  showPanel("productsPanel");
 }
 
-async function saveProduct(i){
-  const p=products[i];
-  if(!p.name.trim()){alert("Product name is required.");return}
-  const payload={name:p.name.trim(),category:p.category||"Research Compound",description:p.description||"",strength:p.strength||"",image_url:p.image_url||null,coa_url:p.coa_url||null,visible:p.visible!==false,featured:p.featured===true,updated_at:new Date().toISOString()};
-  const response=p.id
-    ? await client.from("products").update(payload).eq("id",p.id).select().single()
+async function saveProduct(index){
+  const product = products[index];
+
+  if(!product){
+    return;
+  }
+
+  if(!product.name || !product.name.trim()){
+    alert("Product name is required.");
+    return;
+  }
+
+  const payload = {
+    name:product.name.trim(),
+    category:product.category || "Research Compound",
+    description:product.description || "",
+    strength:product.strength || "",
+    image_url:product.image_url || null,
+    coa_url:product.coa_url || null,
+    visible:product.visible !== false,
+    featured:product.featured === true,
+    status:product.status || "available",
+    updated_at:new Date().toISOString()
+  };
+
+  const response = product.id
+    ? await client.from("products").update(payload).eq("id", product.id).select().single()
     : await client.from("products").insert(payload).select().single();
-  if(response.error){alert(response.error.message);return}
-  products[i]=response.data;
+
+  if(response.error){
+    alert(response.error.message);
+    return;
+  }
+
+  products[index] = response.data;
   flash("Product saved");
   await loadProducts();
+  updateStats();
 }
 
-async function deleteProduct(i){
-  if(!confirm("Delete this product?"))return;
-  const p=products[i];
-  if(p.id){
-    const {error}=await client.from("products").delete().eq("id",p.id);
-    if(error){alert(error.message);return}
+async function deleteProduct(index){
+  const product = products[index];
+
+  if(!product){
+    return;
   }
-  products.splice(i,1);
+
+  if(!confirm(`Delete ${product.name || "this product"}?`)){
+    return;
+  }
+
+  if(product.id){
+    const { error } = await client
+      .from("products")
+      .delete()
+      .eq("id", product.id);
+
+    if(error){
+      alert(error.message);
+      return;
+    }
+  }
+
+  products.splice(index, 1);
   renderProducts();
+  updateStats();
   flash("Product deleted");
 }
 
-async function optimizeProductImage(file) {
-  const imageUrl = URL.createObjectURL(file);
+async function optimizeImage(file, maxSize = 1600, quality = 0.84){
+  const objectUrl = URL.createObjectURL(file);
 
-  try {
-    const img = await new Promise((resolve, reject) => {
-      const image = new Image();
-
-      image.onload = () => resolve(image);
-      image.onerror = () => reject(new Error("Unable to load image."));
-
-      image.src = imageUrl;
+  try{
+    const image = await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error("The selected image could not be opened."));
+      img.src = objectUrl;
     });
 
-    const MAX_SIZE = 1000;
+    let width = image.naturalWidth;
+    let height = image.naturalHeight;
 
-    let width = img.naturalWidth;
-    let height = img.naturalHeight;
-
-    // Resize while keeping aspect ratio
-    if (width > height) {
-      if (width > MAX_SIZE) {
-        height = Math.round(height * (MAX_SIZE / width));
-        width = MAX_SIZE;
-      }
-    } else {
-      if (height > MAX_SIZE) {
-        width = Math.round(width * (MAX_SIZE / height));
-        height = MAX_SIZE;
-      }
+    if(width > maxSize || height > maxSize){
+      const scale = Math.min(maxSize / width, maxSize / height);
+      width = Math.round(width * scale);
+      height = Math.round(height * scale);
     }
 
     const canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
 
-    const ctx = canvas.getContext("2d");
+    const context = canvas.getContext("2d");
 
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
+    if(!context){
+      throw new Error("Your browser could not process the image.");
+    }
 
-    ctx.drawImage(img, 0, 0, width, height);
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = "high";
+    context.drawImage(image, 0, 0, width, height);
 
-    const blob = await new Promise(resolve =>
-      canvas.toBlob(resolve, "image/webp", 0.85)
-    );
+    const blob = await new Promise((resolve, reject) => {
+      canvas.toBlob(result => {
+        if(result){
+          resolve(result);
+        }else{
+          reject(new Error("The optimized image could not be created."));
+        }
+      }, "image/webp", quality);
+    });
 
     return new File(
       [blob],
-      file.name.replace(/\.[^.]+$/, ".webp"),
-      {
-        type: "image/webp"
-      }
+      `${crypto.randomUUID()}.webp`,
+      { type:"image/webp" }
     );
-
-  } finally {
-    URL.revokeObjectURL(imageUrl);
+  }finally{
+    URL.revokeObjectURL(objectUrl);
   }
 }
-async function uploadProductImage(event, index) {
-  try {
-const originalFile = event.target.files?.[0];
 
-if (!originalFile) {
-    return;
+async function uploadFile(path, file, contentType){
+  const { error } = await client.storage
+    .from(window.NEON_CONFIG.storageBucket)
+    .upload(path, file, {
+      cacheControl:"3600",
+      contentType,
+      upsert:false
+    });
+
+  if(error){
+    throw error;
+  }
+
+  const { data } = client.storage
+    .from(window.NEON_CONFIG.storageBucket)
+    .getPublicUrl(path);
+
+  if(!data?.publicUrl){
+    throw new Error("The upload completed, but no public URL was returned.");
+  }
+
+  return data.publicUrl;
 }
 
-    const product = products[index];
+async function uploadProductImage(index){
+  try{
+    const input = el(`productImage-${index}`);
+    const originalFile = input.files?.[0];
 
-    if (!product) {
-      throw new Error("Product could not be found.");
+    if(!originalFile){
+      throw new Error("Choose an image first.");
     }
 
-    flash("Resizing image...");
+    flash("Optimizing product image...");
+    const optimized = await optimizeImage(originalFile, 1200, 0.84);
+    const path = `products/${crypto.randomUUID()}.webp`;
+    const publicUrl = await uploadFile(path, optimized, "image/webp");
 
-    const optimizedFile = await optimizeProductImage(originalFile);
+    products[index].image_url = publicUrl;
 
-    const filePath =
-      `products/${crypto.randomUUID()}.webp`;
-
-    const { error: uploadError } = await client.storage
-      .from(window.NEON_CONFIG.storageBucket)
-      .upload(filePath, optimizedFile, {
-        cacheControl: "3600",
-        contentType: "image/webp",
-        upsert: false
-      });
-
-    if (uploadError) {
-      throw uploadError;
-    }
-
-    const { data: publicUrlData } = client.storage
-      .from(window.NEON_CONFIG.storageBucket)
-      .getPublicUrl(filePath);
-
-    const imageUrl = publicUrlData?.publicUrl;
-
-    if (!imageUrl) {
-      throw new Error(
-        "The image uploaded, but no public URL was created."
-      );
-    }
-
-    product.image_url = imageUrl;
-
-    if (product.id) {
-      const { error: updateError } = await client
+    if(products[index].id){
+      const { error } = await client
         .from("products")
         .update({
-          image_url: imageUrl,
-          updated_at: new Date().toISOString()
+          image_url:publicUrl,
+          updated_at:new Date().toISOString()
         })
-        .eq("id", product.id);
+        .eq("id", products[index].id);
 
-      if (updateError) {
-        throw updateError;
+      if(error){
+        throw error;
       }
     }
 
     renderProducts();
-
-    flash(
-      product.id
-        ? "Image resized, uploaded, and saved."
-        : "Image resized and uploaded. Click Save Product."
+    flash(products[index].id
+      ? "Product image uploaded and saved"
+      : "Product image uploaded. Save the product."
     );
-  } catch (error) {
-    console.error(error);
-    alert(error.message || "Image upload failed.");
+  }catch(error){
+    alert(error.message);
   }
 }
-function flash(message){
-  const box=el("status");
-  if(!box){console.log(message);return}
-  box.textContent=message;box.style.display="block";
-  setTimeout(()=>box.style.display="none",1800);
+
+async function uploadCoa(index){
+  try{
+    const input = el(`coaFile-${index}`);
+    const file = input.files?.[0];
+
+    if(!file){
+      throw new Error("Choose a PDF first.");
+    }
+
+    if(file.type !== "application/pdf"){
+      throw new Error("The COA must be a PDF.");
+    }
+
+    flash("Uploading COA...");
+    const path = `coa/${crypto.randomUUID()}.pdf`;
+    const publicUrl = await uploadFile(path, file, "application/pdf");
+
+    products[index].coa_url = publicUrl;
+
+    if(products[index].id){
+      const { error } = await client
+        .from("products")
+        .update({
+          coa_url:publicUrl,
+          updated_at:new Date().toISOString()
+        })
+        .eq("id", products[index].id);
+
+      if(error){
+        throw error;
+      }
+    }
+
+    renderProducts();
+    flash(products[index].id
+      ? "COA uploaded and saved"
+      : "COA uploaded. Save the product."
+    );
+  }catch(error){
+    alert(error.message);
+  }
 }
 
-document.addEventListener("DOMContentLoaded",init);
+async function uploadHeroImage(){
+  try{
+    const file = el("heroImageFile").files?.[0];
+
+    if(!file){
+      throw new Error("Choose a hero image first.");
+    }
+
+    flash("Optimizing hero image...");
+    const optimized = await optimizeImage(file, 2200, 0.86);
+    const path = `site/hero-${crypto.randomUUID()}.webp`;
+    const publicUrl = await uploadFile(path, optimized, "image/webp");
+
+    el("hero_image_url").value = publicUrl;
+    updateImagePreview("heroPreview", publicUrl);
+    flash("Hero image uploaded. Click Save Homepage.");
+  }catch(error){
+    alert(error.message);
+  }
+}
+
+async function uploadLogo(){
+  try{
+    const file = el("logoFile").files?.[0];
+
+    if(!file){
+      throw new Error("Choose a logo first.");
+    }
+
+    flash("Optimizing logo...");
+    const optimized = await optimizeImage(file, 1200, 0.9);
+    const path = `site/logo-${crypto.randomUUID()}.webp`;
+    const publicUrl = await uploadFile(path, optimized, "image/webp");
+
+    el("logo_url").value = publicUrl;
+    updateImagePreview("logoPreview", publicUrl);
+    flash("Logo uploaded. Click Save Settings.");
+  }catch(error){
+    alert(error.message);
+  }
+}
+
+function updateImagePreview(id, url){
+  const image = el(id);
+
+  if(url){
+    image.src = url;
+    image.hidden = false;
+  }else{
+    image.hidden = true;
+  }
+}
+
+async function saveHomepage(){
+  const payload = {
+    id:1,
+    hero_eyebrow:el("hero_eyebrow").value,
+    hero_title:el("hero_title").value,
+    hero_text:el("hero_text").value,
+    primary_button_text:el("primary_button_text").value,
+    secondary_button_text:el("secondary_button_text").value,
+    hero_image_url:el("hero_image_url").value || null,
+    research_banner_title:el("research_banner_title").value,
+    research_banner_text:el("research_banner_text").value,
+    research_banner_button:el("research_banner_button").value,
+    announcement_text:el("announcement_text").value,
+    announcement_visible:el("announcement_visible").value === "true",
+    updated_at:new Date().toISOString()
+  };
+
+  const { error } = await client
+    .from("site_settings")
+    .upsert(payload);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  siteSettings = { ...siteSettings, ...payload };
+  flash("Homepage saved");
+}
+
+async function saveSettings(){
+  const payload = {
+    id:1,
+    contact_email:el("contact_email").value,
+    footer_disclaimer:el("footer_disclaimer").value,
+    logo_url:el("logo_url").value || null,
+    updated_at:new Date().toISOString()
+  };
+
+  const { error } = await client
+    .from("site_settings")
+    .upsert(payload);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  siteSettings = { ...siteSettings, ...payload };
+  flash("Settings saved");
+}
+
+function flash(message){
+  const box = el("status");
+
+  box.textContent = message;
+  box.style.display = "block";
+
+  window.setTimeout(() => {
+    box.style.display = "none";
+  }, 1900);
+}
+
+document.addEventListener("DOMContentLoaded", init);

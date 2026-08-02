@@ -1,4 +1,191 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Neon Peppers Admin</title><link rel="stylesheet" href="admin.css"></head><body>
-<div id="loginView" class="login"><img src="assets/neon-peppers-logo.jpg"><h1>Admin Login</h1><p id="setupWarning" class="note" style="display:none"></p><label>Email</label><input id="email" type="email"><label>Password</label><input id="password" type="password"><div class="actions"><button class="btn pink" onclick="login()">Sign In</button><a class="btn" href="index.html">View Site</a></div></div>
-<div id="adminView" class="shell" style="display:none"><aside class="side"><img src="assets/neon-peppers-logo.jpg"><a href="index.html" target="_blank">View Website</a><button onclick="addProduct()">+ Add Product</button><button onclick="logout()">Log Out</button></aside><main class="main"><h1>Products</h1><p class="note">Changes save to Supabase and are visible to every visitor.</p><section class="panel"><div id="products"></div></section></main></div><div id="status" class="status"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="admin.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Neon Peppers Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div id="loginView" class="login-card">
+    <img src="assets/neon-peppers-logo.jpg" alt="Neon Peppers">
+    <h1>Admin Login</h1>
+    <p id="setupWarning" class="notice" hidden></p>
+
+    <label>Email</label>
+    <input id="email" type="email" autocomplete="username">
+
+    <label>Password</label>
+    <input id="password" type="password" autocomplete="current-password">
+
+    <div class="actions">
+      <button class="btn pink" id="loginButton">Sign In</button>
+      <a class="btn" href="index.html">View Site</a>
+    </div>
+  </div>
+
+  <div id="adminView" class="shell" hidden>
+    <aside class="sidebar">
+      <img src="assets/neon-peppers-logo.jpg" alt="Neon Peppers">
+      <a href="index.html" target="_blank">↗ View Website</a>
+      <button data-panel="dashboardPanel">Dashboard</button>
+      <button data-panel="homepagePanel">Homepage</button>
+      <button data-panel="productsPanel">Products</button>
+      <button data-panel="settingsPanel">Contact & Settings</button>
+      <button id="logoutButton">Log Out</button>
+    </aside>
+
+    <main class="main">
+      <section id="dashboardPanel" class="panel-view active">
+        <div class="page-head">
+          <div>
+            <div class="eyebrow">Neon Peppers</div>
+            <h1>Dashboard</h1>
+          </div>
+          <button class="btn green" id="refreshButton">Refresh Data</button>
+        </div>
+
+        <div class="stats">
+          <article><span>Total products</span><strong id="statTotal">0</strong></article>
+          <article><span>Visible products</span><strong id="statVisible">0</strong></article>
+          <article><span>Featured products</span><strong id="statFeatured">0</strong></article>
+          <article><span>Products with COAs</span><strong id="statCoa">0</strong></article>
+        </div>
+
+        <div class="panel">
+          <h2>Quick actions</h2>
+          <div class="actions">
+            <button class="btn pink" id="quickAddProduct">+ Add Product</button>
+            <button class="btn blue" data-panel-target="homepagePanel">Edit Homepage</button>
+            <a class="btn" href="index.html" target="_blank">Open Public Site</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="homepagePanel" class="panel-view">
+        <div class="page-head">
+          <div>
+            <div class="eyebrow">Site content</div>
+            <h1>Homepage Editor</h1>
+          </div>
+          <button class="btn pink" id="saveHomepageButton">Save Homepage</button>
+        </div>
+
+        <div class="panel">
+          <h2>Hero section</h2>
+
+          <label>Hero eyebrow</label>
+          <input id="hero_eyebrow" placeholder="Premium research peptides">
+
+          <label>Hero headline</label>
+          <input id="hero_title" placeholder="EXCELLENCE IN RESEARCH">
+
+          <label>Hero description</label>
+          <textarea id="hero_text"></textarea>
+
+          <div class="grid two">
+            <div>
+              <label>Primary button text</label>
+              <input id="primary_button_text" placeholder="Browse Products">
+            </div>
+            <div>
+              <label>Secondary button text</label>
+              <input id="secondary_button_text" placeholder="Quality Assured">
+            </div>
+          </div>
+
+          <label>Hero image URL</label>
+          <input id="hero_image_url" placeholder="Public image URL">
+          <div class="upload-row">
+            <input id="heroImageFile" type="file" accept="image/*">
+            <button class="btn blue" id="uploadHeroButton">Upload Hero Image</button>
+          </div>
+          <img id="heroPreview" class="preview wide" hidden alt="Hero preview">
+        </div>
+
+        <div class="panel">
+          <h2>Research-use strip</h2>
+
+          <label>Strip heading</label>
+          <input id="research_banner_title" placeholder="For research purposes only">
+
+          <label>Strip text</label>
+          <textarea id="research_banner_text"></textarea>
+
+          <label>Learn-more button text</label>
+          <input id="research_banner_button" placeholder="Learn More">
+        </div>
+
+        <div class="panel">
+          <h2>Announcement</h2>
+
+          <label>Announcement text</label>
+          <input id="announcement_text" placeholder="Optional site announcement">
+
+          <label>Show announcement</label>
+          <select id="announcement_visible">
+            <option value="false">No</option>
+            <option value="true">Yes</option>
+          </select>
+        </div>
+      </section>
+
+      <section id="productsPanel" class="panel-view">
+        <div class="page-head">
+          <div>
+            <div class="eyebrow">Catalog</div>
+            <h1>Products</h1>
+          </div>
+          <button class="btn green" id="addProductButton">+ Add Product</button>
+        </div>
+
+        <div class="panel">
+          <div class="product-toolbar">
+            <input id="adminProductSearch" placeholder="Search products...">
+            <select id="adminProductFilter">
+              <option value="all">All products</option>
+              <option value="visible">Visible</option>
+              <option value="hidden">Hidden</option>
+              <option value="featured">Featured</option>
+            </select>
+          </div>
+
+          <div id="products"></div>
+        </div>
+      </section>
+
+      <section id="settingsPanel" class="panel-view">
+        <div class="page-head">
+          <div>
+            <div class="eyebrow">Site settings</div>
+            <h1>Contact & Settings</h1>
+          </div>
+          <button class="btn pink" id="saveSettingsButton">Save Settings</button>
+        </div>
+
+        <div class="panel">
+          <label>Contact email</label>
+          <input id="contact_email" type="email">
+
+          <label>Footer disclaimer</label>
+          <textarea id="footer_disclaimer"></textarea>
+
+          <label>Logo URL</label>
+          <input id="logo_url">
+          <div class="upload-row">
+            <input id="logoFile" type="file" accept="image/*">
+            <button class="btn blue" id="uploadLogoButton">Upload Logo</button>
+          </div>
+          <img id="logoPreview" class="preview logo" hidden alt="Logo preview">
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="status" class="status"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
