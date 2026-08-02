@@ -140,15 +140,50 @@
       </div>
     </section>
 
+
+    <section class="featured-section" id="featured">
+      <div class="section-title featured-heading">
+        <div>
+          <div class="pink-kicker">Selected materials</div>
+          <h2>FEATURED RESEARCH</h2>
+        </div>
+        <div class="featured-controls" aria-label="Featured product controls">
+          <button id="featuredPrev" class="slider-button" aria-label="Previous featured product">‹</button>
+          <button id="featuredNext" class="slider-button" aria-label="Next featured product">›</button>
+        </div>
+      </div>
+
+      <div class="featured-viewport">
+        <div id="featuredTrack" class="featured-track"></div>
+      </div>
+    </section>
+
     <section class="catalog-section" id="products">
       <div class="section-title left">
         <div class="pink-kicker">Live catalog</div>
         <h2>RESEARCH MATERIALS</h2>
       </div>
 
-      <div class="toolbar">
-        <input id="searchInput" class="search" placeholder="Search products or categories...">
-        <div class="filters" id="filters"></div>
+      <div class="catalog-controls">
+        <div class="catalog-search-row">
+          <div class="search-wrap">
+            <span class="search-icon">⌕</span>
+            <input id="searchInput" class="search" placeholder="Search products, categories, or strengths...">
+            <button id="clearSearch" class="clear-search" type="button" aria-label="Clear search">×</button>
+          </div>
+
+          <select id="sortProducts" class="sort-select" aria-label="Sort products">
+            <option value="featured">Featured first</option>
+            <option value="name-asc">Name A–Z</option>
+            <option value="name-desc">Name Z–A</option>
+            <option value="newest">Newest</option>
+          </select>
+        </div>
+
+        <div class="catalog-filter-row">
+          <div class="filters" id="filters"></div>
+          <div id="productCount" class="product-count"></div>
+        </div>
       </div>
 
       <div class="products" id="productGrid"></div>
