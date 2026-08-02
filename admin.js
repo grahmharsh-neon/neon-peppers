@@ -515,46 +515,86 @@ async function uploadFile(path, file, contentType){
   return data.publicUrl;
 }
 
-async function uploadProductImage(index){
-  try{
-    const input = el(`productImage-${index}`);
-    const originalFile = input.files?.[0];
+async function uploadProductImage(index) {
+  try {
+    const product = products[index];
 
-    if(!originalFile){
+    if (!product) {
+      throw new Error("Product could not be found.");
+    }
+
+    if (!product.id) {
+      throw new Error("Save the product before uploading an image.");
+    }
+
+    const input = el(`productImage-${index}`);
+    const originalFile = input?.files?.[0];
+
+    if (!originalFile) {
       throw new Error("Choose an image first.");
     }
 
     flash("Optimizing product image...");
-    const optimized = await optimizeImage(originalFile, 1200, 0.84);
-    const path = `products/${crypto.randomUUID()}.webp`;
-    const publicUrl = await uploadFile(path, optimized, "image/webp");
 
-    products[index].image_url = publicUrl;
+    const optimizedFile = await optimizeImage(
+      originalFile,
+      1200,
+      0.84
+    );
 
-    if(products[index].id){
-      const { error } = await client
-        .from("products")
-        .update({
-          image_url:publicUrl,
-          updated_at:new Date().toISOString()
-        })
-        .eq("id", products[index].id);
+    const filePath =
+      `products/${product.id}-${crypto.randomUUID()}.webp`;
 
-      if(error){
-        throw error;
-      }
+    const { error: uploadError } = await client.storage
+      .from(window.NEON_CONFIG.storageBucket)
+      .upload(filePath, optimizedFile, {
+        cacheControl: "3600",
+        contentType: "image/webp",
+        upsert: false
+      });
+
+    if (uploadError) {
+      throw uploadError;
     }
 
+    const { data: publicUrlData } = client.storage
+      .from(window.NEON_CONFIG.storageBucket)
+      .getPublicUrl(filePath);
+
+    const imageUrl = publicUrlData?.publicUrl;
+
+    if (!imageUrl) {
+      throw new Error(
+        "The image uploaded, but no public URL was returned."
+      );
+    }
+
+    const { data: updatedProduct, error: updateError } =
+      await client
+        .from("products")
+        .update({
+          image_url: imageUrl,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", product.id)
+        .select("*")
+        .single();
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    products[index] = updatedProduct;
+
     renderProducts();
-    flash(products[index].id
-      ? "Product image uploaded and saved"
-      : "Product image uploaded. Save the product."
-    );
-  }catch(error){
-    alert(error.message);
+    updateStats();
+
+    flash("Product image uploaded and saved.");
+  } catch (error) {
+    console.error(error);
+    alert(error.message || "Product image upload failed.");
   }
 }
-
 async function uploadCoa(index){
   try{
     const input = el(`coaFile-${index}`);
