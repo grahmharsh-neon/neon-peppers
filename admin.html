@@ -31,6 +31,7 @@
       <button data-panel="dashboardPanel">Dashboard</button>
       <button data-panel="homepagePanel">Homepage</button>
       <button data-panel="productsPanel">Products</button>
+      <button data-panel="inquiriesPanel">Inquiries</button>
       <button data-panel="settingsPanel">Contact & Settings</button>
       <button id="logoutButton">Log Out</button>
     </aside>
@@ -151,6 +152,31 @@
           </div>
 
           <div id="products"></div>
+        </div>
+      </section>
+
+      
+      <section id="inquiriesPanel" class="panel-view">
+        <div class="page-head">
+          <div>
+            <div class="eyebrow">Leads and messages</div>
+            <h1>Inquiries</h1>
+          </div>
+          <button class="btn green" id="refreshInquiriesButton">Refresh Inquiries</button>
+        </div>
+
+        <div class="panel">
+          <div class="product-toolbar">
+            <input id="inquirySearch" placeholder="Search name, email, company, product, or message...">
+            <select id="inquiryFilter">
+              <option value="all">All inquiries</option>
+              <option value="new">New</option>
+              <option value="replied">Replied</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
+
+          <div id="inquiries"></div>
         </div>
       </section>
 

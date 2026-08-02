@@ -263,3 +263,5 @@
     flex-direction:column;
   }
 }
+
+.product-inquiry-section .contact-card{max-width:900px}

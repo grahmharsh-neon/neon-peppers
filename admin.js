@@ -1,6 +1,7 @@
 let client = null;
 let products = [];
 let siteSettings = null;
+let inquiries = [];
 
 function el(id){
   return document.getElementById(id);
@@ -63,6 +64,16 @@ function bindEvents(){
   el("adminProductSearch").addEventListener("input", renderProducts);
   el("adminProductFilter").addEventListener("change", renderProducts);
 
+
+  const refreshInquiries = el("refreshInquiriesButton");
+  if(refreshInquiries) refreshInquiries.addEventListener("click", loadInquiries);
+
+  const inquirySearch = el("inquirySearch");
+  if(inquirySearch) inquirySearch.addEventListener("input", renderInquiries);
+
+  const inquiryFilter = el("inquiryFilter");
+  if(inquiryFilter) inquiryFilter.addEventListener("change", renderInquiries);
+
   document.querySelectorAll("[data-panel]").forEach(button => {
     button.addEventListener("click", () => showPanel(button.dataset.panel));
   });
@@ -109,7 +120,8 @@ async function showAdmin(){
 async function refreshAll(){
   await Promise.all([
     loadProducts(),
-    loadSettings()
+    loadSettings(),
+    loadInquiries()
   ]);
   updateStats();
   flash("Dashboard refreshed");
@@ -690,6 +702,112 @@ async function saveSettings(){
   siteSettings = { ...siteSettings, ...payload };
   flash("Settings saved");
 }
+
+
+async function loadInquiries(){
+  if(!client) return;
+
+  const { data, error } = await client
+    .from("inquiries")
+    .select("*")
+    .order("created_at", { ascending:false });
+
+  if(error){
+    console.warn(error);
+    return;
+  }
+
+  inquiries = data || [];
+  renderInquiries();
+}
+
+function renderInquiries(){
+  const box = el("inquiries");
+  if(!box) return;
+
+  const query = (el("inquirySearch")?.value || "").trim().toLowerCase();
+  const filter = el("inquiryFilter")?.value || "all";
+
+  const filtered = inquiries.filter(inquiry => {
+    const searchable = `${inquiry.name} ${inquiry.email} ${inquiry.company || ""} ${inquiry.product || ""} ${inquiry.message || ""}`.toLowerCase();
+    const matchesSearch = searchable.includes(query);
+    const matchesFilter = filter === "all" || inquiry.status === filter;
+    return matchesSearch && matchesFilter;
+  });
+
+  if(!filtered.length){
+    box.innerHTML = '<p class="muted">No matching inquiries.</p>';
+    return;
+  }
+
+  box.innerHTML = filtered.map(inquiry => {
+    const date = inquiry.created_at
+      ? new Date(inquiry.created_at).toLocaleString()
+      : "";
+
+    const status = inquiry.status || "new";
+
+    return `
+      <article class="inquiry-item">
+        <div class="inquiry-head">
+          <div>
+            <h3>${escapeHtml(inquiry.name)}</h3>
+            <div class="inquiry-date">${escapeHtml(date)}</div>
+          </div>
+          <span class="inquiry-badge ${escapeHtml(status)}">${escapeHtml(status)}</span>
+        </div>
+
+        <div class="inquiry-meta">
+          <div><span>Email</span><a href="mailto:${escapeHtml(inquiry.email)}">${escapeHtml(inquiry.email)}</a></div>
+          <div><span>Company</span>${escapeHtml(inquiry.company || "Not provided")}</div>
+          <div><span>Product</span>${escapeHtml(inquiry.product || "General inquiry")}</div>
+        </div>
+
+        <div class="inquiry-message">${escapeHtml(inquiry.message)}</div>
+
+        <div class="actions">
+          <a class="btn pink" href="mailto:${escapeHtml(inquiry.email)}?subject=${encodeURIComponent("Re: Neon Peppers inquiry")}">Reply by Email</a>
+          <button class="btn blue" onclick="updateInquiryStatus('${escapeHtml(inquiry.id)}','replied')">Mark Replied</button>
+          <button class="btn" onclick="updateInquiryStatus('${escapeHtml(inquiry.id)}','closed')">Close</button>
+          <button class="btn danger" onclick="deleteInquiry('${escapeHtml(inquiry.id)}')">Delete</button>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+async function updateInquiryStatus(id, status){
+  const { error } = await client
+    .from("inquiries")
+    .update({ status, updated_at:new Date().toISOString() })
+    .eq("id", id);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  await loadInquiries();
+  flash(`Inquiry marked ${status}`);
+}
+
+async function deleteInquiry(id){
+  if(!confirm("Delete this inquiry?")) return;
+
+  const { error } = await client
+    .from("inquiries")
+    .delete()
+    .eq("id", id);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
+
+  await loadInquiries();
+  flash("Inquiry deleted");
+}
+
 
 function flash(message){
   const box = el("status");

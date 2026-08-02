@@ -162,11 +162,52 @@
     </section>
 
     <section class="contact-section" id="contact">
-      <div class="contact-card">
+      <div class="contact-card inquiry-card">
         <div class="eyebrow">Qualified inquiries</div>
         <h2>Request information</h2>
-        <p>Do not submit personal medical information.</p>
-        <a class="btn pink" href="mailto:support@neonpeppers.com">support@neonpeppers.com</a>
+        <p>Messages are saved securely and sent to the Neon Peppers inbox. Do not submit personal medical information.</p>
+
+      <form id="inquiryForm" class="inquiry-form">
+        <div class="form-grid">
+          <div>
+            <label for="inquiryName">Name *</label>
+            <input id="inquiryName" name="name" required maxlength="100" autocomplete="name">
+          </div>
+
+          <div>
+            <label for="inquiryEmail">Email *</label>
+            <input id="inquiryEmail" name="email" type="email" required maxlength="180" autocomplete="email">
+          </div>
+
+          <div>
+            <label for="inquiryCompany">Company or institution</label>
+            <input id="inquiryCompany" name="company" maxlength="180" autocomplete="organization">
+          </div>
+
+          <div>
+            <label for="inquiryProduct">Product of interest</label>
+            <select id="inquiryProduct" name="product">
+              <option value="">General inquiry</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="inquiryMessage">Message *</label>
+        <textarea id="inquiryMessage" name="message" required maxlength="3000" placeholder="Describe your laboratory, institutional, business, or analytical research inquiry."></textarea>
+
+        <label class="consent-row">
+          <input id="inquiryConsent" name="research_acknowledged" type="checkbox" required>
+          <span>I understand these materials are offered only for legitimate research purposes and are not intended for human or veterinary use.</span>
+        </label>
+
+        <input id="inquiryWebsite" name="website" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+        <div class="form-actions">
+          <button id="sendInquiryButton" class="btn pink" type="submit">Send Inquiry</button>
+          <span id="inquiryStatus" class="form-status" role="status"></span>
+        </div>
+      </form>
+
       </div>
     </section>
   </main>
@@ -206,5 +247,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script src="site.js"></script>
+  <script src="inquiry.js"></script>
 </body>
 </html>

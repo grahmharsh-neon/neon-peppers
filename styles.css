@@ -637,3 +637,98 @@ footer{
     max-width:none;
   }
 }
+
+
+/* INQUIRY SYSTEM */
+.inquiry-card{
+  max-width:900px;
+  text-align:left;
+}
+.inquiry-card > .eyebrow,
+.inquiry-card > h2,
+.inquiry-card > p{
+  text-align:center;
+}
+.inquiry-form{
+  margin-top:28px;
+  padding:24px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:rgba(3,5,8,.62);
+}
+.form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+.inquiry-form label{
+  display:block;
+  margin:13px 0 6px;
+  color:#d7dce4;
+  font-size:.82rem;
+  font-weight:700;
+}
+.inquiry-form input,
+.inquiry-form textarea,
+.inquiry-form select{
+  width:100%;
+  padding:13px;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:8px;
+  background:#070a0f;
+  color:#fff;
+}
+.inquiry-form textarea{
+  min-height:140px;
+  resize:vertical;
+}
+.consent-row{
+  display:flex!important;
+  align-items:flex-start;
+  gap:11px;
+  padding:14px;
+  border:1px solid rgba(124,255,50,.35);
+  border-radius:9px;
+  background:rgba(124,255,50,.035);
+  cursor:pointer;
+}
+.consent-row input{
+  width:19px;
+  height:19px;
+  flex:0 0 auto;
+  margin-top:1px;
+  accent-color:var(--green);
+}
+.consent-row span{
+  color:#cbd3dc;
+  line-height:1.45;
+  font-weight:400;
+}
+.form-actions{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-top:18px;
+}
+.form-status{
+  color:var(--muted);
+  font-size:.86rem;
+}
+.form-status.success{color:var(--green)}
+.form-status.error{color:#ff6572}
+.honeypot{
+  position:absolute!important;
+  left:-9999px!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+.product-inquiry-section{
+  max-width:1240px;
+  margin:auto;
+  padding:20px 3vw 70px;
+}
+@media(max-width:650px){
+  .form-grid{grid-template-columns:1fr}
+  .inquiry-form{padding:17px}
+}
