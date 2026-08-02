@@ -1112,29 +1112,52 @@ function renderMerchAdmin(){
 }
 
 async function addMerchItem(){
-  const {data,error}=await client
-    .from("merch_items")
-    .insert({
-      name:"New Merch Item",
-      category:"Apparel",
-      description:"",
-      image_url:null,
-      base_price:0,
-      visible:true,
-      sort_order:merchItems.length
-    })
-    .select()
-    .single();
+  try{
+    if(!client){
+      client = createClient();
+    }
 
-  if(error){
-    alert(error.message);
-    return;
+    const { data, error } = await client
+      .from("merch_items")
+      .insert({
+        name:"New Merch Item",
+        category:"Apparel",
+        description:"",
+        image_url:null,
+        base_price:0,
+        visible:true,
+        sort_order:merchItems.length
+      })
+      .select("*")
+      .single();
+
+    if(error){
+      throw error;
+    }
+
+    merchItems.push(data);
+    renderMerchAdmin();
+    showPanel("merchPanel");
+    flash("Merch item added");
+  }catch(error){
+    console.error("Add merch item failed:", error);
+
+    let message = error?.message || "The merch item could not be added.";
+
+    if(
+      message.includes("merch_items") &&
+      (
+        message.includes("does not exist") ||
+        message.includes("schema cache") ||
+        message.includes("relation")
+      )
+    ){
+      message =
+        "The merch tables are missing in Supabase. Run supabase-merch-v10.sql in the Supabase SQL Editor, then refresh Admin.";
+    }
+
+    alert(message);
   }
-
-  merchItems.push(data);
-  renderMerchAdmin();
-  showPanel("merchPanel");
-  flash("Merch item added");
 }
 
 async function saveMerchItem(id){
