@@ -6,3 +6,4 @@
   from = "/products/*"
   to = "/product.html"
   status = 200
+netlify/ functions/ generate-product-description.js
