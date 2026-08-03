@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Neon Peppers public Certificate of Analysis library.">
+  <title>COA Library | Neon Peppers</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/coa-library.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a class="brand" href="/#home"><img src="/assets/neon-peppers-logo.jpg" alt="Neon Peppers"></a>
+      <button class="menu" id="menuBtn" aria-label="Open navigation">☰</button>
+      <nav id="navLinks">
+        <a href="/#home">Home</a>
+        <a href="/#products">Products</a>
+        <a href="/order.html">Order Request</a>
+        <a href="/merch.html">Merch</a>
+        <a class="active" href="/coa.html">COAs</a>
+        <a href="/#about">About</a>
+        <a href="/#contact">Contact</a>
+        <a class="admin-link" href="/admin.html">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="coa-library-page">
+    <section class="coa-library-hero">
+      <div class="eyebrow">Batch documentation</div>
+      <h1>COA LIBRARY</h1>
+      <p>View public Certificates of Analysis organized by product and lot number.</p>
+    </section>
+
+    <section class="coa-library-controls">
+      <input id="publicCoaSearch" placeholder="Search product, lot, strength, or lab...">
+      <select id="publicCoaProduct"><option value="all">All products</option></select>
+    </section>
+
+    <section id="publicCoaGrid" class="public-coa-grid">
+      <p class="coa-library-loading">Loading COAs…</p>
+    </section>
+  </main>
+
+  <footer>
+    <div><strong>Neon Peppers Research</strong><br>Research use only. Not for human or veterinary use.</div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/config.js"></script>
+  <script src="/coa-library.js"></script>
+</body>
+</html>
