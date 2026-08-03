@@ -143,7 +143,7 @@ function renderOrderItems(){
   });
 
   if(!filtered.length){
-    box.innerHTML='<div class="order-loading">No matching order items.</div>';
+    box.innerHTML='<div class="order-loading">No matching peptides.</div>';
     return;
   }
 
