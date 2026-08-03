@@ -325,8 +325,33 @@ function renderProducts(){
         </div>
       </div>
 
-      <label>Description</label>
-      <textarea data-index="${index}" data-key="description">${escapeHtml(product.description)}</textarea>
+      <div class="description-heading">
+        <label for="productDescription-${index}">Description</label>
+
+        <div class="description-ai-actions">
+          <button
+            class="btn ai-button"
+            type="button"
+            id="generateDescription-${index}"
+            onclick="generateProductDescription(${index})"
+          >
+            ✨ ${product.description ? "Regenerate Description" : "Generate Description"}
+          </button>
+        </div>
+      </div>
+
+      <textarea
+        id="productDescription-${index}"
+        data-index="${index}"
+        data-key="description"
+        placeholder="Enter a description or generate one with AI."
+      >${escapeHtml(product.description)}</textarea>
+
+      <div
+        id="descriptionStatus-${index}"
+        class="description-ai-status"
+        aria-live="polite"
+      ></div>
 
       <div class="grid two">
         <div>
@@ -419,6 +444,125 @@ function addProduct(){
   renderProducts();
   updateStats();
   showPanel("productsPanel");
+}
+
+
+function setDescriptionGenerationStatus(index, message, type = ""){
+  const status = el(`descriptionStatus-${index}`);
+
+  if(!status){
+    return;
+  }
+
+  status.textContent = message;
+  status.className = `description-ai-status ${type}`.trim();
+}
+
+async function generateProductDescription(index){
+  const product = products[index];
+
+  if(!product){
+    alert("The product could not be found.");
+    return;
+  }
+
+  const name = String(product.name || "").trim();
+  const strength = String(product.strength || "").trim();
+  const category = String(product.category || "").trim();
+
+  if(!name || name === "New Product"){
+    alert("Enter the product name before generating a description.");
+    return;
+  }
+
+  const button = el(`generateDescription-${index}`);
+  const textarea = el(`productDescription-${index}`);
+
+  if(!textarea){
+    alert("The description field could not be found.");
+    return;
+  }
+
+  const originalButtonText = button?.textContent || "Generate Description";
+
+  if(button){
+    button.disabled = true;
+    button.textContent = "Generating…";
+  }
+
+  setDescriptionGenerationStatus(
+    index,
+    "Creating a neutral research-focused draft…",
+    "working"
+  );
+
+  try{
+    const response = await fetch(
+      "/.netlify/functions/generate-product-description",
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          name,
+          strength,
+          category,
+          existing_description:String(product.description || "").trim()
+        })
+      }
+    );
+
+    const result = await response.json().catch(() => ({}));
+
+    if(!response.ok){
+      throw new Error(
+        result.error || "The description could not be generated."
+      );
+    }
+
+    const description = String(result.description || "").trim();
+
+    if(!description){
+      throw new Error("The generator returned an empty description.");
+    }
+
+    product.description = description;
+    textarea.value = description;
+
+    // Trigger the same local update behavior as manual editing.
+    textarea.dispatchEvent(
+      new Event("input", { bubbles:true })
+    );
+
+    setDescriptionGenerationStatus(
+      index,
+      "Draft generated. Review it, make any edits, then click Save Product.",
+      "success"
+    );
+
+    if(button){
+      button.textContent = "↻ Regenerate Description";
+    }
+  }catch(error){
+    console.error("Description generation failed:", error);
+
+    setDescriptionGenerationStatus(
+      index,
+      error.message || "Description generation failed.",
+      "error"
+    );
+
+    alert(error.message || "Description generation failed.");
+
+    if(button){
+      button.textContent = originalButtonText;
+    }
+  }finally{
+    if(button){
+      button.disabled = false;
+    }
+  }
 }
 
 async function saveProduct(index){

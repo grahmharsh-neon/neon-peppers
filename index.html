@@ -125,7 +125,128 @@
       <div class="products" id="productGrid"></div>
     </section>
 
-  
+    <section class="quality-section" id="quality">
+      <div class="quality-card">
+        <div>
+          <div class="eyebrow">Quality framework</div>
+          <h2>Clear identity. Clear records. Clear limits.</h2>
+        </div>
+        <p>
+          Product naming, strength, storage references, batch documentation,
+          and research-use restrictions should remain consistent across the
+          catalog, labels, COAs, and fulfillment process.
+        </p>
+      </div>
+    </section>
 
-  
-      
+    <section class="faq-section" id="faq">
+      <div class="section-title">
+        <div class="pink-kicker">Questions</div>
+        <h2>FAQ</h2>
+      </div>
+
+      <div class="faq-grid">
+        <article>
+          <h3>Who is this catalog for?</h3>
+          <p>Qualified businesses, institutions, laboratories, educational facilities, and analytical researchers.</p>
+        </article>
+        <article>
+          <h3>Are these products intended for people?</h3>
+          <p>No. Products are not intended for human or veterinary use.</p>
+        </article>
+        <article>
+          <h3>Are COAs available?</h3>
+          <p>Where available, batch documentation can be linked from the product record.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="contact-section" id="contact">
+      <div class="contact-card inquiry-card">
+        <div class="eyebrow">Qualified inquiries</div>
+        <h2>Request information</h2>
+        <p>Messages are saved securely and sent to the Neon Peppers inbox. Do not submit personal medical information.</p>
+
+      <form id="inquiryForm" class="inquiry-form">
+        <div class="form-grid">
+          <div>
+            <label for="inquiryName">Name *</label>
+            <input id="inquiryName" name="name" required maxlength="100" autocomplete="name">
+          </div>
+
+          <div>
+            <label for="inquiryEmail">Email *</label>
+            <input id="inquiryEmail" name="email" type="email" required maxlength="180" autocomplete="email">
+          </div>
+
+          <div>
+            <label for="inquiryCompany">Company or institution</label>
+            <input id="inquiryCompany" name="company" maxlength="180" autocomplete="organization">
+          </div>
+
+          <div>
+            <label for="inquiryProduct">Product of interest</label>
+            <select id="inquiryProduct" name="product">
+              <option value="">General inquiry</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="inquiryMessage">Message *</label>
+        <textarea id="inquiryMessage" name="message" required maxlength="3000" placeholder="Describe your laboratory, institutional, business, or analytical research inquiry."></textarea>
+
+        <label class="consent-row">
+          <input id="inquiryConsent" name="research_acknowledged" type="checkbox" required>
+          <span>I understand these materials are offered only for legitimate research purposes and are not intended for human or veterinary use.</span>
+        </label>
+
+        <input id="inquiryWebsite" name="website" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+        <div class="form-actions">
+          <button id="sendInquiryButton" class="btn pink" type="submit">Send Inquiry</button>
+          <span id="inquiryStatus" class="form-status" role="status"></span>
+        </div>
+      </form>
+
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div>
+      <strong>Neon Peppers Research</strong><br>
+      Research use only. Not for human or veterinary use.
+    </div>
+    <div class="footer-links">
+      <a href="research-use-policy.html">Research Policy</a>
+      <a href="terms.html">Terms</a>
+      <a href="privacy.html">Privacy</a>
+    </div>
+  </footer>
+
+  <div class="modal" id="productModal">
+    <div class="modal-card">
+      <div class="modal-grid">
+        <div class="modal-image" id="modalImage">⚗</div>
+        <div class="modal-body">
+          <button class="close" onclick="closeProduct()">×</button>
+          <div class="category" id="modalCategory"></div>
+          <h2 id="modalName"></h2>
+          <p id="modalDescription"></p>
+          <p><strong>Strength:</strong> <span id="modalStrength"></span></p>
+
+          <div class="modal-actions">
+            <a class="btn blue" id="modalCoa" target="_blank">View COA</a>
+            <a class="btn pink" href="mailto:support@neonpeppers.com">Request Information</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="site.js"></script>
+  <script src="inquiry.js"></script>
+</body>
+</html>

@@ -408,3 +408,78 @@ textarea{min-height:95px;resize:vertical}
     grid-template-columns:1fr;
   }
 }
+
+
+/* AI PRODUCT ASSISTANT V11 */
+.description-heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-top:16px;
+}
+
+.description-heading label{
+  margin:0;
+}
+
+.description-ai-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.ai-button{
+  border-color:rgba(255,63,159,.58);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,63,159,.18),
+      rgba(39,199,255,.12)
+    );
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+}
+
+.ai-button:hover{
+  border-color:var(--pink);
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+}
+
+.ai-button:disabled{
+  opacity:.58;
+  cursor:wait;
+}
+
+.description-ai-status{
+  min-height:20px;
+  margin:7px 0 4px;
+  color:var(--muted);
+  font-size:.78rem;
+  line-height:1.4;
+}
+
+.description-ai-status.working{
+  color:var(--blue);
+}
+
+.description-ai-status.success{
+  color:var(--green);
+}
+
+.description-ai-status.error{
+  color:#ff6572;
+}
+
+@media(max-width:620px){
+  .description-heading{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .description-ai-actions,
+  .ai-button{
+    width:100%;
+  }
+}
