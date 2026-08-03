@@ -317,7 +317,7 @@ function productSlug(product){
 }
 
 function openProductPage(product){
-  window.location.href = "/order.html";
+  openProduct(product);
 }
 
 function openProduct(product){

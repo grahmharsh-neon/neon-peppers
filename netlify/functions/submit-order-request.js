@@ -119,7 +119,7 @@ exports.handler=async event=>{
 
     const cleanItems=items.map(item=>({
       order_request_id:requestId,
-      product_id:null,
+      product_id:item.product_id||null,
       order_form_item_id:item.order_form_item_id||null,
       variant_id:item.variant_id||null,
       product_name:String(item.product_name||"").slice(0,180),

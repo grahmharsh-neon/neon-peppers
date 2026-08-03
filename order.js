@@ -70,29 +70,37 @@ async function loadOrderForm(){
     return;
   }
 
-  const [itemsResult,variantsResult]=await Promise.all([
+  const [productsResult,variantsResult]=await Promise.all([
     client
-      .from("order_form_items")
+      .from("products")
       .select("*")
       .eq("visible",true)
-      .order("sort_order",{ascending:true})
       .order("name",{ascending:true}),
 
     client
-      .from("order_form_item_variants")
+      .from("product_variants")
       .select("*")
       .eq("visible",true)
       .order("sort_order",{ascending:true})
   ]);
 
-  if(itemsResult.error){
-    console.error(itemsResult.error);
+  if(productsResult.error){
+    console.error(productsResult.error);
     el("orderItemsList").innerHTML=
-      '<div class="order-loading">The order form could not be loaded.</div>';
+      '<div class="order-loading">The product list could not be loaded.</div>';
     return;
   }
 
-  orderItems=itemsResult.data||[];
+  orderItems=(productsResult.data||[]).map(product=>({
+    id:product.id,
+    name:product.name,
+    category:product.category||"Research Material",
+    description:product.description||"",
+    image_url:product.image_url||"",
+    strength:product.strength||"",
+    status:product.status||"available"
+  }));
+
   orderVariants=variantsResult.error?[]:(variantsResult.data||[]);
 
   renderCategories();
@@ -100,9 +108,26 @@ async function loadOrderForm(){
 }
 
 function variantsForItem(itemId){
-  return orderVariants.filter(
-    variant=>variant.order_form_item_id===itemId
+  const item=orderItems.find(
+    current=>String(current.id)===String(itemId)
   );
+
+  const variants=orderVariants.filter(
+    variant=>String(variant.product_id)===String(itemId)
+  );
+
+  if(variants.length){
+    return variants;
+  }
+
+  return [{
+    id:`fallback-${itemId}`,
+    product_id:itemId,
+    strength:item?.strength||"Standard",
+    stock_status:item?.status||"available",
+    visible:true,
+    sort_order:0
+  }];
 }
 
 function stockLabel(status){
@@ -300,9 +325,9 @@ function syncCartFromRow(itemId){
 
   if(quantity>0){
     cart.push({
-      order_form_item_id:item.id,
-      product_id:null,
-      variant_id:variant.id,
+      order_form_item_id:null,
+      product_id:item.id,
+      variant_id:String(variant.id).startsWith("fallback-") ? null : variant.id,
       product_name:item.name,
       strength:variant.strength,
       quantity
