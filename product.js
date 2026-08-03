@@ -60,37 +60,87 @@ async function loadData(){
     return;
   }
 
-  const [settingsResult, productsResult] = await Promise.all([
-    client.from("site_settings").select("*").eq("id", 1).maybeSingle(),
-    client.from("products").select("*").eq("visible", true).order("created_at", { ascending:false })
-  ]);
+  const requested = getRequestedProduct();
+
+  const settingsPromise = client
+    .from("site_settings")
+    .select("*")
+    .eq("id",1)
+    .maybeSingle();
+
+  let productResult;
+
+  if(requested.id){
+    productResult = await client
+      .from("products")
+      .select("*")
+      .eq("id",requested.id)
+      .eq("visible",true)
+      .maybeSingle();
+  }else{
+    productResult = {
+      data:null,
+      error:null
+    };
+  }
+
+  const settingsResult = await settingsPromise;
 
   if(!settingsResult.error){
     settings = settingsResult.data || {};
     applySettings();
   }
 
-  if(productsResult.error){
-    console.error(productsResult.error);
-    showNotFound();
-    return;
+  if(productResult.error){
+    console.error(productResult.error);
   }
 
-  allProducts = productsResult.data || [];
-  const requested = getRequestedProduct();
+  if(productResult.data){
+    currentProduct = productResult.data;
+  }else{
+    const productsResult = await client
+      .from("products")
+      .select("*")
+      .eq("visible",true)
+      .order("created_at",{ascending:false});
 
-  currentProduct = allProducts.find(product =>
-    (requested.id && String(product.id) === String(requested.id)) ||
-    (requested.slug && slugify(product.name) === requested.slug)
-  );
+    if(productsResult.error){
+      console.error(productsResult.error);
+      showNotFound();
+      return;
+    }
+
+    allProducts = productsResult.data || [];
+
+    currentProduct = allProducts.find(product =>
+      requested.slug &&
+      slugify(product.name) === requested.slug
+    );
+  }
 
   if(!currentProduct){
     showNotFound();
     return;
   }
 
+  if(!allProducts.length){
+    const allResult = await client
+      .from("products")
+      .select("*")
+      .eq("visible",true)
+      .order("created_at",{ascending:false});
+
+    if(!allResult.error){
+      allProducts = allResult.data || [];
+    }
+  }
+
   renderProduct(currentProduct);
   renderRelated();
+
+  if(typeof loadProductCoas === "function"){
+    loadProductCoas(currentProduct.id);
+  }
 }
 
 function applySettings(){
@@ -220,7 +270,14 @@ function renderRelated(){
 
   grid.querySelectorAll(".card").forEach(card => {
     card.addEventListener("click", () => {
-      window.location.href = `/products/${encodeURIComponent(card.dataset.slug)}`;
+      const product = allProducts.find(
+        item => slugify(item.name) === card.dataset.slug
+      );
+
+      const id = encodeURIComponent(product?.id || "");
+
+      window.location.href =
+        `/products/${encodeURIComponent(card.dataset.slug)}?id=${id}`;
     });
   });
 

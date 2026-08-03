@@ -318,7 +318,8 @@ function productSlug(product){
 
 function openProductPage(product){
   const slug = productSlug(product);
-  window.location.href = `/products/${encodeURIComponent(slug)}`;
+  const id = encodeURIComponent(product.id || "");
+  window.location.href = `/products/${encodeURIComponent(slug)}?id=${id}`;
 }
 
 function openProduct(product){
