@@ -994,3 +994,15 @@ button.order-request-button,
     line-height:1.68;
   }
 }
+
+
+/* PRODUCT PAGE EMPTY SPACE FIX V14.1 */
+.product-loading:empty,
+.loading-section:empty,
+.product-hero-placeholder:empty{
+  display:none !important;
+  min-height:0 !important;
+  height:0 !important;
+  padding:0 !important;
+  margin:0 !important;
+}
