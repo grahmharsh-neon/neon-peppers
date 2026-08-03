@@ -317,7 +317,8 @@ function productSlug(product){
 }
 
 function openProductPage(product){
-  openProduct(product);
+  const slug = productSlug(product);
+  window.location.href = `/products/${encodeURIComponent(slug)}`;
 }
 
 function openProduct(product){

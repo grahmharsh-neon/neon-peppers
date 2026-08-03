@@ -38,15 +38,18 @@ function slugify(value){
     .replace(/^-+|-+$/g, "");
 }
 
-function getRequestedSlug(){
+function getRequestedProduct(){
   const path = decodeURIComponent(window.location.pathname);
   const parts = path.split("/").filter(Boolean);
+  const params = new URLSearchParams(window.location.search);
 
-  if(parts[0] === "products" && parts[1]){
-    return parts.slice(1).join("-");
-  }
-
-  return new URLSearchParams(window.location.search).get("slug") || "";
+  return {
+    slug:
+      parts[0] === "products" && parts[1]
+        ? parts.slice(1).join("-")
+        : params.get("slug") || "",
+    id:params.get("id") || ""
+  };
 }
 
 async function loadData(){
@@ -74,9 +77,12 @@ async function loadData(){
   }
 
   allProducts = productsResult.data || [];
-  const requestedSlug = getRequestedSlug();
+  const requested = getRequestedProduct();
 
-  currentProduct = allProducts.find(product => slugify(product.name) === requestedSlug);
+  currentProduct = allProducts.find(product =>
+    (requested.id && String(product.id) === String(requested.id)) ||
+    (requested.slug && slugify(product.name) === requested.slug)
+  );
 
   if(!currentProduct){
     showNotFound();

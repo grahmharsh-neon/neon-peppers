@@ -1006,3 +1006,10 @@ button.order-request-button,
   padding:0 !important;
   margin:0 !important;
 }
+
+
+/* INDIVIDUAL PRODUCT PAGE LINKS V14.3 */
+#productGrid .card,
+#relatedProducts .card{
+  cursor:pointer;
+}
