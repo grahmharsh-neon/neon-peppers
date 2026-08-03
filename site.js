@@ -112,7 +112,7 @@ function applySettings(){
 
   if(settings.contact_email){
     document.querySelectorAll('a[href^="mailto:"]').forEach(link => {
-      link.href = `mailto:${settings.contact_email}`;
+      link.href = "/order.html";
       if(link.textContent.includes("@")) link.textContent = settings.contact_email;
     });
   }
@@ -317,8 +317,7 @@ function productSlug(product){
 }
 
 function openProductPage(product){
-  const slug = productSlug(product);
-  window.location.href = `/products/${encodeURIComponent(slug)}`;
+  window.location.href = "/order.html";
 }
 
 function openProduct(product){

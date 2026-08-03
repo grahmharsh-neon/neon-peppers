@@ -96,7 +96,7 @@ function applySettings(){
 
   if(settings.contact_email){
     const emailLink = el("productEmail");
-    emailLink.href = `mailto:${settings.contact_email}`;
+    emailLink.href = "/order.html";
   }
 
   const footer = document.querySelector("footer > div:first-child");

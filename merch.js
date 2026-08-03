@@ -225,34 +225,7 @@ function updateMerchModalPrice(){
 }
 
 function requestMerch(){
-  if(!currentMerch) return;
-
-  const variant=merchVariants.find(
-    current=>String(current.id)===String(el("merchModalVariant").value)
-  );
-
-  const quantity=Math.max(
-    1,
-    Number(el("merchModalQuantity").value||1)
-  );
-
-  const details=[
-    currentMerch.name,
-    variant?.label,
-    variant?.color,
-    variant?.size
-  ].filter(Boolean).join(" — ");
-
-  const subject=encodeURIComponent(
-    `Merch request: ${currentMerch.name}`
-  );
-
-  const body=encodeURIComponent(
-    `I would like to request:\n\n${details}\nQuantity: ${quantity}\n\nPlease contact me with availability and next steps.`
-  );
-
-  window.location.href=
-    `mailto:support@neonpeppers.com?subject=${subject}&body=${body}`;
+  window.location.href = "/order.html";
 }
 
 function closeMerchModal(){
