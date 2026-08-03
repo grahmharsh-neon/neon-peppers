@@ -493,3 +493,17 @@ body.gated{
     z-index:3;
   }
 }
+
+
+.quick-order-price{
+  margin-top:7px;
+  color:var(--green);
+  font-size:.8rem;
+  font-weight:800;
+}
+
+.cart-price{
+  margin-top:4px;
+  color:var(--green);
+  font-size:.78rem;
+}

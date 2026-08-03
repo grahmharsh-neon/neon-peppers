@@ -315,6 +315,40 @@ function renderProducts(){
           <input data-index="${index}" data-key="strength" value="${escapeHtml(product.strength)}">
         </div>
 
+      <div>
+        <label>Price</label>
+        <input
+          type="number"
+          min="0"
+          step="0.01"
+          data-index="${index}"
+          data-key="price"
+          value="${Number(product.price || 0)}"
+        >
+      </div>
+
+      <div>
+        <label>Compare-at Price</label>
+        <input
+          type="number"
+          min="0"
+          step="0.01"
+          data-index="${index}"
+          data-key="compare_at_price"
+          value="${product.compare_at_price == null ? "" : Number(product.compare_at_price)}"
+        >
+      </div>
+
+      <div>
+        <label>Price Note</label>
+        <input
+          data-index="${index}"
+          data-key="price_note"
+          value="${escapeHtml(product.price_note || "")}"
+          placeholder="Optional, e.g. per vial"
+        >
+      </div>
+
         <div>
           <label>Status</label>
           <select data-index="${index}" data-key="status">
@@ -432,6 +466,9 @@ function renderProducts(){
       if(key === "visible" || key === "featured"){
         value = value === "true";
       }
+      if(key === "price" || key === "compare_at_price"){
+        value = value === "" ? null : Number(value);
+      }
 
       products[index][key] = value;
     };
@@ -448,6 +485,9 @@ function addProduct(){
     category:"Research Compound",
     description:"",
     strength:"",
+      price:0,
+      compare_at_price:null,
+      price_note:"",
     image_url:"",
     coa_url:"",
     visible:true,

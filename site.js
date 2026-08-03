@@ -224,6 +224,25 @@ function productCardSummary(description){
   return lines[0] || source.replace(/[#*_`>-]/g, "").trim();
 }
 
+
+function formatProductPrice(product){
+  const price=Number(product?.price||0);
+  const compare=Number(product?.compare_at_price||0);
+  const note=String(product?.price_note||"").trim();
+
+  if(price<=0){
+    return '<span class="product-price-contact">Price on request</span>';
+  }
+
+  return `
+    <div class="product-price-wrap">
+      <span class="product-price">$${price.toFixed(2)}</span>
+      ${compare>price ? `<span class="product-compare-price">$${compare.toFixed(2)}</span>` : ""}
+      ${note ? `<span class="product-price-note">${esc(note)}</span>` : ""}
+    </div>
+  `;
+}
+
 function renderProducts(){
   const grid = document.getElementById("productGrid");
   const count = document.getElementById("productCount");
@@ -295,6 +314,7 @@ function renderProducts(){
 
         <h3>${esc(product.name)}</h3>
         <p>${esc(productCardSummary(product.description))}</p>
+          ${formatProductPrice(product)}
 
         <div class="card-actions">
           <div class="strength">${esc(product.strength || "")}</div>

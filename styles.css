@@ -1075,3 +1075,61 @@ body.gated{
     z-index:3;
   }
 }
+
+
+/* PRODUCT PRICING V18 */
+.product-price-wrap{
+  display:flex;
+  align-items:baseline;
+  gap:9px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
+
+.product-price{
+  color:var(--green);
+  font-size:1.1rem;
+  font-weight:900;
+}
+
+.product-compare-price{
+  color:var(--muted);
+  text-decoration:line-through;
+  font-size:.9rem;
+}
+
+.product-price-note,
+.product-price-contact{
+  color:var(--muted);
+  font-size:.76rem;
+}
+
+.product-page-price{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:16px 0 22px;
+}
+
+.product-page-price-main{
+  color:var(--green);
+  font-size:2rem;
+  font-weight:900;
+}
+
+.product-page-price-compare{
+  color:var(--muted);
+  font-size:1rem;
+  text-decoration:line-through;
+}
+
+.product-page-price-note{
+  width:100%;
+  color:var(--muted);
+  font-size:.8rem;
+}
+
+[hidden]{
+  display:none !important;
+}

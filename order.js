@@ -98,7 +98,10 @@ async function loadOrderForm(){
     description:product.description||"",
     image_url:product.image_url||"",
     strength:product.strength||"",
-    status:product.status||"available"
+    status:product.status||"available",
+    price:Number(product.price||0),
+    compare_at_price:product.compare_at_price==null?null:Number(product.compare_at_price),
+    price_note:product.price_note||""
   }));
 
   orderVariants=variantsResult.error?[]:(variantsResult.data||[]);
@@ -206,6 +209,7 @@ function renderOrderItems(){
 
             <strong>${esc(item.name)}</strong>
             <small>${esc(item.description||"")}</small>
+            <div class="quick-order-price">${Number(item.price||0)>0 ? `$${Number(item.price).toFixed(2)}${item.price_note ? ` · ${esc(item.price_note)}` : ""}` : "Price on request"}</div>
           </div>
         </div>
 
@@ -330,7 +334,8 @@ function syncCartFromRow(itemId){
       variant_id:String(variant.id).startsWith("fallback-") ? null : variant.id,
       product_name:item.name,
       strength:variant.strength,
-      quantity
+      quantity,
+      unit_price:Number(item.price||0)
     });
   }
 
@@ -378,6 +383,7 @@ function renderCart(){
       <div>
         <strong>${esc(item.product_name)}</strong>
         <small>${esc(item.strength)} × ${item.quantity}</small>
+        ${Number(item.unit_price||0)>0 ? `<div class="cart-price">$${(Number(item.unit_price)*Number(item.quantity)).toFixed(2)}</div>` : ""}
       </div>
 
       <button

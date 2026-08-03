@@ -55,59 +55,63 @@ function getRequestedProduct(){
 }
 
 async function loadData(){
-  client = createClient();
+  client=createClient();
 
   if(!client){
     showNotFound();
     return;
   }
 
-  const requested = getRequestedProduct();
+  const requested=
+    typeof getRequestedProduct==="function"
+      ? getRequestedProduct()
+      : {id:new URLSearchParams(window.location.search).get("id")||"",slug:""};
 
   try{
-    const settingsResult = await client
+    const settingsResult=await client
       .from("site_settings")
       .select("*")
       .eq("id",1)
       .maybeSingle();
 
     if(!settingsResult.error){
-      settings = settingsResult.data || {};
+      settings=settingsResult.data||{};
       applySettings();
     }
 
+    let exactProduct=null;
+
     if(requested.id){
-      const exactResult = await client
+      const exactResult=await client
         .from("products")
         .select("*")
         .eq("id",requested.id)
         .maybeSingle();
 
       if(exactResult.error){
-        console.error("Exact product lookup failed:", exactResult.error);
-      }
-
-      if(exactResult.data){
-        currentProduct = exactResult.data;
+        console.error("Product ID lookup failed:",exactResult.error);
+      }else{
+        exactProduct=exactResult.data;
       }
     }
 
-    const allResult = await client
+    const allResult=await client
       .from("products")
       .select("*")
       .order("created_at",{ascending:false});
 
     if(allResult.error){
-      console.error("Product list lookup failed:", allResult.error);
+      console.error("Product list failed:",allResult.error);
       showNotFound();
       return;
     }
 
-    allProducts = allResult.data || [];
+    allProducts=allResult.data||[];
+    currentProduct=exactProduct;
 
-    if(!currentProduct && requested.slug){
-      currentProduct = allProducts.find(item =>
-        slugify(item.name) === slugify(requested.slug)
+    if(!currentProduct&&requested.slug){
+      currentProduct=allProducts.find(item=>
+        slugify(item.name)===slugify(requested.slug)
       );
     }
 
@@ -119,14 +123,15 @@ async function loadData(){
     renderProduct(currentProduct);
     renderRelated();
 
-    if(typeof loadProductCoas === "function"){
+    if(typeof loadProductCoas==="function"){
       loadProductCoas(currentProduct.id);
     }
   }catch(error){
-    console.error("Product page error:", error);
+    console.error("Product page error:",error);
     showNotFound();
   }
 }
+
 
 function applySettings(){
   if(settings.logo_url){
@@ -167,6 +172,22 @@ function renderProduct(product){
   el("productCategory").textContent = product.category || "Research Compound";
   el("productName").textContent = product.name;
   el("productStrength").textContent = product.strength || "Not listed";
+
+  const priceBox=el("productPrice");
+  if(priceBox){
+    const price=Number(product.price||0);
+    const compare=Number(product.compare_at_price||0);
+    const note=String(product.price_note||"").trim();
+
+    priceBox.innerHTML=price>0
+      ? `
+          <div class="product-page-price-main">$${price.toFixed(2)}</div>
+          ${compare>price ? `<div class="product-page-price-compare">$${compare.toFixed(2)}</div>` : ""}
+          ${note ? `<div class="product-page-price-note">${esc(note)}</div>` : ""}
+        `
+      : '<div class="product-page-price-main">Price on request</div>';
+  }
+
   el("productDescription").innerHTML =
     window.renderMarkdown
       ? window.renderMarkdown(
