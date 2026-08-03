@@ -32,8 +32,10 @@ function createClient(){
 
 function slugify(value){
   return String(value || "")
+    .normalize("NFKD")
     .toLowerCase()
     .trim()
+    .replace(/['’]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
@@ -62,84 +64,67 @@ async function loadData(){
 
   const requested = getRequestedProduct();
 
-  const settingsPromise = client
-    .from("site_settings")
-    .select("*")
-    .eq("id",1)
-    .maybeSingle();
-
-  let productResult;
-
-  if(requested.id){
-    productResult = await client
-      .from("products")
+  try{
+    const settingsResult = await client
+      .from("site_settings")
       .select("*")
-      .eq("id",requested.id)
-      .eq("visible",true)
+      .eq("id",1)
       .maybeSingle();
-  }else{
-    productResult = {
-      data:null,
-      error:null
-    };
-  }
 
-  const settingsResult = await settingsPromise;
+    if(!settingsResult.error){
+      settings = settingsResult.data || {};
+      applySettings();
+    }
 
-  if(!settingsResult.error){
-    settings = settingsResult.data || {};
-    applySettings();
-  }
+    if(requested.id){
+      const exactResult = await client
+        .from("products")
+        .select("*")
+        .eq("id",requested.id)
+        .maybeSingle();
 
-  if(productResult.error){
-    console.error(productResult.error);
-  }
+      if(exactResult.error){
+        console.error("Exact product lookup failed:", exactResult.error);
+      }
 
-  if(productResult.data){
-    currentProduct = productResult.data;
-  }else{
-    const productsResult = await client
+      if(exactResult.data){
+        currentProduct = exactResult.data;
+      }
+    }
+
+    const allResult = await client
       .from("products")
       .select("*")
-      .eq("visible",true)
       .order("created_at",{ascending:false});
 
-    if(productsResult.error){
-      console.error(productsResult.error);
+    if(allResult.error){
+      console.error("Product list lookup failed:", allResult.error);
       showNotFound();
       return;
     }
 
-    allProducts = productsResult.data || [];
+    allProducts = allResult.data || [];
 
-    currentProduct = allProducts.find(product =>
-      requested.slug &&
-      slugify(product.name) === requested.slug
-    );
-  }
-
-  if(!currentProduct){
-    showNotFound();
-    return;
-  }
-
-  if(!allProducts.length){
-    const allResult = await client
-      .from("products")
-      .select("*")
-      .eq("visible",true)
-      .order("created_at",{ascending:false});
-
-    if(!allResult.error){
-      allProducts = allResult.data || [];
+    if(!currentProduct && requested.slug){
+      currentProduct = allProducts.find(item =>
+        slugify(item.name) === slugify(requested.slug)
+      );
     }
-  }
 
-  renderProduct(currentProduct);
-  renderRelated();
+    if(!currentProduct){
+      showNotFound();
+      return;
+    }
 
-  if(typeof loadProductCoas === "function"){
-    loadProductCoas(currentProduct.id);
+    renderProduct(currentProduct);
+    renderRelated();
+
+    if(typeof loadProductCoas === "function"){
+      loadProductCoas(currentProduct.id);
+    }
+  }catch(error){
+    console.error("Product page error:", error);
+    showNotFound();
   }
 }
 
@@ -270,14 +255,16 @@ function renderRelated(){
 
   grid.querySelectorAll(".card").forEach(card => {
     card.addEventListener("click", () => {
-      const product = allProducts.find(
+      const selected = allProducts.find(
         item => slugify(item.name) === card.dataset.slug
       );
 
-      const id = encodeURIComponent(product?.id || "");
+      if(!selected?.id){
+        return;
+      }
 
       window.location.href =
-        `/products/${encodeURIComponent(card.dataset.slug)}?id=${id}`;
+        `/product.html?id=${encodeURIComponent(selected.id)}`;
     });
   });
 

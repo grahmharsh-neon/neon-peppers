@@ -1013,3 +1013,9 @@ button.order-request-button,
 #relatedProducts .card{
   cursor:pointer;
 }
+
+
+/* DIRECT PRODUCT ID FIX V16.2 */
+[hidden]{
+  display:none !important;
+}

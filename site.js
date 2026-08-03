@@ -317,9 +317,13 @@ function productSlug(product){
 }
 
 function openProductPage(product){
-  const slug = productSlug(product);
-  const id = encodeURIComponent(product.id || "");
-  window.location.href = `/products/${encodeURIComponent(slug)}?id=${id}`;
+  if(!product?.id){
+    console.error("Product ID is missing.", product);
+    return;
+  }
+
+  window.location.href =
+    `/product.html?id=${encodeURIComponent(product.id)}`;
 }
 
 function openProduct(product){
