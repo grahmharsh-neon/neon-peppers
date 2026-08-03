@@ -67,6 +67,12 @@ async function loadData(){
       ? getRequestedProduct()
       : {id:new URLSearchParams(window.location.search).get("id")||"",slug:""};
 
+  if(!requested.id && !requested.slug){
+    console.error("No product ID or slug was provided.");
+    showNotFound();
+    return;
+  }
+
   try{
     const settingsResult=await client
       .from("site_settings")
@@ -159,14 +165,27 @@ function statusText(product){
 }
 
 function renderProduct(product){
+  const productPage = el("productPage");
+  const notFound = el("productNotFound");
+  const orderSection = el("productOrderSection");
+
+  if(notFound){
+    notFound.hidden = true;
+  }
+
+  if(productPage){
+    productPage.hidden = false;
+  }
+
+  if(orderSection){
+    orderSection.hidden = false;
+  }
+
   document.title = `${product.name} | Neon Peppers Research`;
   document.querySelector('meta[name="description"]').setAttribute(
     "content",
     product.description || `${product.name} research material reference page.`
   );
-
-  el("productLoading").hidden = true;
-  el("productPage").hidden = false;
 
   el("breadcrumbName").textContent = product.name;
   el("productCategory").textContent = product.category || "Research Compound";
@@ -210,6 +229,7 @@ function renderProduct(product){
   }
 
   const status = el("productStatus");
+  status.classList.remove("coming","out");
   status.textContent = statusText(product);
 
   if(product.status === "coming_soon"){
@@ -293,8 +313,26 @@ function renderRelated(){
 }
 
 function showNotFound(){
-  el("productLoading").hidden = true;
-  el("productNotFound").hidden = false;
+  const productPage = el("productPage");
+  const orderSection = el("productOrderSection");
+  const relatedSection = el("relatedSection");
+  const notFound = el("productNotFound");
+
+  if(productPage){
+    productPage.hidden = true;
+  }
+
+  if(orderSection){
+    orderSection.hidden = true;
+  }
+
+  if(relatedSection){
+    relatedSection.hidden = true;
+  }
+
+  if(notFound){
+    notFound.hidden = false;
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {

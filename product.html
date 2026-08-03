@@ -33,7 +33,7 @@
   <main>
     
 
-    <section id="productPage" hidden class="product-page" hidden>
+    <section id="productPage" class="product-page" hidden>
       <div class="product-breadcrumb">
         <a href="/#products">Products</a>
         <span>›</span>
@@ -60,7 +60,7 @@
           </div>
 
           <div id="productPrice" class="product-page-price"></div>
-        <div id="productDescription" class="product-description markdown-description"></div>
+          <div id="productDescription" class="product-description markdown-description"></div>
 
           <div class="research-notice">
             <div class="research-notice-icon">⚗</div>
@@ -111,7 +111,7 @@
     </section>
 
     
-    <section class="product-order-section">
+    <section id="productOrderSection" class="product-order-section" hidden>
       <div class="contact-card order-request-cta">
         <div class="eyebrow">Research request</div>
         <h2>Order Request</h2>
@@ -128,7 +128,7 @@
       <div id="relatedProducts" class="products"></div>
     </section>
 
-    <section id="productNotFound" hidden class="not-found" hidden>
+    <section id="productNotFound" class="not-found" hidden>
       <div class="eyebrow">Product unavailable</div>
       <h1>RESEARCH MATERIAL NOT FOUND</h1>
       <p>The requested product may be hidden, renamed, or unavailable.</p>
@@ -151,6 +151,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/config.js"></script>
   <script src="/markdown.js"></script>
-  <script src="/product.js"></script>
+  <script src="/product.js?v=18.1"></script>
 </body>
 </html>
