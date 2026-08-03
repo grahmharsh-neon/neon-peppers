@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>COA Admin | Neon Peppers</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/admin.css">
+  <link rel="stylesheet" href="/coa-admin.css">
+</head>
+<body class="admin-body">
+  <div id="coaAuthGate" class="coa-auth-gate">
+    <div class="coa-auth-card">
+      <div class="eyebrow">Admin Access</div>
+      <h1>COA ADMIN</h1>
+      <p>Sign in with your Neon Peppers admin account.</p>
+      <input id="coaAdminEmail" type="email" placeholder="Email">
+      <input id="coaAdminPassword" type="password" placeholder="Password">
+      <button id="coaAdminLoginButton" class="btn pink" type="button">Sign In</button>
+      <div id="coaAuthMessage" class="form-status"></div>
+    </div>
+  </div>
+
+  <aside class="admin-sidebar">
+    <a class="admin-logo" href="/admin.html">
+      <img src="/assets/neon-peppers-logo.jpg" alt="Neon Peppers">
+    </a>
+
+    <nav>
+      <a class="admin-nav-link" href="/admin.html">Dashboard</a>
+      <a class="admin-nav-link active" href="/coa-admin.html">COA Admin</a>
+      <a class="admin-nav-link" href="/coa.html" target="_blank" rel="noopener">Public COA Library</a>
+      <a class="admin-nav-link" href="/#products" target="_blank" rel="noopener">Public Products</a>
+    </nav>
+
+    <button id="coaSignOutButton" class="btn" type="button">Sign Out</button>
+  </aside>
+
+  <main class="admin-main coa-admin-main">
+    <section class="coa-admin-header">
+      <div>
+        <div class="eyebrow">Batch documentation</div>
+        <h1>COA ADMIN</h1>
+        <p class="muted">Add, edit, upload, publish, and remove Certificates of Analysis.</p>
+      </div>
+
+      <button id="addCoaButton" class="btn green" type="button">
+        + Add COA
+      </button>
+    </section>
+
+    <section class="panel">
+      <div class="product-toolbar">
+        <input id="coaSearch" placeholder="Search product, lot, batch, or lab...">
+
+        <select id="coaFilter">
+          <option value="all">All COAs</option>
+          <option value="public">Public</option>
+          <option value="private">Admin Only</option>
+          <option value="missing">Missing File</option>
+        </select>
+      </div>
+
+      <div id="coaAdminList">
+        <p class="muted">Loading COAs…</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="coaModal" class="modal coa-modal">
+    <div class="modal-card coa-modal-card">
+      <button id="closeCoaButton" class="modal-close" type="button">×</button>
+
+      <div class="coa-modal-head">
+        <div>
+          <div class="eyebrow">Certificate of Analysis</div>
+          <h2 id="coaModalTitle">Add COA</h2>
+        </div>
+        <span id="coaFileBadge" class="coa-file-badge">No File</span>
+      </div>
+
+      <div class="grid two">
+        <div>
+          <label>Product *</label>
+          <select id="coaProduct"></select>
+        </div>
+
+        <div>
+          <label>Strength / Variant</label>
+          <input id="coaStrength" placeholder="Example: 10 mg">
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div>
+          <label>Lot Number *</label>
+          <input id="coaLot" placeholder="Example: RT-2026-0815A">
+        </div>
+
+        <div>
+          <label>Batch Number</label>
+          <input id="coaBatch" placeholder="Optional">
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div>
+          <label>Testing Lab</label>
+          <input id="coaLab" placeholder="Lab name">
+        </div>
+
+        <div>
+          <label>Purity %</label>
+          <input id="coaPurity" type="number" min="0" max="100" step="0.01">
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div>
+          <label>Test Date</label>
+          <input id="coaTestDate" type="date">
+        </div>
+
+        <div>
+          <label>Expiration Date</label>
+          <input id="coaExpiration" type="date">
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div>
+          <label>Visibility</label>
+          <select id="coaPublic">
+            <option value="true">Public</option>
+            <option value="false">Admin Only</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Sort Order</label>
+          <input id="coaSort" type="number" value="0">
+        </div>
+      </div>
+
+      <label>Admin Notes</label>
+      <textarea id="coaNotes"></textarea>
+
+      <div class="coa-upload-box">
+        <label>COA File</label>
+        <input
+          id="coaFile"
+          type="file"
+          accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg"
+        >
+        <p class="muted">PDF, PNG, JPG, or JPEG. Maximum 10 MB.</p>
+        <div id="coaCurrentFile" class="coa-current-file">
+          <span class="muted">No file uploaded.</span>
+        </div>
+      </div>
+
+      <div class="coa-modal-actions">
+        <button id="saveCoaButton" class="btn pink" type="button">Save COA</button>
+        <button id="uploadCoaButton" class="btn blue" type="button">Upload / Replace File</button>
+        <button id="viewCoaButton" class="btn" type="button">View File</button>
+      </div>
+
+      <div id="coaMessage" class="form-status"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/config.js"></script>
+  <script src="/coa-admin.js?v=17"></script>
+</body>
+</html>
