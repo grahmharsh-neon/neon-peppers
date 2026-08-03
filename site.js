@@ -329,7 +329,10 @@ function openProduct(product){
 
   document.getElementById("modalCategory").textContent = product.category || "Research Compound";
   document.getElementById("modalName").textContent = product.name;
-  document.getElementById("modalDescription").textContent = product.description || "";
+  document.getElementById("modalDescription").innerHTML =
+    window.renderMarkdown
+      ? window.renderMarkdown(product.description || "")
+      : esc(product.description || "");
   document.getElementById("modalStrength").textContent = product.strength || "";
 
   const coa = document.getElementById("modalCoa");

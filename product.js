@@ -126,7 +126,14 @@ function renderProduct(product){
   el("productCategory").textContent = product.category || "Research Compound";
   el("productName").textContent = product.name;
   el("productStrength").textContent = product.strength || "Not listed";
-  el("productDescription").textContent = product.description || "No description is currently available.";
+  el("productDescription").innerHTML =
+    window.renderMarkdown
+      ? window.renderMarkdown(
+          product.description || "No description is currently available."
+        )
+      : esc(
+          product.description || "No description is currently available."
+        );
 
   el("identityName").textContent = product.name;
   el("identityCategory").textContent = product.category || "Research Compound";

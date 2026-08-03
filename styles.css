@@ -893,3 +893,104 @@ button.order-request-button,
   margin:auto;
   padding:20px 3vw 70px;
 }
+
+
+/* PRODUCT DESCRIPTION READABILITY FIX V13.1 */
+#modalDescription,
+#productDescription,
+.markdown-description,
+.product-description{
+  white-space:normal;
+  font-size:.96rem;
+  line-height:1.72;
+}
+
+#modalDescription{
+  max-height:440px;
+  overflow-y:auto;
+  padding-right:12px;
+  margin:10px 0 18px;
+}
+
+#modalDescription::-webkit-scrollbar{
+  width:7px;
+}
+
+#modalDescription::-webkit-scrollbar-thumb{
+  border-radius:999px;
+  background:rgba(255,255,255,.22);
+}
+
+#modalDescription h2,
+#modalDescription h3,
+#modalDescription h4,
+#productDescription h2,
+#productDescription h3,
+#productDescription h4{
+  margin:24px 0 10px;
+  padding-bottom:7px;
+  border-bottom:1px solid rgba(255,255,255,.1);
+  color:#fff;
+  font-size:1rem;
+  line-height:1.3;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+
+#modalDescription h2:first-child,
+#modalDescription h3:first-child,
+#modalDescription h4:first-child,
+#productDescription h2:first-child,
+#productDescription h3:first-child,
+#productDescription h4:first-child{
+  margin-top:4px;
+}
+
+#modalDescription p,
+#productDescription p{
+  margin:0 0 16px;
+  color:var(--muted);
+}
+
+#modalDescription ul,
+#modalDescription ol,
+#productDescription ul,
+#productDescription ol{
+  margin:10px 0 20px;
+  padding-left:25px;
+}
+
+#modalDescription li,
+#productDescription li{
+  margin:9px 0;
+  padding-left:4px;
+  color:var(--muted);
+}
+
+#modalDescription li::marker,
+#productDescription li::marker{
+  color:var(--green);
+}
+
+#modalDescription strong,
+#productDescription strong{
+  color:#fff;
+}
+
+.modal-body{
+  min-width:0;
+}
+
+@media(max-width:720px){
+  #modalDescription{
+    max-height:none;
+    overflow:visible;
+    padding-right:0;
+  }
+
+  #modalDescription,
+  #productDescription{
+    font-size:.94rem;
+    line-height:1.68;
+  }
+}
