@@ -296,3 +296,4 @@
 #productHero:empty{
   display:none !important;
 }
+.product-coa-section{max-width:1240px;margin:auto;padding:20px 3vw 60px}.product-coa-list{display:grid;gap:12px}.product-coa-card{display:grid;grid-template-columns:1fr auto auto;gap:18px;align-items:center;padding:17px;border:1px solid var(--line);border-radius:12px;background:#090d13}.product-coa-card span{display:block;margin-top:4px;color:var(--muted);font-size:.8rem}@media(max-width:700px){.product-coa-card{grid-template-columns:1fr}}
