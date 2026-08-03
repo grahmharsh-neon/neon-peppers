@@ -337,6 +337,14 @@ function renderProducts(){
           >
             ✨ ${product.description ? "Regenerate Description" : "Generate Description"}
           </button>
+
+          <button
+            class="btn"
+            type="button"
+            onclick="toggleDescriptionPreview(${index})"
+          >
+            Preview
+          </button>
         </div>
       </div>
 
@@ -351,6 +359,12 @@ function renderProducts(){
         id="descriptionStatus-${index}"
         class="description-ai-status"
         aria-live="polite"
+      ></div>
+
+      <div
+        id="descriptionPreview-${index}"
+        class="description-preview markdown-description"
+        hidden
       ></div>
 
       <div class="grid two">
@@ -447,6 +461,27 @@ function addProduct(){
 }
 
 
+
+function toggleDescriptionPreview(index){
+  const product = products[index];
+  const preview = el(`descriptionPreview-${index}`);
+
+  if(!product || !preview){
+    return;
+  }
+
+  if(!preview.hidden){
+    preview.hidden = true;
+    return;
+  }
+
+  preview.innerHTML = window.renderMarkdown
+    ? window.renderMarkdown(product.description || "")
+    : escapeHtml(product.description || "");
+
+  preview.hidden = false;
+}
+
 function setDescriptionGenerationStatus(index, message, type = ""){
   const status = el(`descriptionStatus-${index}`);
 
@@ -529,6 +564,16 @@ async function generateProductDescription(index){
 
     product.description = description;
     textarea.value = description;
+
+    const preview = el(`descriptionPreview-${index}`);
+
+    if(preview){
+      preview.innerHTML = window.renderMarkdown
+        ? window.renderMarkdown(description)
+        : escapeHtml(description);
+
+      preview.hidden = false;
+    }
 
     // Trigger the same local update behavior as manual editing.
     textarea.dispatchEvent(

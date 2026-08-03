@@ -780,3 +780,83 @@ footer{
     padding:13px;
   }
 }
+
+
+/* MARKDOWN PRODUCT DESCRIPTIONS V12 */
+.markdown-description,
+#modalDescription,
+#productDescription,
+.product-description{
+  color:var(--muted);
+  line-height:1.65;
+}
+
+.markdown-description p,
+#modalDescription p,
+#productDescription p,
+.product-description p{
+  margin:0 0 14px;
+}
+
+.markdown-description h2,
+.markdown-description h3,
+.markdown-description h4,
+#modalDescription h2,
+#modalDescription h3,
+#modalDescription h4,
+#productDescription h2,
+#productDescription h3,
+#productDescription h4,
+.product-description h2,
+.product-description h3,
+.product-description h4{
+  margin:22px 0 9px;
+  color:#fff;
+  font-size:1rem;
+  line-height:1.25;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+
+.markdown-description ul,
+.markdown-description ol,
+#modalDescription ul,
+#modalDescription ol,
+#productDescription ul,
+#productDescription ol,
+.product-description ul,
+.product-description ol{
+  margin:8px 0 17px;
+  padding-left:23px;
+}
+
+.markdown-description li,
+#modalDescription li,
+#productDescription li,
+.product-description li{
+  margin:7px 0;
+  padding-left:3px;
+}
+
+.markdown-description li::marker,
+#modalDescription li::marker,
+#productDescription li::marker,
+.product-description li::marker{
+  color:var(--green);
+}
+
+.markdown-description strong,
+#modalDescription strong,
+#productDescription strong,
+.product-description strong{
+  color:#fff;
+}
+
+.markdown-description hr,
+#modalDescription hr,
+#productDescription hr,
+.product-description hr{
+  margin:20px 0;
+  border:0;
+  border-top:1px solid var(--line);
+}

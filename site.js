@@ -205,6 +205,25 @@ function getFilteredProducts(){
   return filtered;
 }
 
+
+function productCardSummary(description){
+  const source = String(description || "").trim();
+
+  if(!source){
+    return "";
+  }
+
+  const lines = source
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(Boolean)
+    .filter(line => !/^#{1,6}\s+/.test(line))
+    .filter(line => !/^[-*]\s+/.test(line))
+    .filter(line => !/^\d+[.)]\s+/.test(line));
+
+  return lines[0] || source.replace(/[#*_`>-]/g, "").trim();
+}
+
 function renderProducts(){
   const grid = document.getElementById("productGrid");
   const count = document.getElementById("productCount");
@@ -275,7 +294,7 @@ function renderProducts(){
         </div>
 
         <h3>${esc(product.name)}</h3>
-        <p>${esc(product.description || "")}</p>
+        <p>${esc(productCardSummary(product.description))}</p>
 
         <div class="card-actions">
           <div class="strength">${esc(product.strength || "")}</div>

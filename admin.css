@@ -483,3 +483,47 @@ textarea{min-height:95px;resize:vertical}
     width:100%;
   }
 }
+
+
+/* MARKDOWN DESCRIPTION PREVIEW V12 */
+.description-preview{
+  margin:12px 0 18px;
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#070a0f;
+}
+
+.description-preview[hidden]{
+  display:none;
+}
+
+.description-preview h2,
+.description-preview h3,
+.description-preview h4{
+  margin:18px 0 8px;
+  color:#fff;
+  font-size:.95rem;
+  text-transform:uppercase;
+}
+
+.description-preview p{
+  margin:0 0 12px;
+  color:var(--muted);
+  line-height:1.6;
+}
+
+.description-preview ul,
+.description-preview ol{
+  margin:8px 0 14px;
+  padding-left:22px;
+}
+
+.description-preview li{
+  margin:6px 0;
+  color:var(--muted);
+}
+
+.description-preview li::marker{
+  color:var(--green);
+}

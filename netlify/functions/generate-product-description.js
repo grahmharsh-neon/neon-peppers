@@ -98,15 +98,34 @@ Existing description for context: ${existingDescription || "None"}
 
 Create:
 1. A short card summary of no more than 24 words.
-2. A structured full description with these headings:
-   Research Focus
-   Research Context
-   Product Information
-   Research Use Only
+2. A structured full description written in clean Markdown.
 
-Use short paragraphs rather than long blocks.
-For Product Information, mention the supplied strength only when one was provided.
-Do not invent a format, purity, batch, testing result, storage condition, or mechanism that was not provided.
+Use this exact general structure:
+
+## Research Focus
+
+One short paragraph.
+
+## Common Research Areas
+
+- Two to four concise bullet points
+
+## Product Information
+
+- Include the supplied strength only when one was provided
+- Include only facts supplied in the request
+
+## Research Use Only
+
+One short disclaimer paragraph.
+
+Formatting rules:
+- Use Markdown headings beginning with ##.
+- Put each bullet on its own line beginning with "- ".
+- Keep paragraphs short.
+- Do not place multiple bullet points on one line.
+- Do not use tables.
+- Do not invent a format, purity, batch, testing result, storage condition, or mechanism that was not provided.
 `.trim();
 
     const requestBody = {
