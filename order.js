@@ -263,9 +263,30 @@ function selectedVariant(itemId){
   const select=el(`strength-${itemId}`);
   if(!select || !select.value) return null;
 
-  return orderVariants.find(
+  const savedVariant=orderVariants.find(
     variant=>String(variant.id)===String(select.value)
-  )||null;
+  );
+
+  if(savedVariant){
+    return savedVariant;
+  }
+
+  const item=orderItems.find(
+    current=>String(current.id)===String(itemId)
+  );
+
+  if(String(select.value).startsWith("fallback-") && item){
+    return {
+      id:select.value,
+      product_id:item.id,
+      strength:item.strength||"Standard",
+      stock_status:item.status||"available",
+      visible:true,
+      sort_order:0
+    };
+  }
+
+  return null;
 }
 
 function updateRowStatus(itemId){
@@ -331,11 +352,13 @@ function syncCartFromRow(itemId){
     cart.push({
       order_form_item_id:null,
       product_id:item.id,
-      variant_id:String(variant.id).startsWith("fallback-") ? null : variant.id,
+      variant_id:String(variant.id).startsWith("fallback-")
+        ? null
+        : variant.id,
       product_name:item.name,
-      strength:variant.strength,
+      strength:variant.strength || item.strength || "Standard",
       quantity,
-      unit_price:Number(item.price||0)
+      unit_price:Number(item.price || 0)
     });
   }
 
