@@ -458,8 +458,12 @@ async function submitOrder(event){
     cart=[];
     renderCart();
 
+    const invoiceText = result.invoice_number
+      ? ` Draft invoice ${result.invoice_number} was created for $${Number(result.invoice_total||0).toFixed(2)}.`
+      : "";
+
     setStatus(
-      "Thank you. Your order request was sent.",
+      `Thank you. Your order request was sent.${invoiceText}`,
       "success"
     );
   }catch(error){

@@ -534,3 +534,37 @@ textarea{min-height:95px;resize:vertical}
 .product-pricing-fields{
   margin:14px 0;
 }
+
+
+/* AUTO-INVOICE SUMMARY V19 */
+.order-invoice-summary{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin:14px 0;
+}
+
+.order-invoice-summary div{
+  padding:12px;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:9px;
+  background:#070a0f;
+}
+
+.order-invoice-summary span{
+  display:block;
+  margin-bottom:5px;
+  color:var(--muted);
+  font-size:.7rem;
+  text-transform:uppercase;
+}
+
+.order-invoice-summary strong{
+  color:var(--green);
+}
+
+@media(max-width:560px){
+  .order-invoice-summary{
+    grid-template-columns:1fr;
+  }
+}

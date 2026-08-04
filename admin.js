@@ -666,6 +666,14 @@ async function saveProduct(index){
     category:product.category || "Research Compound",
     description:product.description || "",
     strength:product.strength || "",
+    price:Number(product.price || 0),
+    compare_at_price:
+      product.compare_at_price === null ||
+      product.compare_at_price === "" ||
+      typeof product.compare_at_price === "undefined"
+        ? null
+        : Number(product.compare_at_price),
+    price_note:product.price_note || null,
     image_url:product.image_url || null,
     coa_url:product.coa_url || null,
     visible:product.visible !== false,
@@ -2027,7 +2035,20 @@ function renderOrderRequests(){
   const q=(el("orderAdminSearch")?.value||"").trim().toLowerCase(),f=el("orderAdminFilter")?.value||"all";
   const list=orderRequests.filter(o=>{const items=orderRequestItems.filter(i=>i.order_request_id===o.id),text=`${o.name} ${o.email} ${o.company||""} ${o.phone||""} ${o.notes||""} ${items.map(i=>`${i.product_name} ${i.strength}`).join(" ")}`.toLowerCase();return text.includes(q)&&(f==="all"||o.status===f)});
   if(!list.length){box.innerHTML='<p class="muted">No matching order requests.</p>';return}
-  box.innerHTML=list.map(o=>{const items=orderRequestItems.filter(i=>i.order_request_id===o.id),date=o.created_at?new Date(o.created_at).toLocaleString():"";return `<article class="order-admin-item"><div class="inquiry-head"><div><h3>${escapeHtml(o.name)}</h3><div class="inquiry-date">${escapeHtml(date)}</div></div><span class="inquiry-badge ${escapeHtml(o.status||"new")}">${escapeHtml(o.status||"new")}</span></div><div class="inquiry-meta"><div><span>Email</span><a href="mailto:${escapeHtml(o.email)}">${escapeHtml(o.email)}</a></div><div><span>Company</span>${escapeHtml(o.company||"Not provided")}</div><div><span>Phone</span>${escapeHtml(o.phone||"Not provided")}</div></div><div class="order-admin-products">${items.map(i=>`<div><strong>${escapeHtml(i.product_name)}</strong><span>${escapeHtml(i.strength)} × ${i.quantity}</span></div>`).join("")}</div>${o.notes?`<div class="inquiry-message">${escapeHtml(o.notes)}</div>`:""}<div class="actions"><a class="btn pink" href="mailto:${escapeHtml(o.email)}?subject=${encodeURIComponent("Re: Neon Peppers order request")}">Reply</a><button class="btn blue" onclick="updateOrderStatus('${escapeHtml(o.id)}','contacted')">Contacted</button><button class="btn green" onclick="updateOrderStatus('${escapeHtml(o.id)}','approved')">Approved</button><button class="btn" onclick="updateOrderStatus('${escapeHtml(o.id)}','closed')">Close</button><button class="btn danger" onclick="deleteOrderRequest('${escapeHtml(o.id)}')">Delete</button></div></article>`}).join("")
+  box.innerHTML=list.map(o=>{const items=orderRequestItems.filter(i=>i.order_request_id===o.id),date=o.created_at?new Date(o.created_at).toLocaleString():"";return `<article class="order-admin-item"><div class="inquiry-head"><div><h3>${escapeHtml(o.name)}</h3><div class="inquiry-date">${escapeHtml(date)}</div></div><span class="inquiry-badge ${escapeHtml(o.status||"new")}">${escapeHtml(o.status||"new")}</span></div><div class="inquiry-meta"><div><span>Email</span><a href="mailto:${escapeHtml(o.email)}">${escapeHtml(o.email)}</a></div><div><span>Company</span>${escapeHtml(o.company||"Not provided")}</div><div><span>Phone</span>${escapeHtml(o.phone||"Not provided")}</div></div><div class="order-admin-products">${items.map(i=>`<div><strong>${escapeHtml(i.product_name)}</strong><span>${escapeHtml(i.strength)} × ${i.quantity}</span></div>`).join("")}</div>
+${o.invoice_number ? `
+  <div class="order-invoice-summary">
+    <div>
+      <span>Draft Invoice</span>
+      <strong>${escapeHtml(o.invoice_number)}</strong>
+    </div>
+    <div>
+      <span>Invoice Total</span>
+      <strong>$${Number(o.invoice_total||0).toFixed(2)}</strong>
+    </div>
+  </div>
+` : ""}
+${o.notes?`<div class="inquiry-message">${escapeHtml(o.notes)}</div>`:""}<div class="actions"><a class="btn pink" href="mailto:${escapeHtml(o.email)}?subject=${encodeURIComponent("Re: Neon Peppers order request")}">Reply</a><button class="btn blue" onclick="updateOrderStatus('${escapeHtml(o.id)}','contacted')">Contacted</button><button class="btn green" onclick="updateOrderStatus('${escapeHtml(o.id)}','approved')">Approved</button><button class="btn" onclick="updateOrderStatus('${escapeHtml(o.id)}','closed')">Close</button><button class="btn danger" onclick="deleteOrderRequest('${escapeHtml(o.id)}')">Delete</button></div></article>`}).join("")
 }
 async function updateOrderStatus(id,status){const {error}=await client.from("order_requests").update({status,updated_at:new Date().toISOString()}).eq("id",id);if(error){alert(error.message);return}await loadOrderRequests();flash(`Order request marked ${status}`)}
 async function deleteOrderRequest(id){if(!confirm("Delete this order request?"))return;const {error}=await client.from("order_requests").delete().eq("id",id);if(error){alert(error.message);return}await loadOrderRequests();flash("Order request deleted")}
