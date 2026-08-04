@@ -250,9 +250,17 @@ async function loadSettings(){
 
   updateImagePreview("heroPreview", siteSettings.hero_image_url);
   updateImagePreview("logoPreview", siteSettings.logo_url);
+  const approvedVialTemplate =
+    siteSettings.vial_template_url ||
+    "/assets/neon-peppers-approved-vial-template.png";
+
+  if(el("vial_template_url") && !el("vial_template_url").value){
+    el("vial_template_url").value = approvedVialTemplate;
+  }
+
   updateImagePreview(
     "vialTemplatePreview",
-    siteSettings.vial_template_url
+    approvedVialTemplate
   );
 }
 
@@ -965,7 +973,8 @@ function fitCanvasText(context,text,maxWidth,startSize,minSize=16){
 async function createMatchingVialImage(product){
   const templateUrl =
     el("vial_template_url")?.value.trim() ||
-    siteSettings.vial_template_url;
+    siteSettings.vial_template_url ||
+    "/assets/neon-peppers-approved-vial-template.png";
 
   if(!templateUrl){
     throw new Error(
