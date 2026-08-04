@@ -68,6 +68,10 @@ function bindEvents(){
   el("saveSettingsButton").addEventListener("click", saveSettings);
   el("uploadHeroButton").addEventListener("click", uploadHeroImage);
   el("uploadLogoButton").addEventListener("click", uploadLogo);
+  const vialTemplateButton = el("uploadVialTemplateButton");
+  if(vialTemplateButton){
+    vialTemplateButton.addEventListener("click", uploadVialTemplate);
+  }
   el("adminProductSearch").addEventListener("input", renderProducts);
   el("adminProductFilter").addEventListener("change", renderProducts);
 
@@ -226,7 +230,11 @@ async function loadSettings(){
     "announcement_visible",
     "contact_email",
     "footer_disclaimer",
-    "logo_url"
+    "logo_url",
+    "vial_template_url",
+    "vial_label_background",
+    "vial_label_text_color",
+    "vial_label_accent_color"
   ];
 
   fields.forEach(field => {
@@ -242,6 +250,10 @@ async function loadSettings(){
 
   updateImagePreview("heroPreview", siteSettings.hero_image_url);
   updateImagePreview("logoPreview", siteSettings.logo_url);
+  updateImagePreview(
+    "vialTemplatePreview",
+    siteSettings.vial_template_url
+  );
 }
 
 function updateStats(){
@@ -372,6 +384,15 @@ function renderProducts(){
           </button>
 
           <button
+            class="btn green ai-build-button"
+            type="button"
+            id="aiBuildProduct-${index}"
+            onclick="aiBuildProduct(${index})"
+          >
+            ✨ AI Build Product
+          </button>
+
+          <button
             class="btn"
             type="button"
             onclick="toggleDescriptionPreview(${index})"
@@ -391,6 +412,12 @@ function renderProducts(){
       <div
         id="descriptionStatus-${index}"
         class="description-ai-status"
+        aria-live="polite"
+      ></div>
+
+      <div
+        id="productBuildStatus-${index}"
+        class="product-build-status"
         aria-live="polite"
       ></div>
 
@@ -884,6 +911,333 @@ async function uploadCoa(index){
     );
   }catch(error){
     alert(error.message);
+  }
+}
+
+
+async function uploadVialTemplate(){
+  try{
+    const file = el("vialTemplateFile")?.files?.[0];
+
+    if(!file){
+      throw new Error("Choose an approved vial image first.");
+    }
+
+    flash("Uploading vial template...");
+
+    const optimized = await optimizeImage(file, 1400, 0.9);
+    const path = `templates/vial-${crypto.randomUUID()}.webp`;
+    const publicUrl = await uploadFile(path, optimized, "image/webp");
+
+    el("vial_template_url").value = publicUrl;
+    siteSettings.vial_template_url = publicUrl;
+
+    updateImagePreview("vialTemplatePreview", publicUrl);
+    flash("Vial template uploaded. Click Save Settings.");
+  }catch(error){
+    console.error(error);
+    alert(error.message || "The vial template could not be uploaded.");
+  }
+}
+
+function loadCanvasImage(source){
+  return new Promise((resolve,reject)=>{
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(
+      new Error("The approved vial template could not be loaded.")
+    );
+    image.src = source;
+  });
+}
+
+function fitCanvasText(context,text,maxWidth,startSize,minSize=16){
+  let size=startSize;
+
+  while(size>minSize){
+    context.font=`900 ${size}px Arial, sans-serif`;
+
+    if(context.measureText(text).width<=maxWidth){
+      return size;
+    }
+
+    size-=2;
+  }
+
+  return minSize;
+}
+
+async function createMatchingVialImage(product){
+  const templateUrl =
+    el("vial_template_url")?.value.trim() ||
+    siteSettings.vial_template_url;
+
+  if(!templateUrl){
+    throw new Error(
+      "Upload an approved vial template in Contact & Settings first."
+    );
+  }
+
+  const template = await loadCanvasImage(templateUrl);
+  const canvas = document.createElement("canvas");
+
+  canvas.width = template.naturalWidth;
+  canvas.height = template.naturalHeight;
+
+  const context = canvas.getContext("2d");
+
+  if(!context){
+    throw new Error("Your browser could not create the vial image.");
+  }
+
+  context.drawImage(template,0,0,canvas.width,canvas.height);
+
+  /*
+    Locked label region for the approved Neon Peppers vial template.
+    The bottle, background, lighting and shadow remain untouched.
+  */
+  const labelX = Math.round(canvas.width * 0.285);
+  const labelY = Math.round(canvas.height * 0.455);
+  const labelW = Math.round(canvas.width * 0.43);
+  const labelH = Math.round(canvas.height * 0.275);
+
+  const background =
+    el("vial_label_background")?.value ||
+    siteSettings.vial_label_background ||
+    "#f4f0e8";
+
+  const textColor =
+    el("vial_label_text_color")?.value ||
+    siteSettings.vial_label_text_color ||
+    "#111111";
+
+  const accent =
+    el("vial_label_accent_color")?.value ||
+    siteSettings.vial_label_accent_color ||
+    "#ff2f92";
+
+  context.save();
+
+  context.fillStyle = background;
+  context.fillRect(labelX,labelY,labelW,labelH);
+
+  context.fillStyle = accent;
+  context.fillRect(
+    labelX,
+    labelY,
+    labelW,
+    Math.max(8,Math.round(labelH * 0.055))
+  );
+
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+
+  context.fillStyle = textColor;
+  context.font =
+    `900 ${Math.round(labelH * 0.105)}px Arial, sans-serif`;
+  context.fillText(
+    "NEON PEPPERS",
+    labelX + labelW / 2,
+    labelY + labelH * 0.17
+  );
+
+  context.fillStyle = accent;
+  context.font =
+    `700 ${Math.round(labelH * 0.045)}px Arial, sans-serif`;
+  context.fillText(
+    "RESEARCH PEPTIDES",
+    labelX + labelW / 2,
+    labelY + labelH * 0.28
+  );
+
+  const name = String(product.name || "").toUpperCase();
+  const nameSize = fitCanvasText(
+    context,
+    name,
+    labelW * 0.86,
+    Math.round(labelH * 0.155),
+    Math.round(labelH * 0.075)
+  );
+
+  context.fillStyle = textColor;
+  context.font = `900 ${nameSize}px Arial, sans-serif`;
+  context.fillText(
+    name,
+    labelX + labelW / 2,
+    labelY + labelH * 0.51
+  );
+
+  const strength =
+    String(product.strength || "").trim().toUpperCase();
+
+  if(strength){
+    context.font =
+      `800 ${Math.round(labelH * 0.09)}px Arial, sans-serif`;
+    context.fillText(
+      strength,
+      labelX + labelW / 2,
+      labelY + labelH * 0.67
+    );
+  }
+
+  context.font =
+    `700 ${Math.round(labelH * 0.042)}px Arial, sans-serif`;
+  context.fillText(
+    "FOR RESEARCH USE ONLY",
+    labelX + labelW / 2,
+    labelY + labelH * 0.84
+  );
+
+  context.restore();
+
+  const blob = await new Promise((resolve,reject)=>{
+    canvas.toBlob(result=>{
+      if(result){
+        resolve(result);
+      }else{
+        reject(new Error("The vial image could not be exported."));
+      }
+    },"image/webp",0.92);
+  });
+
+  return new File(
+    [blob],
+    `${String(product.name||"product")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g,"-")
+      .replace(/^-+|-+$/g,"") || "product"}-vial.webp`,
+    {type:"image/webp"}
+  );
+}
+
+async function aiBuildProduct(index){
+  const product = products[index];
+
+  if(!product){
+    return;
+  }
+
+  if(!String(product.name||"").trim()){
+    alert("Enter the product name first.");
+    return;
+  }
+
+  if(!String(product.strength||"").trim()){
+    alert("Enter the product strength first.");
+    return;
+  }
+
+  const button = el(`aiBuildProduct-${index}`);
+  const status = el(`productBuildStatus-${index}`);
+
+  button.disabled = true;
+  button.textContent = "Building…";
+
+  if(status){
+    status.textContent =
+      "Generating the matching description and vial image…";
+    status.className = "product-build-status working";
+  }
+
+  try{
+    const descriptionResponse = await fetch(
+      "/.netlify/functions/generate-product-description",
+      {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          name:product.name,
+          strength:product.strength,
+          category:product.category,
+          existing_description:product.description
+        })
+      }
+    );
+
+    const descriptionResult =
+      await descriptionResponse.json().catch(()=>({}));
+
+    if(!descriptionResponse.ok){
+      throw new Error(
+        descriptionResult.error ||
+        "The product description could not be generated."
+      );
+    }
+
+    product.description = descriptionResult.description || "";
+
+    const vialFile = await createMatchingVialImage(product);
+    const vialPath =
+      `products/ai-vials/${crypto.randomUUID()}.webp`;
+    const vialUrl = await uploadFile(
+      vialPath,
+      vialFile,
+      "image/webp"
+    );
+
+    product.image_url = vialUrl;
+
+    const payload = {
+      name:String(product.name).trim(),
+      category:product.category || "Research Compound",
+      description:product.description,
+      strength:product.strength || "",
+      price:Number(product.price || 0),
+      compare_at_price:
+        product.compare_at_price === null ||
+        product.compare_at_price === ""
+          ? null
+          : Number(product.compare_at_price),
+      price_note:product.price_note || null,
+      image_url:vialUrl,
+      coa_url:product.coa_url || null,
+      visible:product.visible !== false,
+      featured:product.featured === true,
+      status:product.status || "available",
+      updated_at:new Date().toISOString()
+    };
+
+    const result = product.id
+      ? await client
+          .from("products")
+          .update(payload)
+          .eq("id",product.id)
+          .select("*")
+          .single()
+      : await client
+          .from("products")
+          .insert(payload)
+          .select("*")
+          .single();
+
+    if(result.error){
+      throw result.error;
+    }
+
+    products[index] = result.data;
+
+    if(status){
+      status.textContent =
+        "Product description and matching vial image created and saved.";
+      status.className = "product-build-status success";
+    }
+
+    await loadProducts();
+    flash("AI product build complete");
+  }catch(error){
+    console.error(error);
+
+    if(status){
+      status.textContent =
+        error.message || "The product could not be built.";
+      status.className = "product-build-status error";
+    }
+
+    alert(error.message || "The product could not be built.");
+  }finally{
+    button.disabled = false;
+    button.textContent = "✨ AI Build Product";
   }
 }
 

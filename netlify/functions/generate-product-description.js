@@ -96,28 +96,34 @@ Strength: ${strength || "Not provided"}
 Category: ${category || "Not provided"}
 Existing description for context: ${existingDescription || "None"}
 
+Write the description in the established Neon Peppers catalog style.
+
 Create:
-1. A short card summary of no more than 24 words.
+1. A clear opening paragraph of 35–60 words.
 2. A structured full description written in clean Markdown.
+3. Keep the tone concise, direct, and informational rather than promotional.
 
 Use this exact general structure:
 
 ## Research Focus
 
-One short paragraph.
+One short paragraph explaining what the compound is commonly studied for.
 
 ## Common Research Areas
 
-- Two to four concise bullet points
+- Three to five short bullet points
+- Each bullet must be a distinct research area
+- Keep every bullet on its own line
 
 ## Product Information
 
-- Include the supplied strength only when one was provided
-- Include only facts supplied in the request
+- Product: supplied product name
+- Strength: supplied strength, when provided
+- Category: supplied category, when provided
 
 ## Research Use Only
 
-One short disclaimer paragraph.
+For laboratory research use only. Not intended for human or veterinary use.
 
 Formatting rules:
 - Use Markdown headings beginning with ##.

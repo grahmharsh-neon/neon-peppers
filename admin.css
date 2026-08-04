@@ -568,3 +568,41 @@ textarea{min-height:95px;resize:vertical}
     grid-template-columns:1fr;
   }
 }
+
+
+/* AI PRODUCT BUILDER V20 */
+.settings-divider{
+  margin:28px 0;
+  border:0;
+  border-top:1px solid var(--line);
+}
+
+.ai-build-button{
+  color:#07110c !important;
+}
+
+.product-build-status{
+  min-height:20px;
+  margin:8px 0 14px;
+  color:var(--muted);
+  font-size:.8rem;
+}
+
+.product-build-status.working{
+  color:var(--blue);
+}
+
+.product-build-status.success{
+  color:var(--green);
+}
+
+.product-build-status.error{
+  color:#ff6572;
+}
+
+#vialTemplatePreview{
+  max-width:320px;
+  max-height:360px;
+  object-fit:contain;
+  margin:14px 0 22px;
+}

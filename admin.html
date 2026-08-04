@@ -269,6 +269,51 @@
             <button class="btn blue" id="uploadLogoButton">Upload Logo</button>
           </div>
           <img id="logoPreview" class="preview logo" hidden alt="Logo preview">
+          <hr class="settings-divider">
+
+          <h2>AI Product Builder</h2>
+          <p class="muted">
+            Upload one approved vial image from your Vial Images set. New product
+            images will reuse this exact bottle, lighting, background, and angle.
+          </p>
+
+          <label>Approved vial template URL</label>
+          <input
+            id="vial_template_url"
+            placeholder="Public URL for an approved Neon Peppers vial image"
+          >
+
+          <div class="upload-row">
+            <input id="vialTemplateFile" type="file" accept="image/png,image/jpeg,image/webp">
+            <button class="btn blue" id="uploadVialTemplateButton" type="button">
+              Upload Vial Template
+            </button>
+          </div>
+
+          <img
+            id="vialTemplatePreview"
+            class="preview product-image"
+            hidden
+            alt="Approved vial template preview"
+          >
+
+          <div class="grid three">
+            <div>
+              <label>Label Background</label>
+              <input id="vial_label_background" type="color" value="#f4f0e8">
+            </div>
+
+            <div>
+              <label>Label Text</label>
+              <input id="vial_label_text_color" type="color" value="#111111">
+            </div>
+
+            <div>
+              <label>Accent Color</label>
+              <input id="vial_label_accent_color" type="color" value="#ff2f92">
+            </div>
+          </div>
+
         </div>
       </section>
     </main>
@@ -279,6 +324,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script src="/markdown.js"></script>
-  <script src="admin.js?v=19"></script>
+  <script src="admin.js?v=20"></script>
 </body>
 </html>
