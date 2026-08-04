@@ -2,7 +2,6 @@ create extension if not exists pgcrypto;
 
 alter table public.products add column if not exists slug text;
 alter table public.products add column if not exists tags text[] not null default '{}';
-alter table public.products add column if not exists aliases text[] not null default '{}';
 alter table public.products add column if not exists stock_count integer not null default 0;
 alter table public.products add column if not exists low_stock_threshold integer not null default 5;
 alter table public.products add column if not exists hide_when_out_of_stock boolean not null default false;
@@ -42,5 +41,11 @@ grant select on public.product_events to authenticated;
 update public.products
 set slug=regexp_replace(regexp_replace(lower(name),'[^a-z0-9]+','-','g'),'(^-|-$)','','g')
 where slug is null or btrim(slug)='';
+
+notify pgrst,'reload schema';
+
+
+-- Aliases are no longer used by the website.
+-- An existing aliases column may remain safely; it is optional and ignored.
 
 notify pgrst,'reload schema';

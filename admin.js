@@ -263,7 +263,7 @@ function renderProducts(){
   const filter = el("adminProductFilter").value;
 
   const filtered = products.filter(product => {
-    const searchable = `${product.name} ${product.category} ${product.description} ${(product.tags||[]).join(" ")} ${(product.aliases||[]).join(" ")} ${product.supplier||""} ${product.shelf_location||""}`.toLowerCase();
+    const searchable = `${product.name} ${product.category} ${product.description} ${(product.tags||[]).join(" ")} ${product.supplier||""} ${product.shelf_location||""}`.toLowerCase();
     const matchesSearch = searchable.includes(query);
 
     let matchesFilter = true;
@@ -368,11 +368,6 @@ function renderProducts(){
       <div>
         <label>Tags</label>
         <input data-index="${index}" data-key="tags_text" value="${escapeHtml((product.tags||[]).join(", "))}" placeholder="Recovery, GLP, Skin">
-      </div>
-
-      <div>
-        <label>Aliases / Search Terms</label>
-        <input data-index="${index}" data-key="aliases_text" value="${escapeHtml((product.aliases||[]).join(", "))}">
       </div>
 
       <div>
@@ -532,10 +527,7 @@ function renderProducts(){
       }
 
       if(key==="tags_text"){
-      products[index].tags=value.split(",").map(v=>v.trim()).filter(Boolean);
-    }else if(key==="aliases_text"){
-      products[index].aliases=value.split(",").map(v=>v.trim()).filter(Boolean);
-    }else{
+      products[index].tags=value.split(",").map(v=>v.trim()).filter(Boolean);    }else{
       products[index][key]=value;
     }
     };
@@ -557,7 +549,6 @@ function addProduct(){
       price_note:"",
       slug:"",
       tags:[],
-      aliases:[],
       stock_count:0,
       low_stock_threshold:5,
       hide_when_out_of_stock:false,
@@ -756,7 +747,6 @@ async function saveProduct(index){
     price_note:product.price_note || null,
     slug:(product.slug||product.name||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,""),
     tags:Array.isArray(product.tags)?product.tags:[],
-    aliases:Array.isArray(product.aliases)?product.aliases:[],
     stock_count:Math.max(0,Number(product.stock_count||0)),
     low_stock_threshold:Math.max(0,Number(product.low_stock_threshold||5)),
     hide_when_out_of_stock:product.hide_when_out_of_stock===true,
