@@ -358,14 +358,6 @@ function renderProducts(){
       </div>
 
       <div>
-        <label>Hide When Out of Stock</label>
-        <select data-index="${index}" data-key="hide_when_out_of_stock">
-          <option value="false" ${product.hide_when_out_of_stock!==true?"selected":""}>No</option>
-          <option value="true" ${product.hide_when_out_of_stock===true?"selected":""}>Yes</option>
-        </select>
-      </div>
-
-      <div>
         <label>Tags</label>
         <input data-index="${index}" data-key="tags_text" value="${escapeHtml((product.tags||[]).join(", "))}" placeholder="Recovery, GLP, Skin">
       </div>
@@ -519,7 +511,7 @@ function renderProducts(){
 
       let value = event.target.value;
 
-      if(key === "visible" || key === "featured" || key === "hide_when_out_of_stock"){
+      if(key === "visible" || key === "featured"){
         value = value === "true";
       }
       if(key === "price" || key === "compare_at_price" || key === "unit_cost" || key === "stock_count" || key === "low_stock_threshold"){
@@ -551,7 +543,6 @@ function addProduct(){
       tags:[],
       stock_count:0,
       low_stock_threshold:5,
-      hide_when_out_of_stock:false,
       internal_notes:"",
       supplier:"",
       unit_cost:null,
@@ -749,7 +740,6 @@ async function saveProduct(index){
     tags:Array.isArray(product.tags)?product.tags:[],
     stock_count:Math.max(0,Number(product.stock_count||0)),
     low_stock_threshold:Math.max(0,Number(product.low_stock_threshold||5)),
-    hide_when_out_of_stock:product.hide_when_out_of_stock===true,
     internal_notes:product.internal_notes||null,
     supplier:product.supplier||null,
     unit_cost:product.unit_cost==null?null:Number(product.unit_cost),
