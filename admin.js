@@ -978,7 +978,7 @@ async function createMatchingVialImage(product){
 
   if(!templateUrl){
     throw new Error(
-      "Upload an approved vial template in Contact & Settings first."
+      "The approved vial template is missing."
     );
   }
 
@@ -997,99 +997,88 @@ async function createMatchingVialImage(product){
   context.drawImage(template,0,0,canvas.width,canvas.height);
 
   /*
-    Locked label region for the approved Neon Peppers vial template.
-    The bottle, background, lighting and shadow remain untouched.
+    Preserve the uploaded vial, bottle, cap, logo, icons, warnings,
+    gradient EXP strip, lighting, reflection and black label.
+
+    Only the large product-name area is replaced.
   */
-  const labelX = Math.round(canvas.width * 0.285);
-  const labelY = Math.round(canvas.height * 0.455);
-  const labelW = Math.round(canvas.width * 0.43);
-  const labelH = Math.round(canvas.height * 0.275);
+  const nameAreaX = Math.round(canvas.width * 0.185);
+  const nameAreaY = Math.round(canvas.height * 0.425);
+  const nameAreaW = Math.round(canvas.width * 0.63);
+  const nameAreaH = Math.round(canvas.height * 0.165);
 
-  const background =
-    el("vial_label_background")?.value ||
-    siteSettings.vial_label_background ||
-    "#f4f0e8";
+  const blackGradient = context.createLinearGradient(
+    nameAreaX,
+    nameAreaY,
+    nameAreaX + nameAreaW,
+    nameAreaY
+  );
 
-  const textColor =
-    el("vial_label_text_color")?.value ||
-    siteSettings.vial_label_text_color ||
-    "#111111";
-
-  const accent =
-    el("vial_label_accent_color")?.value ||
-    siteSettings.vial_label_accent_color ||
-    "#ff2f92";
+  blackGradient.addColorStop(0,"#050505");
+  blackGradient.addColorStop(0.5,"#000000");
+  blackGradient.addColorStop(1,"#050505");
 
   context.save();
 
-  context.fillStyle = background;
-  context.fillRect(labelX,labelY,labelW,labelH);
-
-  context.fillStyle = accent;
+  context.fillStyle = blackGradient;
   context.fillRect(
-    labelX,
-    labelY,
-    labelW,
-    Math.max(8,Math.round(labelH * 0.055))
+    nameAreaX,
+    nameAreaY,
+    nameAreaW,
+    nameAreaH
+  );
+
+  const name = String(product.name || "")
+    .trim()
+    .toUpperCase();
+
+  const maxWidth = nameAreaW * 0.94;
+  const startingSize = Math.round(nameAreaH * 0.49);
+  const nameSize = fitCanvasText(
+    context,
+    name,
+    maxWidth,
+    startingSize,
+    Math.round(nameAreaH * 0.22)
   );
 
   context.textAlign = "center";
   context.textBaseline = "middle";
 
-  context.fillStyle = textColor;
-  context.font =
-    `900 ${Math.round(labelH * 0.105)}px Arial, sans-serif`;
-  context.fillText(
-    "NEON PEPPERS",
-    labelX + labelW / 2,
-    labelY + labelH * 0.17
-  );
+  // Subtle dark shadow gives the same dimensional text appearance.
+  context.shadowColor = "rgba(0,0,0,.9)";
+  context.shadowBlur = Math.max(2,Math.round(canvas.width * 0.004));
+  context.shadowOffsetY = Math.max(1,Math.round(canvas.height * 0.002));
 
-  context.fillStyle = accent;
-  context.font =
-    `700 ${Math.round(labelH * 0.045)}px Arial, sans-serif`;
-  context.fillText(
-    "RESEARCH PEPTIDES",
-    labelX + labelW / 2,
-    labelY + labelH * 0.28
-  );
-
-  const name = String(product.name || "").toUpperCase();
-  const nameSize = fitCanvasText(
-    context,
-    name,
-    labelW * 0.86,
-    Math.round(labelH * 0.155),
-    Math.round(labelH * 0.075)
-  );
-
-  context.fillStyle = textColor;
-  context.font = `900 ${nameSize}px Arial, sans-serif`;
+  context.fillStyle = "#f4f4f4";
+  context.font = `900 ${nameSize}px Impact, "Arial Narrow Bold", Arial, sans-serif`;
   context.fillText(
     name,
-    labelX + labelW / 2,
-    labelY + labelH * 0.51
+    nameAreaX + nameAreaW / 2,
+    nameAreaY + nameAreaH * 0.39
   );
 
-  const strength =
-    String(product.strength || "").trim().toUpperCase();
+  context.shadowColor = "transparent";
+  context.shadowBlur = 0;
+  context.shadowOffsetY = 0;
 
-  if(strength){
-    context.font =
-      `800 ${Math.round(labelH * 0.09)}px Arial, sans-serif`;
-    context.fillText(
-      strength,
-      labelX + labelW / 2,
-      labelY + labelH * 0.67
-    );
-  }
+  context.fillStyle = "#eeeeee";
+  context.font =
+    `400 ${Math.round(nameAreaH * 0.145)}px "Arial Narrow", Arial, sans-serif`;
+
+  context.fillText(
+    "LYOPHILIZED POWDER",
+    nameAreaX + nameAreaW / 2,
+    nameAreaY + nameAreaH * 0.72
+  );
 
   context.font =
-    `700 ${Math.round(labelH * 0.042)}px Arial, sans-serif`;
+    `400 ${Math.round(nameAreaH * 0.14)}px "Arial Narrow", Arial, sans-serif`;
+
   context.fillText(
-    "FOR RESEARCH USE ONLY",
-    labelX + labelW / 2,
-    labelY + labelH * 0.84
+    "≥ 99% PURITY",
+    nameAreaX + nameAreaW / 2,
+    nameAreaY + nameAreaH * 0.89
   );
 
   context.restore();
@@ -1099,14 +1088,16 @@ async function createMatchingVialImage(product){
       if(result){
         resolve(result);
       }else{
-        reject(new Error("The vial image could not be exported."));
+        reject(
+          new Error("The vial image could not be exported.")
+        );
       }
-    },"image/webp",0.92);
+    },"image/webp",0.94);
   });
 
   return new File(
     [blob],
-    `${String(product.name||"product")
+    `${String(product.name || "product")
       .toLowerCase()
       .replace(/[^a-z0-9]+/g,"-")
       .replace(/^-+|-+$/g,"") || "product"}-vial.webp`,
