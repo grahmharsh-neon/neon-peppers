@@ -570,58 +570,17 @@ textarea{min-height:95px;resize:vertical}
 }
 
 
-/* AI PRODUCT BUILDER V20 */
-.settings-divider{
-  margin:28px 0;
-  border:0;
-  border-top:1px solid var(--line);
-}
-
-.ai-build-button{
-  color:#07110c !important;
-}
-
-.product-build-status{
-  min-height:20px;
-  margin:8px 0 14px;
-  color:var(--muted);
-  font-size:.8rem;
-}
-
-.product-build-status.working{
-  color:var(--blue);
-}
-
-.product-build-status.success{
-  color:var(--green);
-}
-
-.product-build-status.error{
-  color:#ff6572;
-}
-
-#vialTemplatePreview{
-  max-width:320px;
-  max-height:360px;
-  object-fit:contain;
-  margin:14px 0 22px;
-}
 
 
-/* TWO-BUTTON AI PRODUCT TOOLS V20.1 */
+/* MANUAL PRODUCT IMAGE WORKFLOW V20.5 */
 .description-ai-actions{
   display:flex;
   flex-wrap:wrap;
   gap:10px;
 }
 
-#generateProductImage-0,
-[id^="generateProductImage-"]{
-  color:#07110c !important;
-}
-
-
-/* BLACK LABEL VIAL GENERATOR V20.4 */
-[id^="generateProductImage-"]{
-  color:#07110c !important;
+.product-image-help{
+  margin-top:8px;
+  color:var(--muted);
+  font-size:.78rem;
 }

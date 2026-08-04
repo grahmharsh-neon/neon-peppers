@@ -67,12 +67,7 @@ function bindEvents(){
   el("saveHomepageButton").addEventListener("click", saveHomepage);
   el("saveSettingsButton").addEventListener("click", saveSettings);
   el("uploadHeroButton").addEventListener("click", uploadHeroImage);
-  el("uploadLogoButton").addEventListener("click", uploadLogo);
-  const vialTemplateButton = el("uploadVialTemplateButton");
-  if(vialTemplateButton){
-    vialTemplateButton.addEventListener("click", uploadVialTemplate);
-  }
-  el("adminProductSearch").addEventListener("input", renderProducts);
+  el("uploadLogoButton").addEventListener("click", uploadLogo);  el("adminProductSearch").addEventListener("input", renderProducts);
   el("adminProductFilter").addEventListener("change", renderProducts);
 
 
@@ -231,9 +226,6 @@ async function loadSettings(){
     "contact_email",
     "footer_disclaimer",
     "logo_url",
-    "vial_template_url",
-    "vial_label_background",
-    "vial_label_text_color",
     "vial_label_accent_color"
   ];
 
@@ -249,20 +241,7 @@ async function loadSettings(){
   });
 
   updateImagePreview("heroPreview", siteSettings.hero_image_url);
-  updateImagePreview("logoPreview", siteSettings.logo_url);
-  const approvedVialTemplate =
-    siteSettings.vial_template_url ||
-    "/assets/neon-peppers-approved-vial-template.png";
-
-  if(el("vial_template_url") && !el("vial_template_url").value){
-    el("vial_template_url").value = approvedVialTemplate;
-  }
-
-  updateImagePreview(
-    "vialTemplatePreview",
-    approvedVialTemplate
-  );
-}
+  updateImagePreview("logoPreview", siteSettings.logo_url);}
 
 function updateStats(){
   el("statTotal").textContent = products.length;
@@ -389,15 +368,6 @@ function renderProducts(){
             onclick="generateProductDescription(${index})"
           >
             ✨ Generate Description
-          </button>
-
-          <button
-            class="btn green"
-            type="button"
-            id="generateProductImage-${index}"
-            onclick="generateProductImage(${index})"
-          >
-            🖼 Generate Product Image
           </button>
 
           <button
@@ -917,269 +887,15 @@ async function uploadCoa(index){
 }
 
 
-async function uploadVialTemplate(){
-  try{
-    const file = el("vialTemplateFile")?.files?.[0];
 
-    if(!file){
-      throw new Error("Choose an approved vial image first.");
-    }
 
-    flash("Uploading vial template...");
 
-    const optimized = await optimizeImage(file, 1400, 0.9);
-    const path = `templates/vial-${crypto.randomUUID()}.webp`;
-    const publicUrl = await uploadFile(path, optimized, "image/webp");
 
-    el("vial_template_url").value = publicUrl;
-    siteSettings.vial_template_url = publicUrl;
 
-    updateImagePreview("vialTemplatePreview", publicUrl);
-    flash("Vial template uploaded. Click Save Settings.");
-  }catch(error){
-    console.error(error);
-    alert(error.message || "The vial template could not be uploaded.");
-  }
-}
 
-function loadCanvasImage(source){
-  return new Promise((resolve,reject)=>{
-    const image = new Image();
-    image.crossOrigin = "anonymous";
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(
-      new Error("The approved vial template could not be loaded.")
-    );
-    image.src = source;
-  });
-}
 
-function fitCanvasText(context,text,maxWidth,startSize,minSize=16){
-  let size=startSize;
 
-  while(size>minSize){
-    context.font=`900 ${size}px Arial, sans-serif`;
 
-    if(context.measureText(text).width<=maxWidth){
-      return size;
-    }
-
-    size-=2;
-  }
-
-  return minSize;
-}
-
-async function createMatchingVialImage(product){
-  const templateUrl =
-    el("vial_template_url")?.value.trim() ||
-    siteSettings.vial_template_url ||
-    "/assets/neon-peppers-approved-vial-template.png";
-
-  if(!templateUrl){
-    throw new Error(
-      "The approved vial template is missing."
-    );
-  }
-
-  const template = await loadCanvasImage(templateUrl);
-  const canvas = document.createElement("canvas");
-
-  canvas.width = template.naturalWidth;
-  canvas.height = template.naturalHeight;
-
-  const context = canvas.getContext("2d");
-
-  if(!context){
-    throw new Error("Your browser could not create the vial image.");
-  }
-
-  context.drawImage(template,0,0,canvas.width,canvas.height);
-
-  /*
-    Preserve the uploaded vial, bottle, cap, logo, icons, warnings,
-    gradient EXP strip, lighting, reflection and black label.
-
-    Only the large product-name area is replaced.
-  */
-  const nameAreaX = Math.round(canvas.width * 0.185);
-  const nameAreaY = Math.round(canvas.height * 0.425);
-  const nameAreaW = Math.round(canvas.width * 0.63);
-  const nameAreaH = Math.round(canvas.height * 0.165);
-
-  const blackGradient = context.createLinearGradient(
-    nameAreaX,
-    nameAreaY,
-    nameAreaX + nameAreaW,
-    nameAreaY
-  );
-
-  blackGradient.addColorStop(0,"#050505");
-  blackGradient.addColorStop(0.5,"#000000");
-  blackGradient.addColorStop(1,"#050505");
-
-  context.save();
-
-  context.fillStyle = blackGradient;
-  context.fillRect(
-    nameAreaX,
-    nameAreaY,
-    nameAreaW,
-    nameAreaH
-  );
-
-  const name = String(product.name || "")
-    .trim()
-    .toUpperCase();
-
-  const maxWidth = nameAreaW * 0.94;
-  const startingSize = Math.round(nameAreaH * 0.49);
-  const nameSize = fitCanvasText(
-    context,
-    name,
-    maxWidth,
-    startingSize,
-    Math.round(nameAreaH * 0.22)
-  );
-
-  context.textAlign = "center";
-  context.textBaseline = "middle";
-
-  // Subtle dark shadow gives the same dimensional text appearance.
-  context.shadowColor = "rgba(0,0,0,.9)";
-  context.shadowBlur = Math.max(2,Math.round(canvas.width * 0.004));
-  context.shadowOffsetY = Math.max(1,Math.round(canvas.height * 0.002));
-
-  context.fillStyle = "#f4f4f4";
-  context.font = `900 ${nameSize}px Impact, "Arial Narrow Bold", Arial, sans-serif`;
-  context.fillText(
-    name,
-    nameAreaX + nameAreaW / 2,
-    nameAreaY + nameAreaH * 0.39
-  );
-
-  context.shadowColor = "transparent";
-  context.shadowBlur = 0;
-  context.shadowOffsetY = 0;
-
-  context.fillStyle = "#eeeeee";
-  context.font =
-    `400 ${Math.round(nameAreaH * 0.145)}px "Arial Narrow", Arial, sans-serif`;
-
-  context.fillText(
-    "LYOPHILIZED POWDER",
-    nameAreaX + nameAreaW / 2,
-    nameAreaY + nameAreaH * 0.72
-  );
-
-  context.font =
-    `400 ${Math.round(nameAreaH * 0.14)}px "Arial Narrow", Arial, sans-serif`;
-
-  context.fillText(
-    "≥ 99% PURITY",
-    nameAreaX + nameAreaW / 2,
-    nameAreaY + nameAreaH * 0.89
-  );
-
-  context.restore();
-
-  const blob = await new Promise((resolve,reject)=>{
-    canvas.toBlob(result=>{
-      if(result){
-        resolve(result);
-      }else{
-        reject(
-          new Error("The vial image could not be exported.")
-        );
-      }
-    },"image/webp",0.94);
-  });
-
-  return new File(
-    [blob],
-    `${String(product.name || "product")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g,"-")
-      .replace(/^-+|-+$/g,"") || "product"}-vial.webp`,
-    {type:"image/webp"}
-  );
-}
-
-async function generateProductImage(index){
-  const product = products[index];
-
-  if(!product){
-    return;
-  }
-
-  if(!String(product.name || "").trim()){
-    alert("Enter the product name first.");
-    return;
-  }
-
-  if(!String(product.strength || "").trim()){
-    alert("Enter the product strength first.");
-    return;
-  }
-
-  const button = el(`generateProductImage-${index}`);
-
-  button.disabled = true;
-  button.textContent = "Generating Image…";
-
-  try{
-    const vialFile = await createMatchingVialImage(product);
-    const vialPath =
-      `products/ai-vials/${crypto.randomUUID()}.webp`;
-
-    const vialUrl = await uploadFile(
-      vialPath,
-      vialFile,
-      "image/webp"
-    );
-
-    product.image_url = vialUrl;
-
-    if(product.id){
-      const result = await client
-        .from("products")
-        .update({
-          image_url:vialUrl,
-          updated_at:new Date().toISOString()
-        })
-        .eq("id",product.id)
-        .select("*")
-        .single();
-
-      if(result.error){
-        throw result.error;
-      }
-
-      products[index] = result.data;
-    }
-
-    renderProducts();
-
-    flash(
-      product.id
-        ? "Product image generated and saved"
-        : "Product image generated. Save the product."
-    );
-  }catch(error){
-    console.error(error);
-    alert(
-      error.message ||
-      "The product image could not be generated."
-    );
-  }finally{
-    const refreshedButton = el(`generateProductImage-${index}`);
-
-    if(refreshedButton){
-      refreshedButton.disabled = false;
-      refreshedButton.textContent = "🖼 Generate Product Image";
-    }
-  }
-}
 
 async function uploadHeroImage(){
   try{
