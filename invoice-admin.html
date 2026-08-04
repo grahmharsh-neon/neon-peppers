@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Invoice Center | Neon Peppers</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/admin.css">
+  <link rel="stylesheet" href="/invoice-admin.css">
+</head>
+<body class="invoice-admin-body">
+  <div id="invoiceAuthGate" class="invoice-auth-gate">
+    <div class="invoice-auth-card">
+      <img src="/assets/neon-peppers-logo.jpg" alt="Neon Peppers">
+      <div class="eyebrow">Admin Access</div>
+      <h1>INVOICE CENTER</h1>
+      <input id="invoiceLoginEmail" type="email" placeholder="Email">
+      <input id="invoiceLoginPassword" type="password" placeholder="Password">
+      <button id="invoiceLoginButton" class="btn pink" type="button">Sign In</button>
+      <div id="invoiceAuthMessage" class="form-status"></div>
+    </div>
+  </div>
+
+  <aside class="invoice-sidebar">
+    <a href="/admin.html" class="invoice-logo">
+      <img src="/assets/neon-peppers-logo.jpg" alt="Neon Peppers">
+    </a>
+    <nav>
+      <a href="/admin.html">Main Admin</a>
+      <a class="active" href="/invoice-admin.html">Invoice Center</a>
+      <a href="/order.html" target="_blank" rel="noopener">Order Request Page</a>
+      <a href="/" target="_blank" rel="noopener">Public Site</a>
+    </nav>
+    <button id="invoiceLogoutButton" class="btn" type="button">Sign Out</button>
+  </aside>
+
+  <main class="invoice-main">
+    <section class="invoice-page-head">
+      <div>
+        <div class="eyebrow">Billing workflow</div>
+        <h1>INVOICE CENTER</h1>
+        <p class="muted">Review draft invoices, edit pricing, send them, print them, and track payment.</p>
+      </div>
+      <button id="newInvoiceButton" class="btn green" type="button">+ New Invoice</button>
+    </section>
+
+    <section class="invoice-stats">
+      <article><span>Draft</span><strong id="invoiceStatDraft">0</strong></article>
+      <article><span>Sent</span><strong id="invoiceStatSent">0</strong></article>
+      <article><span>Paid</span><strong id="invoiceStatPaid">0</strong></article>
+      <article><span>Outstanding</span><strong id="invoiceStatOutstanding">$0.00</strong></article>
+    </section>
+
+    <section class="panel">
+      <div class="product-toolbar">
+        <input id="invoiceSearch" placeholder="Search invoice, customer, or email...">
+        <select id="invoiceFilter">
+          <option value="all">All invoices</option>
+          <option value="draft">Draft</option>
+          <option value="sent">Sent</option>
+          <option value="paid">Paid</option>
+          <option value="void">Void</option>
+        </select>
+        <button id="invoiceRefreshButton" class="btn" type="button">Refresh</button>
+      </div>
+      <div id="invoiceList"><p class="muted">Loading invoices…</p></div>
+    </section>
+  </main>
+
+  <div id="invoiceModal" class="modal invoice-modal">
+    <div class="modal-card invoice-modal-card">
+      <button id="invoiceCloseButton" class="modal-close" type="button">×</button>
+
+      <div class="invoice-modal-head">
+        <div>
+          <div class="eyebrow">Invoice editor</div>
+          <h2 id="invoiceModalTitle">New Invoice</h2>
+        </div>
+        <span id="invoiceStatusBadge" class="invoice-status-badge draft">Draft</span>
+      </div>
+
+      <div class="grid two">
+        <div><label>Customer Name *</label><input id="invoiceCustomerName"></div>
+        <div><label>Customer Email *</label><input id="invoiceCustomerEmail" type="email"></div>
+        <div><label>Phone</label><input id="invoiceCustomerPhone"></div>
+        <div><label>Company</label><input id="invoiceCustomerCompany"></div>
+      </div>
+
+      <div class="grid three">
+        <div><label>Invoice Number</label><input id="invoiceNumber" readonly></div>
+        <div><label>Due Date</label><input id="invoiceDueDate" type="date"></div>
+        <div>
+          <label>Status</label>
+          <select id="invoiceStatus">
+            <option value="draft">Draft</option>
+            <option value="sent">Sent</option>
+            <option value="paid">Paid</option>
+            <option value="void">Void</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="invoice-line-heading">
+        <h3>Items</h3>
+        <button id="invoiceAddLineButton" class="btn green" type="button">+ Add Line</button>
+      </div>
+
+      <div class="invoice-lines">
+        <div class="invoice-line invoice-line-labels">
+          <span>Description</span><span>Strength / Option</span><span>Qty</span><span>Price</span><span>Total</span><span></span>
+        </div>
+        <div id="invoiceLines"></div>
+      </div>
+
+      <div class="invoice-lower-grid">
+        <div>
+          <label>Customer Notes</label>
+          <textarea id="invoiceNotes" placeholder="Payment, pickup, shipping, or other instructions."></textarea>
+          <label>Private Notes</label>
+          <textarea id="invoicePrivateNotes" placeholder="Admin only."></textarea>
+        </div>
+
+        <div class="invoice-totals">
+          <div><span>Subtotal</span><strong id="invoiceSubtotal">$0.00</strong></div>
+          <label><span>Discount</span><input id="invoiceDiscount" type="number" min="0" step="0.01" value="0"></label>
+          <label><span>Shipping</span><input id="invoiceShipping" type="number" min="0" step="0.01" value="0"></label>
+          <label><span>Tax %</span><input id="invoiceTaxRate" type="number" min="0" step="0.01" value="0"></label>
+          <div><span>Tax</span><strong id="invoiceTax">$0.00</strong></div>
+          <div class="invoice-grand-total"><span>Total</span><strong id="invoiceTotal">$0.00</strong></div>
+        </div>
+      </div>
+
+      <div class="invoice-modal-actions">
+        <button id="invoiceSaveButton" class="btn pink" type="button">Save</button>
+        <button id="invoiceSendButton" class="btn blue" type="button">Save & Send</button>
+        <button id="invoicePrintButton" class="btn" type="button">Print / PDF</button>
+        <button id="invoiceDuplicateButton" class="btn" type="button">Duplicate</button>
+      </div>
+      <div id="invoiceMessage" class="form-status"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/config.js"></script>
+  <script src="/invoice-admin.js?v=21.4"></script>
+</body>
+</html>

@@ -2126,7 +2126,12 @@ ${o.invoice_number ? `
     </div>
   </div>
 ` : ""}
-${o.notes?`<div class="inquiry-message">${escapeHtml(o.notes)}</div>`:""}<div class="actions"><a class="btn pink" href="mailto:${escapeHtml(o.email)}?subject=${encodeURIComponent("Re: Neon Peppers order request")}">Reply</a><button class="btn blue" onclick="updateOrderStatus('${escapeHtml(o.id)}','contacted')">Contacted</button><button class="btn green" onclick="updateOrderStatus('${escapeHtml(o.id)}','approved')">Approved</button><button class="btn" onclick="updateOrderStatus('${escapeHtml(o.id)}','closed')">Close</button><button class="btn danger" onclick="deleteOrderRequest('${escapeHtml(o.id)}')">Delete</button></div></article>`}).join("")
+${o.notes?`<div class="inquiry-message">${escapeHtml(o.notes)}</div>`:""}<div class="actions">
+${o.invoice_id
+  ? `<a class="btn pink" href="/invoice-admin.html?invoice=${escapeHtml(o.invoice_id)}">Open Invoice</a>`
+  : `<a class="btn pink" href="/invoice-admin.html?request=${escapeHtml(o.id)}">Create Invoice</a>`
+}
+<a class="btn" href="mailto:${escapeHtml(o.email)}?subject=${encodeURIComponent("Re: Neon Peppers order request")}">Reply</a><button class="btn blue" onclick="updateOrderStatus('${escapeHtml(o.id)}','contacted')">Contacted</button><button class="btn green" onclick="updateOrderStatus('${escapeHtml(o.id)}','approved')">Approved</button><button class="btn" onclick="updateOrderStatus('${escapeHtml(o.id)}','closed')">Close</button><button class="btn danger" onclick="deleteOrderRequest('${escapeHtml(o.id)}')">Delete</button></div></article>`}).join("")
 }
 async function updateOrderStatus(id,status){const {error}=await client.from("order_requests").update({status,updated_at:new Date().toISOString()}).eq("id",id);if(error){alert(error.message);return}await loadOrderRequests();flash(`Order request marked ${status}`)}
 async function deleteOrderRequest(id){if(!confirm("Delete this order request?"))return;const {error}=await client.from("order_requests").delete().eq("id",id);if(error){alert(error.message);return}await loadOrderRequests();flash("Order request deleted")}
