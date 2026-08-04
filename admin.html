@@ -31,10 +31,8 @@
       <button data-panel="dashboardPanel">Dashboard</button>
       <button data-panel="homepagePanel">Homepage</button>
       <button data-panel="productsPanel">Products</button>
-      <a class="admin-nav-link" href="/coa-admin.html">COA Admin</a>
       <button data-panel="merchPanel">Merch</button>
       <button data-panel="orderItemsPanel">Peptide Order Form</button>
-      <button data-panel="invoicesPanel" onclick="loadInvoices()">Invoices</button>
       <button data-panel="ordersPanel">Order Requests</button>
       <button data-panel="inquiriesPanel">Inquiries</button>
       <button data-panel="settingsPanel">Contact & Settings</button>
@@ -220,11 +218,6 @@
           <div id="orderFormItems"></div>
         </div>
       </section>
-
-      <section id="invoicesPanel" class="panel-view">
-<div class="page-head"><div><div class="eyebrow">Billing</div><h1>Invoices</h1><p class="muted">Create invoices from order requests, email them, print them, and track payment.</p></div><button class="btn green" onclick="loadInvoices()">Refresh Invoices</button></div>
-<div class="panel"><div class="product-toolbar"><input id="invoiceSearch" placeholder="Search invoices..." oninput="renderInvoices()"><select id="invoiceFilter" onchange="renderInvoices()"><option value="all">All invoices</option><option value="draft">Draft</option><option value="sent">Sent</option><option value="paid">Paid</option><option value="void">Void</option></select></div><div id="adminInvoices"><p class="muted">Open this section to load invoices.</p></div></div>
-</section>
 <section id="ordersPanel" class="panel-view">
         <div class="page-head"><div><div class="eyebrow">Research requests</div><h1>Order Requests</h1></div><button class="btn green" id="refreshOrdersButton">Refresh Orders</button></div>
         <div class="panel"><div class="product-toolbar"><input id="orderAdminSearch" placeholder="Search requests..."><select id="orderAdminFilter"><option value="all">All requests</option><option value="new">New</option><option value="contacted">Contacted</option><option value="approved">Approved</option><option value="closed">Closed</option></select></div><div id="adminOrders"></div></div>
@@ -288,16 +281,11 @@
   <script src="config.js"></script>
   <script src="/markdown.js"></script>
   <script src="admin.js"></script>
-<div id="invoiceModal" class="modal invoice-editor-modal"><div class="modal-card invoice-editor-card">
-<button class="modal-close" onclick="closeInvoiceEditor()">×</button>
-<div class="invoice-editor-head"><div><div class="eyebrow">Billing</div><h2 id="invoiceTitle">Create Invoice</h2></div><span id="invoiceBadge" class="invoice-status-badge draft">Draft</span></div>
-<div class="invoice-customer-grid"><div><label>Customer Name</label><input id="invName"></div><div><label>Customer Email</label><input id="invEmail" type="email"></div><div><label>Phone</label><input id="invPhone"></div><div><label>Company</label><input id="invCompany"></div></div>
 <div class="invoice-meta-grid"><div><label>Invoice Number</label><input id="invNumber" readonly></div><div><label>Due Date</label><input id="invDue" type="date"></div><div><label>Status</label><select id="invStatus" onchange="updateInvoiceBadge(this.value)"><option value="draft">Draft</option><option value="sent">Sent</option><option value="paid">Paid</option><option value="void">Void</option></select></div></div>
 <div class="invoice-lines-head"><h3>Invoice Items</h3><button class="btn green" onclick="addInvoiceLine()">+ Add Line</button></div>
 <div class="invoice-lines-table"><div class="invoice-line invoice-line-header"><span>Description</span><span>Strength / Option</span><span>Qty</span><span>Unit Price</span><span>Total</span><span></span></div><div id="invoiceLines"></div></div>
 <div class="invoice-bottom-grid"><div><label>Customer Notes</label><textarea id="invNotes"></textarea><label>Internal Notes</label><textarea id="invInternal"></textarea></div><div class="invoice-totals-card"><div class="invoice-total-row"><span>Subtotal</span><strong id="invSubtotal">$0.00</strong></div><label class="invoice-charge-row"><span>Discount</span><input id="invDiscount" type="number" min="0" step="0.01" value="0" oninput="recalculateInvoice()"></label><label class="invoice-charge-row"><span>Shipping</span><input id="invShipping" type="number" min="0" step="0.01" value="0" oninput="recalculateInvoice()"></label><label class="invoice-charge-row"><span>Tax Rate %</span><input id="invTaxRate" type="number" min="0" step="0.01" value="0" oninput="recalculateInvoice()"></label><div class="invoice-total-row"><span>Tax</span><strong id="invTax">$0.00</strong></div><div class="invoice-total-row grand"><span>Total</span><strong id="invTotal">$0.00</strong></div></div></div>
 <div class="invoice-editor-actions"><button class="btn pink" onclick="saveInvoice()">Save Invoice</button><button class="btn blue" onclick="emailInvoice()">Email Invoice</button><button class="btn" onclick="printInvoice()">Print / Save PDF</button></div><div id="invoiceMessage" class="form-status"></div>
-</div></div>
-<script src="/invoice.js"></script><div class="grid two"><div><label>Lot Number *</label><input id="coaLot"></div><div><label>Batch Number</label><input id="coaBatch"></div></div><div class="grid two"><div><label>Testing Lab</label><input id="coaLab"></div><div><label>Purity %</label><input id="coaPurity" type="number" min="0" max="100" step="0.01"></div></div><div class="grid two"><div><label>Test Date</label><input id="coaTestDate" type="date"></div><div><label>Expiration Date</label><input id="coaExpiration" type="date"></div></div><div class="grid two"><div><label>Visibility</label><select id="coaPublic"><option value="true">Public</option><option value="false">Admin Only</option></select></div><div><label>Sort Order</label><input id="coaSort" type="number" value="0"></div></div><label>Admin Notes</label><textarea id="coaNotes"></textarea><div class="coa-upload-box"><label>COA File</label><input id="coaFile" type="file" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg"><p class="muted">PDF, PNG, JPG, or JPEG. Maximum 10 MB.</p><div id="coaCurrent"></div></div><div class="coa-editor-actions"><button class="btn pink" onclick="saveCoa()">Save COA</button><button class="btn blue" onclick="uploadCoa()">Upload / Replace File</button><button class="btn" onclick="viewCoa()">View File</button></div><div id="coaMessage" class="form-status"></div></div></div>
+</div></div><div class="grid two"><div><label>Lot Number *</label><input id="coaLot"></div><div><label>Batch Number</label><input id="coaBatch"></div></div><div class="grid two"><div><label>Testing Lab</label><input id="coaLab"></div><div><label>Purity %</label><input id="coaPurity" type="number" min="0" max="100" step="0.01"></div></div><div class="grid two"><div><label>Test Date</label><input id="coaTestDate" type="date"></div><div><label>Expiration Date</label><input id="coaExpiration" type="date"></div></div><div class="grid two"><div><label>Visibility</label><select id="coaPublic"><option value="true">Public</option><option value="false">Admin Only</option></select></div><div><label>Sort Order</label><input id="coaSort" type="number" value="0"></div></div><label>Admin Notes</label><textarea id="coaNotes"></textarea><div class="coa-upload-box"><label>COA File</label><input id="coaFile" type="file" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg"><p class="muted">PDF, PNG, JPG, or JPEG. Maximum 10 MB.</p><div id="coaCurrent"></div></div><div class="coa-editor-actions"><button class="btn pink" onclick="saveCoa()">Save COA</button><button class="btn blue" onclick="uploadCoa()">Upload / Replace File</button><button class="btn" onclick="viewCoa()">View File</button></div><div id="coaMessage" class="form-status"></div></div></div>
 </body>
 </html>
