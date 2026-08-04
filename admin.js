@@ -263,7 +263,7 @@ function renderProducts(){
   const filter = el("adminProductFilter").value;
 
   const filtered = products.filter(product => {
-    const searchable = `${product.name} ${product.category} ${product.description}`.toLowerCase();
+    const searchable = `${product.name} ${product.category} ${product.description} ${(product.tags||[]).join(" ")} ${(product.aliases||[]).join(" ")} ${product.supplier||""} ${product.shelf_location||""}`.toLowerCase();
     const matchesSearch = searchable.includes(query);
 
     let matchesFilter = true;
@@ -347,6 +347,39 @@ function renderProducts(){
         >
       </div>
 
+      <div>
+        <label>Stock Count</label>
+        <input type="number" min="0" step="1" data-index="${index}" data-key="stock_count" value="${Number(product.stock_count||0)}">
+      </div>
+
+      <div>
+        <label>Low Stock Alert</label>
+        <input type="number" min="0" step="1" data-index="${index}" data-key="low_stock_threshold" value="${Number(product.low_stock_threshold||5)}">
+      </div>
+
+      <div>
+        <label>Hide When Out of Stock</label>
+        <select data-index="${index}" data-key="hide_when_out_of_stock">
+          <option value="false" ${product.hide_when_out_of_stock!==true?"selected":""}>No</option>
+          <option value="true" ${product.hide_when_out_of_stock===true?"selected":""}>Yes</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Tags</label>
+        <input data-index="${index}" data-key="tags_text" value="${escapeHtml((product.tags||[]).join(", "))}" placeholder="Recovery, GLP, Skin">
+      </div>
+
+      <div>
+        <label>Aliases / Search Terms</label>
+        <input data-index="${index}" data-key="aliases_text" value="${escapeHtml((product.aliases||[]).join(", "))}">
+      </div>
+
+      <div>
+        <label>URL Slug</label>
+        <input data-index="${index}" data-key="slug" value="${escapeHtml(product.slug||"")}" placeholder="automatic-from-name">
+      </div>
+
         <div>
           <label>Status</label>
           <select data-index="${index}" data-key="status">
@@ -354,6 +387,36 @@ function renderProducts(){
             <option value="coming_soon" ${product.status === "coming_soon" ? "selected" : ""}>Coming Soon</option>
             <option value="out_of_stock" ${product.status === "out_of_stock" ? "selected" : ""}>Out of Stock</option>
           </select>
+        </div>
+      </div>
+
+
+      <div class="grid three product-private-fields">
+        <div>
+          <label>Supplier (Private)</label>
+          <input data-index="${index}" data-key="supplier" value="${escapeHtml(product.supplier||"")}">
+        </div>
+        <div>
+          <label>Unit Cost (Private)</label>
+          <input type="number" min="0" step="0.01" data-index="${index}" data-key="unit_cost" value="${product.unit_cost==null?"":Number(product.unit_cost)}">
+        </div>
+        <div>
+          <label>Shelf Location (Private)</label>
+          <input data-index="${index}" data-key="shelf_location" value="${escapeHtml(product.shelf_location||"")}">
+        </div>
+      </div>
+
+      <label>Internal Notes</label>
+      <textarea data-index="${index}" data-key="internal_notes" placeholder="Private notes">${escapeHtml(product.internal_notes||"")}</textarea>
+
+      <div class="grid two">
+        <div>
+          <label>SEO Title</label>
+          <input data-index="${index}" data-key="seo_title" value="${escapeHtml(product.seo_title||"")}">
+        </div>
+        <div>
+          <label>SEO Description</label>
+          <input data-index="${index}" data-key="seo_description" value="${escapeHtml(product.seo_description||"")}">
         </div>
       </div>
 
@@ -461,14 +524,20 @@ function renderProducts(){
 
       let value = event.target.value;
 
-      if(key === "visible" || key === "featured"){
+      if(key === "visible" || key === "featured" || key === "hide_when_out_of_stock"){
         value = value === "true";
       }
-      if(key === "price" || key === "compare_at_price"){
+      if(key === "price" || key === "compare_at_price" || key === "unit_cost" || key === "stock_count" || key === "low_stock_threshold"){
         value = value === "" ? null : Number(value);
       }
 
-      products[index][key] = value;
+      if(key==="tags_text"){
+      products[index].tags=value.split(",").map(v=>v.trim()).filter(Boolean);
+    }else if(key==="aliases_text"){
+      products[index].aliases=value.split(",").map(v=>v.trim()).filter(Boolean);
+    }else{
+      products[index][key]=value;
+    }
     };
 
     node.addEventListener("input", update);
@@ -486,6 +555,18 @@ function addProduct(){
       price:0,
       compare_at_price:null,
       price_note:"",
+      slug:"",
+      tags:[],
+      aliases:[],
+      stock_count:0,
+      low_stock_threshold:5,
+      hide_when_out_of_stock:false,
+      internal_notes:"",
+      supplier:"",
+      unit_cost:null,
+      shelf_location:"",
+      seo_title:"",
+      seo_description:"",
     image_url:"",
     coa_url:"",
     visible:true,
@@ -673,6 +754,18 @@ async function saveProduct(index){
         ? null
         : Number(product.compare_at_price),
     price_note:product.price_note || null,
+    slug:(product.slug||product.name||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,""),
+    tags:Array.isArray(product.tags)?product.tags:[],
+    aliases:Array.isArray(product.aliases)?product.aliases:[],
+    stock_count:Math.max(0,Number(product.stock_count||0)),
+    low_stock_threshold:Math.max(0,Number(product.low_stock_threshold||5)),
+    hide_when_out_of_stock:product.hide_when_out_of_stock===true,
+    internal_notes:product.internal_notes||null,
+    supplier:product.supplier||null,
+    unit_cost:product.unit_cost==null?null:Number(product.unit_cost),
+    shelf_location:product.shelf_location||null,
+    seo_title:product.seo_title||`${product.name} | Neon Peppers`,
+    seo_description:product.seo_description||String(product.description||"").replace(/[#*_`]/g,"").slice(0,155),
     image_url:product.image_url || null,
     coa_url:product.coa_url || null,
     visible:product.visible !== false,

@@ -584,3 +584,5 @@ textarea{min-height:95px;resize:vertical}
   color:var(--muted);
   font-size:.78rem;
 }
+
+.product-private-fields{margin:16px 0;padding:14px;border:1px dashed rgba(255,255,255,.15);border-radius:10px}

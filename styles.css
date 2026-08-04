@@ -1133,3 +1133,8 @@ body.gated{
 [hidden]{
   display:none !important;
 }
+
+/* CORE BUSINESS UPGRADE V21 */
+.product-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+.product-tag{padding:4px 7px;border:1px solid rgba(255,255,255,.14);border-radius:999px;color:var(--muted);font-size:.67rem}
+.product-status.low{background:#ffd35c;color:#111}

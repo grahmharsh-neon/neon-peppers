@@ -127,6 +127,8 @@ async function loadData(){
     }
 
     renderProduct(currentProduct);
+    applyProductSeo(currentProduct);
+    trackProductView(currentProduct.id);
     renderRelated();
 
     if(typeof loadProductCoas==="function"){
@@ -162,6 +164,18 @@ function statusText(product){
   if(product.status === "coming_soon") return "Coming Soon";
   if(product.status === "out_of_stock") return "Out of Stock";
   return "Available";
+}
+
+function applyProductSeo(product){
+  document.title=product.seo_title||`${product.name} | Neon Peppers`;
+  const meta=document.querySelector('meta[name="description"]');
+  if(meta)meta.setAttribute("content",product.seo_description||String(product.description||"").replace(/[#*_`]/g,"").slice(0,155));
+  history.replaceState(null,"",`/products/${encodeURIComponent(product.slug||slugify(product.name))}?id=${encodeURIComponent(product.id)}`);
+}
+async function trackProductView(productId){
+  try{await client.from("product_events").insert({
+    product_id:productId,event_type:"view",source_url:window.location.href
+  });}catch(error){}
 }
 
 function renderProduct(product){

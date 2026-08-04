@@ -45,7 +45,29 @@ exports.handler = async event => {
     const body = JSON.parse(event.body || "{}");
 
     if(body.website){
-      return response(200,{ok:true});
+      if(resendKey){
+      const customerRows=cleanItems.map(item=>`
+        <tr><td>${esc(item.product_name)}</td><td>${esc(item.strength)}</td><td>${item.quantity}</td></tr>
+      `).join("");
+      await fetch("https://api.resend.com/emails",{
+        method:"POST",
+        headers:{"Authorization":`Bearer ${resendKey}`,"Content-Type":"application/json"},
+        body:JSON.stringify({
+          from:fromAddress,to:[email],reply_to:RECIPIENT,
+          subject:"We received your Neon Peppers request",
+          html:`<div style="font-family:Arial;max-width:680px;margin:auto">
+            <h1>Request Received</h1>
+            <p>Hi ${esc(name)},</p>
+            <p>We received your research-material request and will follow up after reviewing availability.</p>
+            <table style="width:100%"><tr><th>Item</th><th>Strength</th><th>Qty</th></tr>${customerRows}</table>
+            <p><strong>Reference:</strong> ${esc(invoiceNumber||requestId)}</p>
+            <p>Research use only. Not for human or veterinary use.</p>
+          </div>`
+        })
+      });
+    }
+
+    return response(200,{ok:true});
     }
 
     const name = String(body.name || "").trim();

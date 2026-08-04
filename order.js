@@ -91,14 +91,22 @@ async function loadOrderForm(){
     return;
   }
 
-  orderItems=(productsResult.data||[]).map(product=>({
+  orderItems=(productsResult.data||[])
+  .filter(product=>!(product.hide_when_out_of_stock===true&&Number(product.stock_count||0)<=0))
+  .map(product=>({
     id:product.id,
     name:product.name,
     category:product.category||"Research Material",
     description:product.description||"",
     image_url:product.image_url||"",
     strength:product.strength||"",
-    status:product.status||"available",
+    status:Number(product.stock_count||0)<=0
+      ? "out_of_stock"
+      : (Number(product.stock_count||0)<=Number(product.low_stock_threshold||5)
+          ? "low_stock"
+          : (product.status||"available")),
+    stock_count:Number(product.stock_count||0),
+    low_stock_threshold:Number(product.low_stock_threshold||5),
     price:Number(product.price||0),
     compare_at_price:product.compare_at_price==null?null:Number(product.compare_at_price),
     price_note:product.price_note||""

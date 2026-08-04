@@ -282,9 +282,9 @@ function renderProducts(){
       : "";
 
     let status = "";
-    if(product.status === "coming_soon"){
+    if(Number(product.stock_count||0)<=0 || product.status === "out_of_stock"){
       status = '<div class="product-status coming">Coming Soon</div>';
-    }else if(product.status === "out_of_stock"){
+    }else if(product.status === "coming_soon"){
       status = '<div class="product-status out">Out of Stock</div>';
     }else{
       status = '<div class="product-status available">Available</div>';
@@ -294,15 +294,23 @@ function renderProducts(){
       ? '<div class="product-status featured">Featured</div>'
       : "";
 
+    const lowStock=Number(product.stock_count||0)>0&&Number(product.stock_count||0)<=Number(product.low_stock_threshold||5)
+      ? '<div class="product-status low">Low Stock</div>'
+      : "";
+
+    const tags=(product.tags||[]).slice(0,3).map(tag=>`<span class="product-tag">${esc(tag)}</span>`).join("");
+
     card.innerHTML = `
       <div class="card-image" ${image}>
         ${product.image_url ? "" : "⚗"}
         ${status}
         ${featured}
+        ${lowStock}
         <div class="card-glow"></div>
       </div>
 
       <div class="card-body">
+        <div class="product-tags">${tags}</div>
         <div class="card-topline">
           <div>
             <div class="category">${esc(product.category || "Research Compound")}</div>
@@ -343,7 +351,7 @@ function openProductPage(product){
   }
 
   window.location.href =
-    `/product.html?id=${encodeURIComponent(product.id)}`;
+    `/products/${encodeURIComponent(product.slug||productSlug(product))}?id=${encodeURIComponent(product.id)}`;
 }
 
 function openProduct(product){
@@ -401,4 +409,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     if(event.target.id === "productModal") closeProduct();
   });
 
+});
+
+async function trackCatalogSearch(term){
+  if(!client||!String(term||"").trim())return;
+  try{await client.from("product_events").insert({
+    event_type:"search",
+    search_term:String(term).trim().slice(0,120),
+    source_url:window.location.href
+  });}catch(error){}
+}
+let searchTrackTimer;
+document.addEventListener("input",event=>{
+  if(event.target?.id!=="searchInput")return;
+  clearTimeout(searchTrackTimer);
+  searchTrackTimer=setTimeout(()=>trackCatalogSearch(event.target.value),900);
 });
