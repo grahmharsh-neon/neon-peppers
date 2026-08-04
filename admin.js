@@ -393,9 +393,6 @@ function renderProducts(){
         </div>
       </div>
 
-      <label>Internal Notes</label>
-      <textarea data-index="${index}" data-key="internal_notes" placeholder="Private notes">${escapeHtml(product.internal_notes||"")}</textarea>
-
       <div class="grid two">
         <div>
           <label>SEO Title</label>
@@ -543,7 +540,6 @@ function addProduct(){
       tags:[],
       stock_count:0,
       low_stock_threshold:5,
-      internal_notes:"",
       supplier:"",
       unit_cost:null,
       shelf_location:"",
@@ -740,7 +736,6 @@ async function saveProduct(index){
     tags:Array.isArray(product.tags)?product.tags:[],
     stock_count:Math.max(0,Number(product.stock_count||0)),
     low_stock_threshold:Math.max(0,Number(product.low_stock_threshold||5)),
-    internal_notes:product.internal_notes||null,
     supplier:product.supplier||null,
     unit_cost:product.unit_cost==null?null:Number(product.unit_cost),
     shelf_location:product.shelf_location||null,

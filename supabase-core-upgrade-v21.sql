@@ -4,7 +4,6 @@ alter table public.products add column if not exists slug text;
 alter table public.products add column if not exists tags text[] not null default '{}';
 alter table public.products add column if not exists stock_count integer not null default 0;
 alter table public.products add column if not exists low_stock_threshold integer not null default 5;
-alter table public.products add column if not exists internal_notes text;
 alter table public.products add column if not exists supplier text;
 alter table public.products add column if not exists unit_cost numeric(10,2);
 alter table public.products add column if not exists shelf_location text;
@@ -51,6 +50,12 @@ notify pgrst,'reload schema';
 
 
 -- hide_when_out_of_stock is no longer used by the website.
+-- If the column already exists, it may remain safely and will be ignored.
+
+notify pgrst,'reload schema';
+
+
+-- internal_notes is no longer used by the website.
 -- If the column already exists, it may remain safely and will be ignored.
 
 notify pgrst,'reload schema';
