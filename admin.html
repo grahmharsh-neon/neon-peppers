@@ -53,7 +53,6 @@
           <article><span>Total products</span><strong id="statTotal">0</strong></article>
           <article><span>Visible products</span><strong id="statVisible">0</strong></article>
           <article><span>Featured products</span><strong id="statFeatured">0</strong></article>
-          <article><span>Products with COAs</span><strong id="statCoa">0</strong></article>
         </div>
 
         <div class="panel">
@@ -280,12 +279,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script src="/markdown.js"></script>
-  <script src="admin.js"></script>
-<div class="invoice-meta-grid"><div><label>Invoice Number</label><input id="invNumber" readonly></div><div><label>Due Date</label><input id="invDue" type="date"></div><div><label>Status</label><select id="invStatus" onchange="updateInvoiceBadge(this.value)"><option value="draft">Draft</option><option value="sent">Sent</option><option value="paid">Paid</option><option value="void">Void</option></select></div></div>
-<div class="invoice-lines-head"><h3>Invoice Items</h3><button class="btn green" onclick="addInvoiceLine()">+ Add Line</button></div>
-<div class="invoice-lines-table"><div class="invoice-line invoice-line-header"><span>Description</span><span>Strength / Option</span><span>Qty</span><span>Unit Price</span><span>Total</span><span></span></div><div id="invoiceLines"></div></div>
-<div class="invoice-bottom-grid"><div><label>Customer Notes</label><textarea id="invNotes"></textarea><label>Internal Notes</label><textarea id="invInternal"></textarea></div><div class="invoice-totals-card"><div class="invoice-total-row"><span>Subtotal</span><strong id="invSubtotal">$0.00</strong></div><label class="invoice-charge-row"><span>Discount</span><input id="invDiscount" type="number" min="0" step="0.01" value="0" oninput="recalculateInvoice()"></label><label class="invoice-charge-row"><span>Shipping</span><input id="invShipping" type="number" min="0" step="0.01" value="0" oninput="recalculateInvoice()"></label><label class="invoice-charge-row"><span>Tax Rate %</span><input id="invTaxRate" type="number" min="0" step="0.01" value="0" oninput="recalculateInvoice()"></label><div class="invoice-total-row"><span>Tax</span><strong id="invTax">$0.00</strong></div><div class="invoice-total-row grand"><span>Total</span><strong id="invTotal">$0.00</strong></div></div></div>
-<div class="invoice-editor-actions"><button class="btn pink" onclick="saveInvoice()">Save Invoice</button><button class="btn blue" onclick="emailInvoice()">Email Invoice</button><button class="btn" onclick="printInvoice()">Print / Save PDF</button></div><div id="invoiceMessage" class="form-status"></div>
-</div></div><div class="grid two"><div><label>Lot Number *</label><input id="coaLot"></div><div><label>Batch Number</label><input id="coaBatch"></div></div><div class="grid two"><div><label>Testing Lab</label><input id="coaLab"></div><div><label>Purity %</label><input id="coaPurity" type="number" min="0" max="100" step="0.01"></div></div><div class="grid two"><div><label>Test Date</label><input id="coaTestDate" type="date"></div><div><label>Expiration Date</label><input id="coaExpiration" type="date"></div></div><div class="grid two"><div><label>Visibility</label><select id="coaPublic"><option value="true">Public</option><option value="false">Admin Only</option></select></div><div><label>Sort Order</label><input id="coaSort" type="number" value="0"></div></div><label>Admin Notes</label><textarea id="coaNotes"></textarea><div class="coa-upload-box"><label>COA File</label><input id="coaFile" type="file" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg"><p class="muted">PDF, PNG, JPG, or JPEG. Maximum 10 MB.</p><div id="coaCurrent"></div></div><div class="coa-editor-actions"><button class="btn pink" onclick="saveCoa()">Save COA</button><button class="btn blue" onclick="uploadCoa()">Upload / Replace File</button><button class="btn" onclick="viewCoa()">View File</button></div><div id="coaMessage" class="form-status"></div></div></div>
+  <script src="admin.js?v=18.3"></script>
 </body>
 </html>

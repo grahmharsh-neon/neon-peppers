@@ -248,7 +248,6 @@ function updateStats(){
   el("statTotal").textContent = products.length;
   el("statVisible").textContent = products.filter(product => product.visible !== false).length;
   el("statFeatured").textContent = products.filter(product => product.featured === true).length;
-  el("statCoa").textContent = products.filter(product => Boolean(product.coa_url)).length;
 }
 
 function escapeHtml(value){
