@@ -380,16 +380,16 @@ function renderProducts(){
             id="generateDescription-${index}"
             onclick="generateProductDescription(${index})"
           >
-            ✨ ${product.description ? "Regenerate Description" : "Generate Description"}
+            ✨ Generate Description
           </button>
 
           <button
-            class="btn green ai-build-button"
+            class="btn green"
             type="button"
-            id="aiBuildProduct-${index}"
-            onclick="aiBuildProduct(${index})"
+            id="generateProductImage-${index}"
+            onclick="generateProductImage(${index})"
           >
-            ✨ AI Build Product
+            🖼 Generate Product Image
           </button>
 
           <button
@@ -412,12 +412,6 @@ function renderProducts(){
       <div
         id="descriptionStatus-${index}"
         class="description-ai-status"
-        aria-live="polite"
-      ></div>
-
-      <div
-        id="productBuildStatus-${index}"
-        class="product-build-status"
         aria-live="polite"
       ></div>
 
@@ -1111,65 +1105,33 @@ async function createMatchingVialImage(product){
   );
 }
 
-async function aiBuildProduct(index){
+async function generateProductImage(index){
   const product = products[index];
 
   if(!product){
     return;
   }
 
-  if(!String(product.name||"").trim()){
+  if(!String(product.name || "").trim()){
     alert("Enter the product name first.");
     return;
   }
 
-  if(!String(product.strength||"").trim()){
+  if(!String(product.strength || "").trim()){
     alert("Enter the product strength first.");
     return;
   }
 
-  const button = el(`aiBuildProduct-${index}`);
-  const status = el(`productBuildStatus-${index}`);
+  const button = el(`generateProductImage-${index}`);
 
   button.disabled = true;
-  button.textContent = "Building…";
-
-  if(status){
-    status.textContent =
-      "Generating the matching description and vial image…";
-    status.className = "product-build-status working";
-  }
+  button.textContent = "Generating Image…";
 
   try{
-    const descriptionResponse = await fetch(
-      "/.netlify/functions/generate-product-description",
-      {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          name:product.name,
-          strength:product.strength,
-          category:product.category,
-          existing_description:product.description
-        })
-      }
-    );
-
-    const descriptionResult =
-      await descriptionResponse.json().catch(()=>({}));
-
-    if(!descriptionResponse.ok){
-      throw new Error(
-        descriptionResult.error ||
-        "The product description could not be generated."
-      );
-    }
-
-    product.description = descriptionResult.description || "";
-
     const vialFile = await createMatchingVialImage(product);
     const vialPath =
       `products/ai-vials/${crypto.randomUUID()}.webp`;
+
     const vialUrl = await uploadFile(
       vialPath,
       vialFile,
@@ -1178,66 +1140,44 @@ async function aiBuildProduct(index){
 
     product.image_url = vialUrl;
 
-    const payload = {
-      name:String(product.name).trim(),
-      category:product.category || "Research Compound",
-      description:product.description,
-      strength:product.strength || "",
-      price:Number(product.price || 0),
-      compare_at_price:
-        product.compare_at_price === null ||
-        product.compare_at_price === ""
-          ? null
-          : Number(product.compare_at_price),
-      price_note:product.price_note || null,
-      image_url:vialUrl,
-      coa_url:product.coa_url || null,
-      visible:product.visible !== false,
-      featured:product.featured === true,
-      status:product.status || "available",
-      updated_at:new Date().toISOString()
-    };
+    if(product.id){
+      const result = await client
+        .from("products")
+        .update({
+          image_url:vialUrl,
+          updated_at:new Date().toISOString()
+        })
+        .eq("id",product.id)
+        .select("*")
+        .single();
 
-    const result = product.id
-      ? await client
-          .from("products")
-          .update(payload)
-          .eq("id",product.id)
-          .select("*")
-          .single()
-      : await client
-          .from("products")
-          .insert(payload)
-          .select("*")
-          .single();
+      if(result.error){
+        throw result.error;
+      }
 
-    if(result.error){
-      throw result.error;
+      products[index] = result.data;
     }
 
-    products[index] = result.data;
+    renderProducts();
 
-    if(status){
-      status.textContent =
-        "Product description and matching vial image created and saved.";
-      status.className = "product-build-status success";
-    }
-
-    await loadProducts();
-    flash("AI product build complete");
+    flash(
+      product.id
+        ? "Product image generated and saved"
+        : "Product image generated. Save the product."
+    );
   }catch(error){
     console.error(error);
-
-    if(status){
-      status.textContent =
-        error.message || "The product could not be built.";
-      status.className = "product-build-status error";
-    }
-
-    alert(error.message || "The product could not be built.");
+    alert(
+      error.message ||
+      "The product image could not be generated."
+    );
   }finally{
-    button.disabled = false;
-    button.textContent = "✨ AI Build Product";
+    const refreshedButton = el(`generateProductImage-${index}`);
+
+    if(refreshedButton){
+      refreshedButton.disabled = false;
+      refreshedButton.textContent = "🖼 Generate Product Image";
+    }
   }
 }
 

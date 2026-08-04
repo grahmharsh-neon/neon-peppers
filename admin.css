@@ -606,3 +606,16 @@ textarea{min-height:95px;resize:vertical}
   object-fit:contain;
   margin:14px 0 22px;
 }
+
+
+/* TWO-BUTTON AI PRODUCT TOOLS V20.1 */
+.description-ai-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+#generateProductImage-0,
+[id^="generateProductImage-"]{
+  color:#07110c !important;
+}
