@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Customer CRM | Neon Peppers</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/admin.css">
+  <link rel="stylesheet" href="/customer-crm.css">
+</head>
+<body class="crm-body">
+  <div id="crmAuthGate" class="crm-auth-gate">
+    <div class="crm-auth-card">
+      <img src="/assets/neon-peppers-logo.jpg" alt="Neon Peppers">
+      <div class="eyebrow">Admin Access</div>
+      <h1>CUSTOMER CRM</h1>
+      <input id="crmEmail" type="email" placeholder="Email">
+      <input id="crmPassword" type="password" placeholder="Password">
+      <button id="crmLoginButton" class="btn pink" type="button">Sign In</button>
+      <div id="crmAuthMessage" class="form-status"></div>
+    </div>
+  </div>
+
+  <aside class="crm-sidebar">
+    <a href="/admin.html" class="crm-logo">
+      <img src="/assets/neon-peppers-logo.jpg" alt="Neon Peppers">
+    </a>
+    <nav>
+      <a href="/admin.html">Main Admin</a>
+      <a href="/invoice-admin.html">Invoice Center</a>
+      <a class="active" href="/customer-crm.html">Customer CRM</a>
+      <a href="/" target="_blank" rel="noopener">Public Site</a>
+    </nav>
+    <button id="crmLogoutButton" class="btn" type="button">Sign Out</button>
+  </aside>
+
+  <main class="crm-main">
+    <section class="crm-page-head">
+      <div>
+        <div class="eyebrow">Customer management</div>
+        <h1>CUSTOMER CRM</h1>
+        <p class="muted">View customer history, requests, invoices, totals, and notes in one place.</p>
+      </div>
+      <button id="crmRefreshButton" class="btn green" type="button">Refresh</button>
+    </section>
+
+    <section class="crm-stats">
+      <article><span>Total Customers</span><strong id="crmStatCustomers">0</strong></article>
+      <article><span>Active Customers</span><strong id="crmStatActive">0</strong></article>
+      <article><span>Total Requested</span><strong id="crmStatRequested">$0.00</strong></article>
+      <article><span>Total Paid</span><strong id="crmStatPaid">$0.00</strong></article>
+    </section>
+
+    <section class="panel">
+      <div class="product-toolbar">
+        <input id="crmSearch" placeholder="Search customer, email, phone, company, or product...">
+        <select id="crmFilter">
+          <option value="all">All customers</option>
+          <option value="new">New</option>
+          <option value="active">Active</option>
+          <option value="vip">VIP</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+      <div id="crmList"><p class="muted">Loading customers…</p></div>
+    </section>
+  </main>
+
+  <div id="crmModal" class="modal crm-modal">
+    <div class="modal-card crm-modal-card">
+      <button id="crmCloseButton" class="modal-close" type="button">×</button>
+
+      <div class="crm-modal-head">
+        <div>
+          <div class="eyebrow">Customer profile</div>
+          <h2 id="crmCustomerName">Customer</h2>
+        </div>
+        <span id="crmCustomerStatus" class="crm-status active">Active</span>
+      </div>
+
+      <div class="grid two">
+        <div><label>Email</label><input id="crmCustomerEmail" readonly></div>
+        <div><label>Phone</label><input id="crmCustomerPhone"></div>
+        <div><label>Company</label><input id="crmCustomerCompany"></div>
+        <div>
+          <label>Status</label>
+          <select id="crmStatus">
+            <option value="new">New</option>
+            <option value="active">Active</option>
+            <option value="vip">VIP</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Private Notes</label>
+      <textarea id="crmNotes" placeholder="Preferences, follow-up notes, or other details."></textarea>
+
+      <div class="crm-summary-grid">
+        <article><span>Requests</span><strong id="crmRequestCount">0</strong></article>
+        <article><span>Invoices</span><strong id="crmInvoiceCount">0</strong></article>
+        <article><span>Requested Total</span><strong id="crmRequestedTotal">$0.00</strong></article>
+        <article><span>Paid Total</span><strong id="crmPaidTotal">$0.00</strong></article>
+      </div>
+
+      <section class="crm-history-section">
+        <h3>Recent Requests</h3>
+        <div id="crmRequests"></div>
+      </section>
+
+      <section class="crm-history-section">
+        <h3>Invoices</h3>
+        <div id="crmInvoices"></div>
+      </section>
+
+      <div class="crm-modal-actions">
+        <button id="crmSaveButton" class="btn pink" type="button">Save Customer</button>
+        <a id="crmEmailButton" class="btn blue" href="#">Email Customer</a>
+      </div>
+      <div id="crmMessage" class="form-status"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/config.js"></script>
+  <script src="/customer-crm.js?v=21.5"></script>
+</body>
+</html>

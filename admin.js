@@ -9,6 +9,11 @@ let orderFormItems = [];
 let orderFormItemVariants = [];
 let merchItems = [];
 let merchVariants = [];
+let dashboardInvoices = [];
+let dashboardCustomers = [];
+let dashboardCoas = [];
+let dashboardCoupons = [];
+let dashboardReferrals = [];
 
 function el(id){
   return document.getElementById(id);
@@ -160,6 +165,8 @@ async function showAdmin(){
   el("loginView").hidden = true;
   el("adminView").hidden = false;
   await refreshAll();
+  await loadDashboardData();
+  updateStats();
 }
 
 async function refreshAll(){
@@ -172,6 +179,7 @@ async function refreshAll(){
     loadOrderFormItems(),
     loadMerchAdmin()
   ]);
+  await loadDashboardData();
   updateStats();
   flash("Dashboard refreshed");
 }
@@ -243,351 +251,90 @@ async function loadSettings(){
   updateImagePreview("heroPreview", siteSettings.hero_image_url);
   updateImagePreview("logoPreview", siteSettings.logo_url);}
 
+async function loadDashboardData(){
+  if(!client)return;
+
+  const [invoiceResult,customerResult,coaResult,couponResult,referralResult]=await Promise.all([
+    client.from("invoices").select("*").order("updated_at",{ascending:false}),
+    client.from("customers").select("*").order("updated_at",{ascending:false}),
+    client.from("product_coas").select("product_id"),
+    client.from("coupon_codes").select("*"),
+    client.from("referrals").select("*")
+  ]);
+
+  dashboardInvoices=invoiceResult.error?[]:invoiceResult.data||[];
+  dashboardCustomers=customerResult.error?[]:customerResult.data||[];
+  dashboardCoas=coaResult.error?[]:coaResult.data||[];
+  dashboardCoupons=couponResult.error?[]:couponResult.data||[];
+  dashboardReferrals=referralResult.error?[]:referralResult.data||[];
+}
+
 function updateStats(){
-  el("statTotal").textContent = products.length;
-  el("statVisible").textContent = products.filter(product => product.visible !== false).length;
-  el("statFeatured").textContent = products.filter(product => product.featured === true).length;
+  const now=new Date();
+  const today=now.toISOString().slice(0,10);
+  const month=now.toISOString().slice(0,7);
+
+  const requestsToday=orderRequests.filter(x=>
+    String(x.created_at||"").slice(0,10)===today
+  ).length;
+
+  const drafts=dashboardInvoices.filter(x=>x.status==="draft").length;
+  const paidMonth=dashboardInvoices
+    .filter(x=>x.status==="paid"&&String(x.paid_at||x.updated_at||"").slice(0,7)===month)
+    .reduce((sum,x)=>sum+Number(x.total||0),0);
+
+  const lowStock=products.filter(x=>
+    Number(x.stock_count||0)<=Number(x.low_stock_threshold||5)
+  ).length;
+
+  const productIdsWithCoa=new Set(dashboardCoas.map(x=>String(x.product_id)));
+  const missingCoas=products.filter(x=>x.visible!==false&&!productIdsWithCoa.has(String(x.id))).length;
+
+  const credits=dashboardCustomers.reduce((sum,x)=>sum+Number(x.referral_credit||0),0);
+
+  const money=value=>new Intl.NumberFormat("en-US",{
+    style:"currency",currency:"USD"
+  }).format(Number(value||0));
+
+  if(el("statRequestsToday"))el("statRequestsToday").textContent=requestsToday;
+  if(el("statDraftInvoices"))el("statDraftInvoices").textContent=drafts;
+  if(el("statPaidMonth"))el("statPaidMonth").textContent=money(paidMonth);
+  if(el("statLowInventory"))el("statLowInventory").textContent=lowStock;
+  if(el("statCustomers"))el("statCustomers").textContent=dashboardCustomers.length;
+  if(el("statMissingCoas"))el("statMissingCoas").textContent=missingCoas;
+  if(el("statActiveCoupons"))el("statActiveCoupons").textContent=dashboardCoupons.filter(x=>x.active).length;
+  if(el("statReferralCredits"))el("statReferralCredits").textContent=money(credits);
+
+  renderDashboardActivity();
 }
 
-function escapeHtml(value){
-  return String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
+function renderDashboardActivity(){
+  const box=el("dashboardRecentActivity");
+  if(!box)return;
 
-function renderProducts(){
-  const box = el("products");
-  const query = el("adminProductSearch").value.trim().toLowerCase();
-  const filter = el("adminProductFilter").value;
+  const activity=[
+    ...orderRequests.slice(0,5).map(x=>({
+      date:x.created_at,
+      title:`Order request from ${x.name}`,
+      detail:x.invoice_number?`Invoice ${x.invoice_number}`:x.status||"new"
+    })),
+    ...dashboardInvoices.slice(0,5).map(x=>({
+      date:x.updated_at||x.created_at,
+      title:`Invoice ${x.invoice_number}`,
+      detail:`${x.customer_name} · ${x.status}`
+    }))
+  ]
+  .sort((a,b)=>new Date(b.date)-new Date(a.date))
+  .slice(0,8);
 
-  const filtered = products.filter(product => {
-    const searchable = `${product.name} ${product.category} ${product.description} ${(product.tags||[]).join(" ")} ${product.supplier||""} ${product.shelf_location||""}`.toLowerCase();
-    const matchesSearch = searchable.includes(query);
-
-    let matchesFilter = true;
-
-    if(filter === "visible"){
-      matchesFilter = product.visible !== false;
-    }else if(filter === "hidden"){
-      matchesFilter = product.visible === false;
-    }else if(filter === "featured"){
-      matchesFilter = product.featured === true;
-    }
-
-    return matchesSearch && matchesFilter;
-  });
-
-  box.innerHTML = "";
-
-  if(!filtered.length){
-    box.innerHTML = '<p class="muted">No matching products.</p>';
-    return;
-  }
-
-  filtered.forEach(product => {
-    const index = products.indexOf(product);
-    const row = document.createElement("article");
-    row.className = "product";
-
-    row.innerHTML = `
-      <div class="product-head">
-        <h3>${escapeHtml(product.name || "New Product")}</h3>
-        <span class="muted">${product.id ? "Saved product" : "Unsaved product"}</span>
+  box.innerHTML=activity.length
+    ?activity.map(x=>`
+      <div class="dashboard-activity-row">
+        <div><strong>${escapeHtml(x.title)}</strong><span>${escapeHtml(x.detail)}</span></div>
+        <time>${new Date(x.date).toLocaleString()}</time>
       </div>
-
-      <div class="grid two">
-        <div>
-          <label>Name</label>
-          <input data-index="${index}" data-key="name" value="${escapeHtml(product.name)}">
-        </div>
-
-        <div>
-          <label>Category</label>
-          <input data-index="${index}" data-key="category" value="${escapeHtml(product.category)}">
-        </div>
-
-        <div>
-          <label>Strength</label>
-          <input data-index="${index}" data-key="strength" value="${escapeHtml(product.strength)}">
-        </div>
-
-      <div>
-        <label>Price</label>
-        <input
-          type="number"
-          min="0"
-          step="0.01"
-          data-index="${index}"
-          data-key="price"
-          value="${Number(product.price || 0)}"
-        >
-      </div>
-
-      <div>
-        <label>Compare-at Price</label>
-        <input
-          type="number"
-          min="0"
-          step="0.01"
-          data-index="${index}"
-          data-key="compare_at_price"
-          value="${product.compare_at_price == null ? "" : Number(product.compare_at_price)}"
-        >
-      </div>
-
-      <div>
-        <label>Price Note</label>
-        <input
-          data-index="${index}"
-          data-key="price_note"
-          value="${escapeHtml(product.price_note || "")}"
-          placeholder="Optional, e.g. per vial"
-        >
-      </div>
-
-      <div>
-        <label>Stock Count</label>
-        <input type="number" min="0" step="1" data-index="${index}" data-key="stock_count" value="${Number(product.stock_count||0)}">
-      </div>
-
-      <div>
-        <label>Low Stock Alert</label>
-        <input type="number" min="0" step="1" data-index="${index}" data-key="low_stock_threshold" value="${Number(product.low_stock_threshold||5)}">
-      </div>
-
-      <div>
-        <label>Tags</label>
-        <input data-index="${index}" data-key="tags_text" value="${escapeHtml((product.tags||[]).join(", "))}" placeholder="Recovery, GLP, Skin">
-      </div>
-
-      <div>
-        <label>URL Slug</label>
-        <input data-index="${index}" data-key="slug" value="${escapeHtml(product.slug||"")}" placeholder="automatic-from-name">
-      </div>
-
-        <div>
-          <label>Status</label>
-          <select data-index="${index}" data-key="status">
-            <option value="available" ${product.status === "available" || !product.status ? "selected" : ""}>Available</option>
-            <option value="coming_soon" ${product.status === "coming_soon" ? "selected" : ""}>Coming Soon</option>
-            <option value="out_of_stock" ${product.status === "out_of_stock" ? "selected" : ""}>Out of Stock</option>
-          </select>
-        </div>
-      </div>
-
-
-      <div class="grid three product-private-fields">
-        <div>
-          <label>Supplier (Private)</label>
-          <input data-index="${index}" data-key="supplier" value="${escapeHtml(product.supplier||"")}">
-        </div>
-        <div>
-          <label>Unit Cost (Private)</label>
-          <input type="number" min="0" step="0.01" data-index="${index}" data-key="unit_cost" value="${product.unit_cost==null?"":Number(product.unit_cost)}">
-        </div>
-        <div>
-          <label>Shelf Location (Private)</label>
-          <input data-index="${index}" data-key="shelf_location" value="${escapeHtml(product.shelf_location||"")}">
-        </div>
-      </div>
-
-      <div class="grid two">
-        <div>
-          <label>SEO Title</label>
-          <input data-index="${index}" data-key="seo_title" value="${escapeHtml(product.seo_title||"")}">
-        </div>
-        <div>
-          <label>SEO Description</label>
-          <input data-index="${index}" data-key="seo_description" value="${escapeHtml(product.seo_description||"")}">
-        </div>
-      </div>
-
-      <div class="description-heading">
-        <label for="productDescription-${index}">Description</label>
-
-        <div class="description-ai-actions">
-          <button
-            class="btn ai-button"
-            type="button"
-            id="generateDescription-${index}"
-            onclick="generateProductDescription(${index})"
-          >
-            ✨ Generate Description
-          </button>
-
-          <button
-            class="btn"
-            type="button"
-            onclick="toggleDescriptionPreview(${index})"
-          >
-            Preview
-          </button>
-        </div>
-      </div>
-
-      <textarea
-        id="productDescription-${index}"
-        data-index="${index}"
-        data-key="description"
-        placeholder="Enter a description or generate one with AI."
-      >${escapeHtml(product.description)}</textarea>
-
-      <div
-        id="descriptionStatus-${index}"
-        class="description-ai-status"
-        aria-live="polite"
-      ></div>
-
-      <div
-        id="descriptionPreview-${index}"
-        class="description-preview markdown-description"
-        hidden
-      ></div>
-
-      <div class="grid two">
-        <div>
-          <label>Visible</label>
-          <select data-index="${index}" data-key="visible">
-            <option value="true" ${product.visible !== false ? "selected" : ""}>Yes</option>
-            <option value="false" ${product.visible === false ? "selected" : ""}>No</option>
-          </select>
-        </div>
-
-        <div>
-          <label>Featured</label>
-          <select data-index="${index}" data-key="featured">
-            <option value="false" ${product.featured !== true ? "selected" : ""}>No</option>
-            <option value="true" ${product.featured === true ? "selected" : ""}>Yes</option>
-          </select>
-        </div>
-      </div>
-
-      <label>Product image URL</label>
-      <input data-index="${index}" data-key="image_url" value="${escapeHtml(product.image_url)}">
-
-      <div class="upload-row">
-        <input id="productImage-${index}" type="file" accept="image/*">
-        <button class="btn blue" onclick="uploadProductImage(${index})">Upload Product Image</button>
-      </div>
-
-      ${product.image_url
-        ? `<img class="product-image" src="${escapeHtml(product.image_url)}" alt="${escapeHtml(product.name)}">`
-        : ""
-      }
-
-      <div class="variant-admin"><div class="variant-admin-head"><h4>Strengths & Stock</h4><button class="btn green" type="button" onclick="addVariant(${index})">+ Add Strength</button></div><div id="variants-${index}" class="variant-list"></div></div>
-
-      <label>COA URL</label>
-      <input data-index="${index}" data-key="coa_url" value="${escapeHtml(product.coa_url)}">
-
-      <div class="upload-row">
-        <input id="coaFile-${index}" type="file" accept="application/pdf">
-        <button class="btn blue" onclick="uploadCoa(${index})">Upload COA PDF</button>
-      </div>
-
-      <div class="actions">
-        <button class="btn pink" onclick="saveProduct(${index})">Save Product</button>
-        <button class="btn danger" onclick="deleteProduct(${index})">Delete</button>
-      </div>
-    `;
-
-    box.appendChild(row);
-    renderVariantsForProduct(index);
-  });
-
-  box.querySelectorAll("[data-index]").forEach(node => {
-    const update = event => {
-      const index = Number(event.target.dataset.index);
-      const key = event.target.dataset.key;
-
-      if(!products[index]){
-        return;
-      }
-
-      let value = event.target.value;
-
-      if(key === "visible" || key === "featured"){
-        value = value === "true";
-      }
-      if(key === "price" || key === "compare_at_price" || key === "unit_cost" || key === "stock_count" || key === "low_stock_threshold"){
-        value = value === "" ? null : Number(value);
-      }
-
-      if(key==="tags_text"){
-      products[index].tags=value.split(",").map(v=>v.trim()).filter(Boolean);    }else{
-      products[index][key]=value;
-    }
-    };
-
-    node.addEventListener("input", update);
-    node.addEventListener("change", update);
-  });
-}
-
-function addProduct(){
-  products.unshift({
-    id:null,
-    name:"New Product",
-    category:"Research Compound",
-    description:"",
-    strength:"",
-      price:0,
-      compare_at_price:null,
-      price_note:"",
-      slug:"",
-      tags:[],
-      stock_count:0,
-      low_stock_threshold:5,
-      supplier:"",
-      unit_cost:null,
-      shelf_location:"",
-      seo_title:"",
-      seo_description:"",
-    image_url:"",
-    coa_url:"",
-    visible:true,
-    featured:false,
-    status:"available"
-  });
-
-  renderProducts();
-  updateStats();
-  showPanel("productsPanel");
-}
-
-
-
-function toggleDescriptionPreview(index){
-  const product = products[index];
-  const preview = el(`descriptionPreview-${index}`);
-
-  if(!product || !preview){
-    return;
-  }
-
-  if(!preview.hidden){
-    preview.hidden = true;
-    return;
-  }
-
-  preview.innerHTML = window.renderMarkdown
-    ? window.renderMarkdown(product.description || "")
-    : escapeHtml(product.description || "");
-
-  preview.hidden = false;
-}
-
-function setDescriptionGenerationStatus(index, message, type = ""){
-  const status = el(`descriptionStatus-${index}`);
-
-  if(!status){
-    return;
-  }
-
-  status.textContent = message;
-  status.className = `description-ai-status ${type}`.trim();
+    `).join("")
+    :'<p class="muted">No recent activity.</p>';
 }
 
 async function generateProductDescription(index){

@@ -49,18 +49,32 @@
           <button class="btn green" id="refreshButton">Refresh Data</button>
         </div>
 
-        <div class="stats">
-          <article><span>Total products</span><strong id="statTotal">0</strong></article>
-          <article><span>Visible products</span><strong id="statVisible">0</strong></article>
-          <article><span>Featured products</span><strong id="statFeatured">0</strong></article>
+        <div class="stats dashboard-stats-v22">
+          <article><span>Requests Today</span><strong id="statRequestsToday">0</strong></article>
+          <article><span>Draft Invoices</span><strong id="statDraftInvoices">0</strong></article>
+          <article><span>Paid This Month</span><strong id="statPaidMonth">$0.00</strong></article>
+          <article><span>Low Inventory</span><strong id="statLowInventory">0</strong></article>
+          <article><span>Customers</span><strong id="statCustomers">0</strong></article>
+          <article><span>Missing COAs</span><strong id="statMissingCoas">0</strong></article>
+          <article><span>Active Coupons</span><strong id="statActiveCoupons">0</strong></article>
+          <article><span>Referral Credits</span><strong id="statReferralCredits">$0.00</strong></article>
         </div>
 
-        <div class="panel">
-          <h2>Quick actions</h2>
-          <div class="actions">
-            <button class="btn pink" id="quickAddProduct">+ Add Product</button>
-            <button class="btn blue" data-panel-target="homepagePanel">Edit Homepage</button>
-            <a class="btn" href="index.html" target="_blank">Open Public Site</a>
+        <div class="dashboard-grid-v22">
+          <div class="panel">
+            <h2>Quick Actions</h2>
+            <div class="actions">
+              <button class="btn pink" id="quickAddProduct">+ Add Product</button>
+              <a class="btn blue" href="/invoice-admin.html">Invoice Center</a>
+              <a class="btn green" href="/customer-crm.html">Customer CRM</a>
+              <a class="btn" href="/growth-admin.html">Coupons & Referrals</a>
+              <a class="btn" href="/coa-admin.html">COA Admin</a>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h2>Recent Activity</h2>
+            <div id="dashboardRecentActivity"><p class="muted">Loading activity…</p></div>
           </div>
         </div>
       </section>
@@ -277,6 +291,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script src="/markdown.js"></script>
-  <script src="admin.js?v=21.4"></script>
+  <script src="admin.js?v=22"></script>
 </body>
 </html>

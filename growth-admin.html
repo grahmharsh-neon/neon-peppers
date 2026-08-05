@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Growth Tools | Neon Peppers</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/admin.css">
+  <link rel="stylesheet" href="/growth-admin.css">
+</head>
+<body class="growth-body">
+  <div id="growthAuthGate" class="growth-auth-gate">
+    <div class="growth-auth-card">
+      <img src="/assets/neon-peppers-logo.jpg" alt="Neon Peppers">
+      <h1>GROWTH TOOLS</h1>
+      <input id="growthEmail" type="email" placeholder="Email">
+      <input id="growthPassword" type="password" placeholder="Password">
+      <button id="growthLoginButton" class="btn pink" type="button">Sign In</button>
+      <div id="growthAuthMessage" class="form-status"></div>
+    </div>
+  </div>
+
+  <aside class="growth-sidebar">
+    <a href="/admin.html"><img src="/assets/neon-peppers-logo.jpg" alt="Neon Peppers"></a>
+    <nav>
+      <a href="/admin.html">Main Admin</a>
+      <a href="/invoice-admin.html">Invoice Center</a>
+      <a href="/customer-crm.html">Customer CRM</a>
+      <a class="active" href="/growth-admin.html">Growth Tools</a>
+    </nav>
+    <button id="growthLogoutButton" class="btn" type="button">Sign Out</button>
+  </aside>
+
+  <main class="growth-main">
+    <section class="growth-head">
+      <div><div class="eyebrow">Promotions and referrals</div><h1>GROWTH TOOLS</h1></div>
+      <button id="addCouponButton" class="btn green" type="button">+ Add Coupon</button>
+    </section>
+
+    <section class="growth-stats">
+      <article><span>Active Coupons</span><strong id="growthActiveCoupons">0</strong></article>
+      <article><span>Total Referrals</span><strong id="growthTotalReferrals">0</strong></article>
+      <article><span>Rewarded</span><strong id="growthRewardedReferrals">0</strong></article>
+      <article><span>Credits Awarded</span><strong id="growthCreditsAwarded">$0.00</strong></article>
+    </section>
+
+    <section class="panel">
+      <h2>Coupon Codes</h2>
+      <div id="couponList"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Referral Activity</h2>
+      <div id="referralList"></div>
+    </section>
+  </main>
+
+  <div id="couponModal" class="modal growth-modal">
+    <div class="modal-card growth-modal-card">
+      <button id="couponCloseButton" class="modal-close" type="button">×</button>
+      <h2 id="couponModalTitle">Add Coupon</h2>
+      <div class="grid two">
+        <div><label>Code *</label><input id="couponCode"></div>
+        <div><label>Description</label><input id="couponDescription"></div>
+        <div><label>Discount Type</label><select id="couponType"><option value="percent">Percent</option><option value="fixed">Fixed Amount</option></select></div>
+        <div><label>Discount Value</label><input id="couponValue" type="number" min="0" step="0.01"></div>
+        <div><label>Minimum Subtotal</label><input id="couponMinimum" type="number" min="0" step="0.01" value="0"></div>
+        <div><label>Usage Limit</label><input id="couponLimit" type="number" min="1" step="1" placeholder="Unlimited"></div>
+        <div><label>Starts</label><input id="couponStarts" type="datetime-local"></div>
+        <div><label>Ends</label><input id="couponEnds" type="datetime-local"></div>
+        <div><label>Active</label><select id="couponActive"><option value="true">Yes</option><option value="false">No</option></select></div>
+      </div>
+      <div class="actions"><button id="couponSaveButton" class="btn pink" type="button">Save Coupon</button></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/config.js"></script>
+  <script src="/growth-admin.js?v=22"></script>
+</body>
+</html>

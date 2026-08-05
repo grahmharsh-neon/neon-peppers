@@ -55,12 +55,18 @@
     const params=new URLSearchParams(location.search);
     const invoiceId=params.get("invoice");
     const requestId=params.get("request");
+    const customerEmail=params.get("customer");
 
     if(invoiceId){
       openExisting(invoiceId);
       history.replaceState(null,"","/invoice-admin.html");
     }else if(requestId){
       await createFromRequest(requestId);
+      history.replaceState(null,"","/invoice-admin.html");
+    }else if(customerEmail){
+      openNew();
+      current.customer_email=customerEmail;
+      el("invoiceCustomerEmail").value=customerEmail;
       history.replaceState(null,"","/invoice-admin.html");
     }
   }

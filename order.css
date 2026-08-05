@@ -507,3 +507,12 @@ body.gated{
   color:var(--green);
   font-size:.78rem;
 }
+
+
+/* COUPON + REFERRAL V22 */
+.order-discount-summary{
+  min-height:20px;
+  margin:8px 0 14px;
+  color:var(--green);
+  font-size:.82rem;
+}

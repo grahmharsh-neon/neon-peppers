@@ -56,6 +56,7 @@
         <a class="active" href="/order.html">Order Request</a>
         <a href="/merch.html">Merch</a>
         <a href="/coa.html">COAs</a>
+        <a href="/customer-portal.html">Customer Portal</a>
         <a href="/#about">About</a>
         <a href="/#contact">Contact</a>
         <a class="admin-link" href="/admin.html">Admin</a>
@@ -144,7 +145,22 @@
             </div>
           </div>
 
-          <label for="orderNotes">Notes</label>
+          
+          <div class="grid two">
+            <div>
+              <label for="orderCoupon">Coupon Code</label>
+              <input id="orderCoupon" placeholder="Optional">
+            </div>
+
+            <div>
+              <label for="orderReferral">Referral Code</label>
+              <input id="orderReferral" placeholder="Optional">
+            </div>
+          </div>
+
+          <div id="orderDiscountSummary" class="order-discount-summary"></div>
+
+<label for="orderNotes">Notes</label>
           <textarea id="orderNotes" maxlength="3000" placeholder="Documentation, quantity, shipping, or other research-related questions."></textarea>
 
           <label class="order-confirmation">
@@ -181,6 +197,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/config.js"></script>
-  <script src="/order.js?v=21.2"></script>
+  <script src="/order.js?v=22"></script>
 </body>
 </html>

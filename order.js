@@ -92,7 +92,6 @@ async function loadOrderForm(){
   }
 
   orderItems=(productsResult.data||[])
-  .filter(product=>!(product.hide_when_out_of_stock===true&&Number(product.stock_count||0)<=0))
   .map(product=>({
     id:product.id,
     name:product.name,
@@ -456,6 +455,8 @@ async function submitOrder(event){
     phone:el("orderPhone").value.trim(),
     company:el("orderCompany").value.trim(),
     notes:el("orderNotes").value.trim(),
+    coupon_code:el("orderCoupon")?.value.trim().toUpperCase()||"",
+    referral_code:el("orderReferral")?.value.trim().toUpperCase()||"",
     research_acknowledged:el("orderConsent").checked,
     website:el("orderWebsite").value,
     source_url:window.location.href,
@@ -489,9 +490,13 @@ async function submitOrder(event){
     cart=[];
     renderCart();
 
-    const invoiceText = result.invoice_number
-      ? ` Draft invoice ${result.invoice_number} was created for $${Number(result.invoice_total||0).toFixed(2)}.`
+    const discountText=Number(result.discount_amount||0)>0
+      ? ` Coupon ${result.coupon_code} saved $${Number(result.discount_amount).toFixed(2)}.`
       : "";
+
+    const invoiceText=result.invoice_number
+      ? ` Draft invoice ${result.invoice_number} was created for $${Number(result.invoice_total||0).toFixed(2)}.${discountText}`
+      : discountText;
 
     setStatus(
       `Thank you. Your order request was sent.${invoiceText}`,
@@ -510,6 +515,7 @@ async function submitOrder(event){
 }
 
 document.addEventListener("DOMContentLoaded",()=>{
+  initReferralCode();
   initGate();
   loadOrderForm();
 
@@ -521,3 +527,11 @@ document.addEventListener("DOMContentLoaded",()=>{
     el("navLinks").classList.toggle("open");
   });
 });
+
+
+function initReferralCode(){
+  const code=new URLSearchParams(window.location.search).get("ref");
+  if(code&&el("orderReferral")){
+    el("orderReferral").value=String(code).trim().toUpperCase();
+  }
+}

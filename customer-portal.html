@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Customer Portal | Neon Peppers</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/customer-portal.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a class="brand" href="/"><img src="/assets/neon-peppers-logo.jpg" alt="Neon Peppers"></a>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/order.html">Order Request</a>
+        <a class="active" href="/customer-portal.html">Customer Portal</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="portal-page">
+    <section id="portalAccess" class="portal-access">
+      <div class="eyebrow">Secure customer access</div>
+      <h1>CUSTOMER PORTAL</h1>
+      <p>Enter the email used on your order request. We will send a secure access link.</p>
+      <input id="portalEmail" type="email" placeholder="Email address">
+      <button id="portalSendLinkButton" class="btn pink" type="button">Email Access Link</button>
+      <div id="portalAccessMessage" class="form-status"></div>
+    </section>
+
+    <section id="portalDashboard" hidden>
+      <div class="portal-head">
+        <div>
+          <div class="eyebrow">Welcome back</div>
+          <h1 id="portalCustomerName">Customer</h1>
+          <p id="portalCustomerEmail" class="muted"></p>
+        </div>
+        <a class="btn green" href="/order.html">New Order Request</a>
+      </div>
+
+      <div class="portal-stats">
+        <article><span>Requests</span><strong id="portalRequestCount">0</strong></article>
+        <article><span>Invoices</span><strong id="portalInvoiceCount">0</strong></article>
+        <article><span>Referral Credit</span><strong id="portalReferralCredit">$0.00</strong></article>
+        <article><span>Referral Code</span><strong id="portalReferralCode">—</strong></article>
+      </div>
+
+      <section class="portal-card referral-card">
+        <div>
+          <h2>Refer a Friend</h2>
+          <p>Share your referral code. Qualified referrals earn account credit after the referred invoice is marked paid.</p>
+        </div>
+        <div class="referral-copy">
+          <input id="portalReferralLink" readonly>
+          <button id="portalCopyReferralButton" class="btn blue" type="button">Copy Link</button>
+        </div>
+      </section>
+
+      <section class="portal-card">
+        <h2>Order Requests</h2>
+        <div id="portalRequests"></div>
+      </section>
+
+      <section class="portal-card">
+        <h2>Invoices</h2>
+        <div id="portalInvoices"></div>
+      </section>
+
+      <section class="portal-card">
+        <h2>Certificates of Analysis</h2>
+        <div id="portalCoas"></div>
+      </section>
+    </section>
+  </main>
+
+  <script src="/customer-portal.js?v=22"></script>
+</body>
+</html>
