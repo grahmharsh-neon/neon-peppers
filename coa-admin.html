@@ -21,19 +21,24 @@
     </div>
   </div>
 
-  <aside class="admin-sidebar">
-    <a class="admin-logo" href="/admin.html">
+    <aside class="admin-sidebar unified-admin-sidebar">
+    <a class="unified-admin-logo" href="/admin.html">
       <img src="/assets/neon-peppers-logo.jpg" alt="Neon Peppers">
     </a>
-
-    <nav>
-      <a class="admin-nav-link" href="/admin.html">Dashboard</a>
-      <a class="admin-nav-link active" href="/coa-admin.html">COA Admin</a>
-      <a class="admin-nav-link" href="/coa.html" target="_blank" rel="noopener">Public COA Library</a>
-      <a class="admin-nav-link" href="/#products" target="_blank" rel="noopener">Public Products</a>
+<nav class="unified-admin-nav">
+      <a href="/admin.html">Dashboard</a>
+      <a href="/admin.html#productsPanel">Products</a>
+      <a href="/admin.html#ordersPanel">Order Requests</a>
+      <a href="/invoice-admin.html">Invoices</a>
+      <a href="/customer-crm.html">Customers</a>
+      <a class="active" href="/coa-admin.html">COAs</a>
+      <a href="/growth-admin.html">Growth</a>
+      <a href="/admin.html#homepagePanel">Homepage</a>
+      <a href="/admin.html#settingsPanel">Settings</a>
+      <a href="/" target="_blank" rel="noopener">View Website</a>
     </nav>
 
-    <button id="coaSignOutButton" class="btn" type="button">Sign Out</button>
+    <button id="coaSignOutButton" class="btn admin-signout-button" type="button">Sign Out</button>
   </aside>
 
   <main class="admin-main coa-admin-main">

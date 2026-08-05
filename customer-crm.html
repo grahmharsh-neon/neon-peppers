@@ -21,17 +21,24 @@
     </div>
   </div>
 
-  <aside class="crm-sidebar">
-    <a href="/admin.html" class="crm-logo">
+    <aside class="crm-sidebar unified-admin-sidebar">
+    <a class="unified-admin-logo" href="/admin.html">
       <img src="/assets/neon-peppers-logo.jpg" alt="Neon Peppers">
     </a>
-    <nav>
-      <a href="/admin.html">Main Admin</a>
-      <a href="/invoice-admin.html">Invoice Center</a>
-      <a class="active" href="/customer-crm.html">Customer CRM</a>
-      <a href="/" target="_blank" rel="noopener">Public Site</a>
+<nav class="unified-admin-nav">
+      <a href="/admin.html">Dashboard</a>
+      <a href="/admin.html#productsPanel">Products</a>
+      <a href="/admin.html#ordersPanel">Order Requests</a>
+      <a href="/invoice-admin.html">Invoices</a>
+      <a class="active" href="/customer-crm.html">Customers</a>
+      <a href="/coa-admin.html">COAs</a>
+      <a href="/growth-admin.html">Growth</a>
+      <a href="/admin.html#homepagePanel">Homepage</a>
+      <a href="/admin.html#settingsPanel">Settings</a>
+      <a href="/" target="_blank" rel="noopener">View Website</a>
     </nav>
-    <button id="crmLogoutButton" class="btn" type="button">Sign Out</button>
+
+    <button id="crmLogoutButton" class="btn admin-signout-button" type="button">Sign Out</button>
   </aside>
 
   <main class="crm-main">

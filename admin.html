@@ -25,18 +25,24 @@
   </div>
 
   <div id="adminView" class="shell" hidden>
-    <aside class="sidebar">
-      <img src="assets/neon-peppers-logo.jpg" alt="Neon Peppers">
-      <a href="index.html" target="_blank">↗ View Website</a>
-      <button data-panel="dashboardPanel">Dashboard</button>
-      <button data-panel="homepagePanel">Homepage</button>
-      <button data-panel="productsPanel">Products</button>
-      <button data-panel="merchPanel">Merch</button>
-      <button data-panel="orderItemsPanel">Peptide Order Form</button>
-      <button data-panel="ordersPanel">Order Requests</button>
-      <button data-panel="inquiriesPanel">Inquiries</button>
-      <button data-panel="settingsPanel">Contact & Settings</button>
-      <button id="logoutButton">Log Out</button>
+        <aside class="sidebar unified-admin-sidebar">
+      <a class="unified-admin-logo" href="/admin.html">
+        <img src="assets/neon-peppers-logo.jpg" alt="Neon Peppers">
+      </a>
+<nav class="unified-admin-nav">
+      <a class="active" href="/admin.html">Dashboard</a>
+      <a href="/admin.html#productsPanel">Products</a>
+      <a href="/admin.html#ordersPanel">Order Requests</a>
+      <a href="/invoice-admin.html">Invoices</a>
+      <a href="/customer-crm.html">Customers</a>
+      <a href="/coa-admin.html">COAs</a>
+      <a href="/growth-admin.html">Growth</a>
+      <a href="/admin.html#homepagePanel">Homepage</a>
+      <a href="/admin.html#settingsPanel">Settings</a>
+      <a href="/" target="_blank" rel="noopener">View Website</a>
+    </nav>
+
+    <button id="logoutButton" class="btn admin-signout-button" type="button">Sign Out</button>
     </aside>
 
     <main class="main">
@@ -291,6 +297,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script src="/markdown.js"></script>
-  <script src="admin.js?v=22"></script>
+  <script src="admin.js?v=22.1"></script>
 </body>
 </html>

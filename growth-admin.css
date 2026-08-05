@@ -1,1 +1,30 @@
 .growth-body{min-height:100vh;background:#05070b;color:#fff}.growth-sidebar{position:fixed;inset:0 auto 0 0;width:230px;padding:22px;background:#090d13;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:20px}.growth-sidebar img{width:100%;max-height:105px;object-fit:contain}.growth-sidebar nav{display:grid;gap:8px}.growth-sidebar nav a{padding:11px 12px;border-radius:8px;color:#cfd5df;text-decoration:none}.growth-sidebar nav a.active,.growth-sidebar nav a:hover{background:#151b24;color:#fff}.growth-sidebar>button{margin-top:auto}.growth-main{margin-left:230px;padding:42px}.growth-head{display:flex;justify-content:space-between;gap:18px}.growth-head h1{font-size:clamp(3rem,7vw,6rem);margin:5px 0}.growth-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0}.growth-stats article{padding:18px;border:1px solid var(--line);border-radius:12px;background:#0a0e14}.growth-stats span{display:block;color:var(--muted);font-size:.72rem;text-transform:uppercase}.growth-stats strong{display:block;margin-top:7px;font-size:1.5rem}.coupon-card,.referral-row{padding:16px;border:1px solid rgba(255,255,255,.09);border-radius:10px;margin:10px 0;background:#080c12}.coupon-head{display:flex;justify-content:space-between;gap:12px}.coupon-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:14px 0}.coupon-meta div{padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:8px}.coupon-meta span{display:block;color:var(--muted);font-size:.68rem;text-transform:uppercase}.referral-row{display:grid;grid-template-columns:1fr 1fr auto auto;gap:12px;align-items:center}.growth-modal{overflow-y:auto}.growth-modal-card{width:min(760px,96vw);max-height:none;margin:20px auto}.growth-modal-card label{display:block;margin:10px 0 6px;color:var(--muted);font-size:.78rem}.growth-modal-card input,.growth-modal-card select{width:100%;padding:11px;border:1px solid var(--line);border-radius:8px;background:#070a0f;color:#fff}.growth-auth-gate{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#05070b}.growth-auth-gate[hidden]{display:none!important}.growth-auth-card{width:min(420px,94vw);padding:28px;border:1px solid var(--line);border-radius:16px;background:#0a0e14}.growth-auth-card img{width:220px;max-width:100%;display:block;margin:0 auto 20px}.growth-auth-card input{width:100%;margin:7px 0;padding:12px;border:1px solid var(--line);border-radius:8px;background:#070a0f;color:#fff}@media(max-width:900px){.growth-sidebar{position:relative;width:auto}.growth-main{margin-left:0;padding:24px}.growth-stats,.coupon-meta{grid-template-columns:1fr 1fr}}@media(max-width:560px){.growth-stats,.coupon-meta,.referral-row{grid-template-columns:1fr}}
+
+/* UNIFIED ADMIN NAVIGATION V22.1 */
+.unified-admin-sidebar{
+  display:flex;
+  flex-direction:column;
+}
+
+.unified-admin-nav{
+  display:grid;
+  gap:7px;
+}
+
+.unified-admin-nav a{
+  display:block;
+  padding:11px 12px;
+  border-radius:8px;
+  color:#cfd5df;
+  text-decoration:none;
+}
+
+.unified-admin-nav a:hover,
+.unified-admin-nav a.active{
+  background:#151b24;
+  color:#fff;
+}
+
+.admin-signout-button{
+  margin-top:auto;
+}

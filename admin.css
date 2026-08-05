@@ -623,3 +623,53 @@ textarea{min-height:95px;resize:vertical}
 @media(max-width:520px){
   .dashboard-stats-v22{grid-template-columns:1fr}
 }
+
+
+/* UNIFIED ADMIN NAVIGATION V22.1 */
+.unified-admin-sidebar{
+  display:flex;
+  flex-direction:column;
+}
+
+.unified-admin-logo{
+  display:block;
+  margin-bottom:18px;
+}
+
+.unified-admin-logo img{
+  width:100%;
+  max-height:105px;
+  object-fit:contain;
+}
+
+.unified-admin-nav{
+  display:grid;
+  gap:7px;
+}
+
+.unified-admin-nav a{
+  display:block;
+  padding:11px 12px;
+  border-radius:8px;
+  color:#cfd5df;
+  text-decoration:none;
+}
+
+.unified-admin-nav a:hover,
+.unified-admin-nav a.active{
+  background:#151b24;
+  color:#fff;
+}
+
+.admin-signout-button{
+  margin-top:auto;
+}
+
+.btn.pink,
+.btn.pink *,
+button.pink,
+button.pink *,
+.bg-pink,
+.bg-pink *{
+  color:#fff !important;
+}

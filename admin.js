@@ -40,6 +40,32 @@ function createClient(){
   );
 }
 
+
+function showPanelFromHash(){
+  const requested=window.location.hash.replace("#","");
+
+  if(!requested){
+    return;
+  }
+
+  const allowed=[
+    "dashboardPanel",
+    "homepagePanel",
+    "productsPanel",
+    "merchPanel",
+    "orderItemsPanel",
+    "ordersPanel",
+    "inquiriesPanel",
+    "settingsPanel"
+  ];
+
+  if(allowed.includes(requested)){
+    showPanel(requested);
+  }
+}
+
+window.addEventListener("hashchange",showPanelFromHash);
+
 async function init(){
   bindEvents();
 
@@ -52,6 +78,7 @@ async function init(){
 
     if(session){
       await showAdmin();
+      showPanelFromHash();
     }
   }catch(error){
     const warning = el("setupWarning");
