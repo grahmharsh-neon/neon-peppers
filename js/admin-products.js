@@ -2,7 +2,7 @@
   "use strict";
 
   const esc=value=>window.NeonCore?window.NeonCore.esc(value):String(value||"");
-  const SIZE_CHOICES=["5 mL","10 mL","20 mL","30 mL"];
+  const SIZE_CHOICES=["5mg","10mg","20mg","30mg"];
 
   window.setDescriptionGenerationStatus=function(index,message,state=""){
     const node=document.getElementById(`descriptionStatus-${index}`);
@@ -70,9 +70,41 @@
   };
 
   window.selectAllProductSizes=function(index){
-    if(!window.products?.[index])return;
-    window.products[index].option_label="Size";
-    window.products[index].option_values=[...SIZE_CHOICES];
+    const product=window.products?.[index];
+    if(!product)return;
+    const custom=(Array.isArray(product.option_values)?product.option_values:[])
+      .filter(value=>!SIZE_CHOICES.includes(value));
+    product.option_label="Size";
+    product.option_values=[...SIZE_CHOICES,...custom];
+    window.renderProducts();
+  };
+
+  window.addCustomProductSize=function(index){
+    const product=window.products?.[index];
+    const input=document.getElementById(`customSize-${index}`);
+    if(!product||!input)return;
+
+    const value=input.value.trim();
+    if(!value)return;
+
+    const current=Array.isArray(product.option_values)?[...product.option_values]:[];
+
+    if(!current.some(item=>String(item).toLowerCase()===value.toLowerCase())){
+      current.push(value);
+      product.option_values=current;
+    }
+
+    input.value="";
+    window.renderProducts();
+  };
+
+  window.removeCustomProductSize=function(index,value){
+    const product=window.products?.[index];
+    if(!product)return;
+
+    product.option_values=(Array.isArray(product.option_values)?product.option_values:[])
+      .filter(item=>item!==value);
+
     window.renderProducts();
   };
 
@@ -178,6 +210,34 @@
                 <span>${esc(size)}</span>
               </label>
             `).join("")}
+          </div>
+
+          <div class="custom-size-admin">
+            <div>
+              <label>Add New Size</label>
+              <div class="custom-size-entry">
+                <input id="customSize-${index}" placeholder="Example: 15mg">
+                <button class="btn green" type="button" onclick="addCustomProductSize(${index})">
+                  + Add Size
+                </button>
+              </div>
+            </div>
+
+            ${(selected||[]).filter(value=>!SIZE_CHOICES.includes(value)).length
+              ? `<div class="custom-size-list">
+                  ${(selected||[]).filter(value=>!SIZE_CHOICES.includes(value)).map(value=>`
+                    <button
+                      class="custom-size-chip"
+                      type="button"
+                      onclick="removeCustomProductSize(${index},'${String(value).replace(/'/g,"\'")}')"
+                      title="Remove ${esc(value)}"
+                    >
+                      ${esc(value)} ×
+                    </button>
+                  `).join("")}
+                </div>`
+              : ""
+            }
           </div>
         </section>
 

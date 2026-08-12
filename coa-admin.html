@@ -87,22 +87,14 @@
           <div class="eyebrow">Multiple files</div>
           <h2>Bulk COA Upload</h2>
           <p class="muted">
-            Select PDF or image files. Product names are matched from filenames when possible.
+            Upload your COA files, then select the matching product. You can add a new product without leaving this screen.
           </p>
         </div>
         <span id="bulkCoaCount" class="coa-file-badge">0 Files</span>
       </div>
 
       <section class="bulk-coa-settings">
-        <div class="grid three">
-          <div>
-            <label>Testing Lab (Default)</label>
-            <input id="bulkCoaLab" placeholder="Optional">
-          </div>
-          <div>
-            <label>Test Date (Default)</label>
-            <input id="bulkCoaTestDate" type="date">
-          </div>
+        <div class="grid two">
           <div>
             <label>Visibility</label>
             <select id="bulkCoaPublic">
@@ -129,7 +121,6 @@
           <span>File</span>
           <span>Product</span>
           <span>Size</span>
-          <span>Lot Number</span>
           <span>Status</span>
         </div>
         <div id="bulkCoaRows">
@@ -172,7 +163,7 @@
 
         <div>
           <label>Size</label>
-          <input id="coaStrength" placeholder="Example: 10 mL">
+          <input id="coaStrength" placeholder="Example: 10mg">
         </div>
       </div>
 
@@ -255,6 +246,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/config.js"></script>
-  <script src="/coa-admin.js?v=23.2"></script>
+  <script src="/coa-admin.js?v=23.3"></script>
 </body>
 </html>

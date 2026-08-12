@@ -71,10 +71,10 @@
 .bulk-coa-table-head,
 .bulk-coa-row{
   display:grid;
-  grid-template-columns:minmax(200px,1.5fr) minmax(190px,1fr) 140px minmax(140px,.8fr) 130px;
+  grid-template-columns:minmax(220px,1.5fr) minmax(220px,1fr) 150px 130px;
   gap:10px;
   align-items:center;
-  min-width:900px;
+  min-width:760px;
 }
 
 .bulk-coa-table-head{

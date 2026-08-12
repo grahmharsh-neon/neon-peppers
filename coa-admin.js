@@ -91,8 +91,6 @@
   function openBulkModal(){
     bulkRows=[];
     el("bulkCoaFiles").value="";
-    el("bulkCoaLab").value="";
-    el("bulkCoaTestDate").value="";
     el("bulkCoaPublic").value="true";
     renderBulkRows();
     el("bulkCoaMessage").textContent="";
@@ -123,7 +121,8 @@
         >
           ${escapeHtml(product.name)}
         </option>
-      `).join("");
+      `).join("") +
+      '<option value="__add_new__">+ Add New Product</option>';
   }
 
   function sizeSelectOptions(productId,selectedValue){
@@ -148,9 +147,53 @@
     if(row.uploaded) return "Uploaded";
     if(row.error) return "Error";
     if(!row.product_id) return "Choose product";
-    if(productOptions(row.product_id).length && !row.strength) return "Choose size";
-    if(!String(row.lot_number||"").trim()) return "Enter lot";
     return "Ready";
+  }
+
+  async function addProductFromBulkRow(index){
+    const row=bulkRows[index];
+    if(!row)return;
+
+    const name=window.prompt("New product name:");
+    if(!name||!name.trim()){
+      row.product_id="";
+      renderBulkRows();
+      return;
+    }
+
+    const cleanName=name.trim();
+
+    const {data,error}=await db
+      .from("products")
+      .insert({
+        name:cleanName,
+        category:"Research Compound",
+        description:"",
+        strength:"",
+        option_label:"Size",
+        option_values:["5mg","10mg","20mg","30mg"],
+        price:0,
+        visible:true,
+        featured:false,
+        status:"available",
+        stock_count:0,
+        low_stock_threshold:5
+      })
+      .select("*")
+      .single();
+
+    if(error){
+      alert(error.message);
+      row.product_id="";
+      renderBulkRows();
+      return;
+    }
+
+    products.push(data);
+    products.sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+    row.product_id=data.id;
+    row.strength="";
+    renderBulkRows();
   }
 
   function renderBulkRows(){
@@ -189,13 +232,6 @@
             ${sizeSelectOptions(row.product_id,row.strength)}
           </select>
 
-          <input
-            data-bulk-index="${index}"
-            data-bulk-key="lot_number"
-            value="${escapeHtml(row.lot_number||"")}"
-            placeholder="Required"
-          >
-
           <div class="bulk-coa-status ${status.toLowerCase().replace(/\s+/g,"-")}">
             ${escapeHtml(status)}
             ${row.error?`<small>${escapeHtml(row.error)}</small>`:""}
@@ -211,7 +247,14 @@
         const row=bulkRows[index];
         if(!row)return;
 
-        row[key]=event.currentTarget.value;
+        const nextValue=event.currentTarget.value;
+
+        if(key==="product_id" && nextValue==="__add_new__"){
+          addProductFromBulkRow(index);
+          return;
+        }
+
+        row[key]=nextValue;
         row.error="";
 
         if(key==="product_id"){
@@ -249,7 +292,6 @@
         file,
         product_id:productId,
         strength:inferSize(file.name,productId),
-        lot_number:"",
         uploaded:false,
         error:"",
         index
@@ -261,18 +303,22 @@
 
   async function uploadOneBulkCoa(row,index,total){
     const extension=row.file.name.toLowerCase().split(".").pop();
-    const lab=el("bulkCoaLab").value.trim()||null;
-    const testDate=el("bulkCoaTestDate").value||null;
     const isPublic=el("bulkCoaPublic").value==="true";
+    const generatedLot=String(row.file.name||"")
+      .replace(/\.[^.]+$/,"")
+      .replace(/[^a-zA-Z0-9_-]+/g,"-")
+      .replace(/^-+|-+$/g,"")
+      .slice(0,80)
+      || `BULK-${Date.now()}-${index+1}`;
 
     const insertResult=await db
       .from("product_coas")
       .insert({
         product_id:row.product_id,
         strength:row.strength||null,
-        lot_number:String(row.lot_number||"").trim(),
-        lab_name:lab,
-        test_date:testDate,
+        lot_number:generatedLot,
+        lab_name:null,
+        test_date:null,
         is_public:isPublic,
         sort_order:0,
         original_file_name:row.file.name,
@@ -332,7 +378,7 @@
     if(!bulkRows.length)return;
 
     if(!bulkRows.every(row=>rowStatus(row)==="Ready")){
-      alert("Complete the product, size, and lot information for every file.");
+      alert("Select a product for every file before uploading.");
       return;
     }
 

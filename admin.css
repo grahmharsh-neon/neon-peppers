@@ -808,3 +808,47 @@ button.pink *{
   .size-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .size-selector-head{flex-direction:column}
 }
+
+
+/* V23.3 CUSTOM PRODUCT SIZES */
+.custom-size-admin{
+  margin-top:16px;
+  padding-top:14px;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+
+.custom-size-entry{
+  display:flex;
+  gap:9px;
+}
+
+.custom-size-entry input{
+  flex:1;
+}
+
+.custom-size-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
+
+.custom-size-chip{
+  padding:7px 10px;
+  border:1px solid var(--pink);
+  border-radius:999px;
+  background:transparent;
+  color:#fff;
+  cursor:pointer;
+}
+
+.custom-size-chip:hover{
+  background:var(--pink);
+  color:#fff;
+}
+
+@media(max-width:560px){
+  .custom-size-entry{
+    flex-direction:column;
+  }
+}
