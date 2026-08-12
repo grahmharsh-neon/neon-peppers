@@ -28,3 +28,141 @@
 .admin-signout-button{
   margin-top:auto;
 }
+
+
+/* BULK COA UPLOAD V23.2 */
+.bulk-coa-modal-card{
+  width:min(1280px,97vw);
+  max-height:none;
+  margin:20px auto;
+  padding:28px;
+}
+
+.bulk-coa-settings{
+  margin:18px 0;
+  padding:18px;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;
+  background:#070a0f;
+}
+
+.bulk-coa-settings label{
+  display:block;
+  margin:10px 0 6px;
+  color:var(--muted);
+  font-size:.78rem;
+}
+
+.bulk-coa-settings input,
+.bulk-coa-settings select{
+  width:100%;
+  padding:11px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#05070b;
+  color:#fff;
+}
+
+.bulk-coa-table-wrap{
+  overflow-x:auto;
+  margin:18px 0;
+}
+
+.bulk-coa-table-head,
+.bulk-coa-row{
+  display:grid;
+  grid-template-columns:minmax(200px,1.5fr) minmax(190px,1fr) 140px minmax(140px,.8fr) 130px;
+  gap:10px;
+  align-items:center;
+  min-width:900px;
+}
+
+.bulk-coa-table-head{
+  padding:0 10px 8px;
+  color:var(--muted);
+  font-size:.7rem;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.bulk-coa-row{
+  margin:7px 0;
+  padding:10px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;
+  background:#080c12;
+}
+
+.bulk-coa-row.uploaded{
+  border-color:var(--green);
+}
+
+.bulk-coa-row.error{
+  border-color:#ff6572;
+}
+
+.bulk-coa-row input,
+.bulk-coa-row select{
+  width:100%;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#05070b;
+  color:#fff;
+}
+
+.bulk-coa-file{
+  min-width:0;
+}
+
+.bulk-coa-file strong,
+.bulk-coa-file span{
+  display:block;
+}
+
+.bulk-coa-file strong{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.bulk-coa-file span{
+  margin-top:3px;
+  color:var(--muted);
+  font-size:.72rem;
+}
+
+.bulk-coa-status{
+  font-size:.75rem;
+  font-weight:900;
+}
+
+.bulk-coa-status.ready{color:var(--green)}
+.bulk-coa-status.uploaded{color:var(--green)}
+.bulk-coa-status.error{color:#ff6572}
+.bulk-coa-status.choose-product,
+.bulk-coa-status.choose-size,
+.bulk-coa-status.enter-lot{color:#ffd35c}
+
+.bulk-coa-status small{
+  display:block;
+  margin-top:4px;
+  font-weight:400;
+}
+
+.bulk-coa-footer{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:18px;
+  padding-top:16px;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+
+@media(max-width:650px){
+  .bulk-coa-modal-card{padding:16px}
+  .bulk-coa-footer{
+    flex-direction:column;
+    align-items:stretch;
+  }
+}

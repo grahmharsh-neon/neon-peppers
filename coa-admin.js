@@ -12,6 +12,7 @@
   let products = [];
   let coas = [];
   let current = null;
+  let bulkRows = [];
 
   const escapeHtml = value =>
     String(value || "").replace(/[&<>"']/g, char => ({
@@ -32,6 +33,347 @@
 
   function productName(id){
     return products.find(item => String(item.id) === String(id))?.name || "Unknown Product";
+  }
+
+
+  function normalizeMatchText(value){
+    return String(value || "")
+      .toLowerCase()
+      .replace(/\.[^.]+$/,"")
+      .replace(/[^a-z0-9]+/g," ")
+      .trim();
+  }
+
+  function productOptions(productId){
+    const product=products.find(item=>String(item.id)===String(productId));
+    return Array.isArray(product?.option_values)
+      ? product.option_values.filter(Boolean)
+      : [];
+  }
+
+  function inferProductId(fileName){
+    const fileText=normalizeMatchText(fileName);
+    if(!fileText) return "";
+
+    const candidates=products
+      .map(product=>{
+        const productText=normalizeMatchText(product.name);
+        if(!productText) return {id:product.id,score:0};
+
+        let score=0;
+        if(fileText===productText) score=1000;
+        else if(fileText.includes(productText)) score=productText.length+100;
+        else{
+          const words=productText.split(/\s+/).filter(Boolean);
+          score=words.reduce(
+            (sum,word)=>sum+(fileText.includes(word)?word.length:0),
+            0
+          );
+        }
+
+        return {id:product.id,score};
+      })
+      .sort((a,b)=>b.score-a.score);
+
+    return candidates[0]?.score>=4 ? candidates[0].id : "";
+  }
+
+  function inferSize(fileName,productId){
+    const fileText=String(fileName||"").toLowerCase().replace(/\s+/g,"");
+    const values=productOptions(productId);
+
+    return values.find(value=>{
+      const normalized=String(value).toLowerCase().replace(/\s+/g,"");
+      return normalized && fileText.includes(normalized);
+    }) || "";
+  }
+
+  function openBulkModal(){
+    bulkRows=[];
+    el("bulkCoaFiles").value="";
+    el("bulkCoaLab").value="";
+    el("bulkCoaTestDate").value="";
+    el("bulkCoaPublic").value="true";
+    renderBulkRows();
+    el("bulkCoaMessage").textContent="";
+    el("bulkCoaProgress").textContent="Ready";
+    el("bulkCoaModal").classList.add("open");
+    document.body.classList.add("modal-open");
+  }
+
+  function closeBulkModal(){
+    el("bulkCoaModal").classList.remove("open");
+    document.body.classList.remove("modal-open");
+  }
+
+  function clearBulkRows(){
+    bulkRows=[];
+    el("bulkCoaFiles").value="";
+    renderBulkRows();
+    el("bulkCoaMessage").textContent="";
+    el("bulkCoaProgress").textContent="Ready";
+  }
+
+  function productSelectOptions(selectedId){
+    return '<option value="">Select product</option>' +
+      products.map(product=>`
+        <option
+          value="${escapeHtml(product.id)}"
+          ${String(product.id)===String(selectedId)?"selected":""}
+        >
+          ${escapeHtml(product.name)}
+        </option>
+      `).join("");
+  }
+
+  function sizeSelectOptions(productId,selectedValue){
+    const values=productOptions(productId);
+
+    if(!values.length){
+      return '<option value="">No sizes configured</option>';
+    }
+
+    return '<option value="">Select size</option>' +
+      values.map(value=>`
+        <option
+          value="${escapeHtml(value)}"
+          ${String(value)===String(selectedValue)?"selected":""}
+        >
+          ${escapeHtml(value)}
+        </option>
+      `).join("");
+  }
+
+  function rowStatus(row){
+    if(row.uploaded) return "Uploaded";
+    if(row.error) return "Error";
+    if(!row.product_id) return "Choose product";
+    if(productOptions(row.product_id).length && !row.strength) return "Choose size";
+    if(!String(row.lot_number||"").trim()) return "Enter lot";
+    return "Ready";
+  }
+
+  function renderBulkRows(){
+    const box=el("bulkCoaRows");
+    const count=bulkRows.length;
+
+    el("bulkCoaCount").textContent=`${count} File${count===1?"":"s"}`;
+
+    const readyCount=bulkRows.filter(row=>rowStatus(row)==="Ready").length;
+    el("uploadAllCoasButton").disabled=!count || readyCount!==count;
+
+    if(!count){
+      box.innerHTML='<p class="muted">Choose files to begin.</p>';
+      return;
+    }
+
+    box.innerHTML=bulkRows.map((row,index)=>{
+      const status=rowStatus(row);
+
+      return `
+        <div class="bulk-coa-row ${row.uploaded?"uploaded":""} ${row.error?"error":""}">
+          <div class="bulk-coa-file">
+            <strong>${escapeHtml(row.file.name)}</strong>
+            <span>${(row.file.size/1024/1024).toFixed(2)} MB</span>
+          </div>
+
+          <select data-bulk-index="${index}" data-bulk-key="product_id">
+            ${productSelectOptions(row.product_id)}
+          </select>
+
+          <select
+            data-bulk-index="${index}"
+            data-bulk-key="strength"
+            ${productOptions(row.product_id).length?"":"disabled"}
+          >
+            ${sizeSelectOptions(row.product_id,row.strength)}
+          </select>
+
+          <input
+            data-bulk-index="${index}"
+            data-bulk-key="lot_number"
+            value="${escapeHtml(row.lot_number||"")}"
+            placeholder="Required"
+          >
+
+          <div class="bulk-coa-status ${status.toLowerCase().replace(/\s+/g,"-")}">
+            ${escapeHtml(status)}
+            ${row.error?`<small>${escapeHtml(row.error)}</small>`:""}
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    box.querySelectorAll("[data-bulk-index]").forEach(node=>{
+      const update=event=>{
+        const index=Number(event.currentTarget.dataset.bulkIndex);
+        const key=event.currentTarget.dataset.bulkKey;
+        const row=bulkRows[index];
+        if(!row)return;
+
+        row[key]=event.currentTarget.value;
+        row.error="";
+
+        if(key==="product_id"){
+          row.strength=inferSize(row.file.name,row.product_id);
+          renderBulkRows();
+        }else{
+          const status=rowStatus(row);
+          event.currentTarget.closest(".bulk-coa-row")
+            ?.querySelector(".bulk-coa-status");
+          el("uploadAllCoasButton").disabled=
+            !bulkRows.length ||
+            !bulkRows.every(item=>rowStatus(item)==="Ready");
+        }
+      };
+
+      node.addEventListener("change",update);
+      node.addEventListener("input",update);
+    });
+  }
+
+  function loadBulkFiles(){
+    const files=[...(el("bulkCoaFiles").files||[])];
+
+    try{
+      files.forEach(validateFile);
+    }catch(error){
+      alert(error.message);
+      el("bulkCoaFiles").value="";
+      return;
+    }
+
+    bulkRows=files.map((file,index)=>{
+      const productId=inferProductId(file.name);
+      return{
+        file,
+        product_id:productId,
+        strength:inferSize(file.name,productId),
+        lot_number:"",
+        uploaded:false,
+        error:"",
+        index
+      };
+    });
+
+    renderBulkRows();
+  }
+
+  async function uploadOneBulkCoa(row,index,total){
+    const extension=row.file.name.toLowerCase().split(".").pop();
+    const lab=el("bulkCoaLab").value.trim()||null;
+    const testDate=el("bulkCoaTestDate").value||null;
+    const isPublic=el("bulkCoaPublic").value==="true";
+
+    const insertResult=await db
+      .from("product_coas")
+      .insert({
+        product_id:row.product_id,
+        strength:row.strength||null,
+        lot_number:String(row.lot_number||"").trim(),
+        lab_name:lab,
+        test_date:testDate,
+        is_public:isPublic,
+        sort_order:0,
+        original_file_name:row.file.name,
+        updated_at:new Date().toISOString()
+      })
+      .select("*")
+      .single();
+
+    if(insertResult.error){
+      throw insertResult.error;
+    }
+
+    const coa=insertResult.data;
+    const storagePath=
+      `coas/${row.product_id}/${coa.id}-${crypto.randomUUID()}.${extension}`;
+
+    const uploadResult=await db.storage
+      .from("product-files")
+      .upload(storagePath,row.file,{
+        contentType:row.file.type||undefined,
+        cacheControl:"3600",
+        upsert:false
+      });
+
+    if(uploadResult.error){
+      await db.from("product_coas").delete().eq("id",coa.id);
+      throw uploadResult.error;
+    }
+
+    const publicUrl=db.storage
+      .from("product-files")
+      .getPublicUrl(storagePath).data.publicUrl;
+
+    const updateResult=await db
+      .from("product_coas")
+      .update({
+        file_url:publicUrl,
+        file_path:storagePath,
+        file_type:row.file.type||extension,
+        original_file_name:row.file.name,
+        updated_at:new Date().toISOString()
+      })
+      .eq("id",coa.id);
+
+    if(updateResult.error){
+      await db.storage.from("product-files").remove([storagePath]);
+      await db.from("product_coas").delete().eq("id",coa.id);
+      throw updateResult.error;
+    }
+
+    row.uploaded=true;
+    row.error="";
+    el("bulkCoaProgress").textContent=`Uploaded ${index+1} of ${total}`;
+  }
+
+  async function uploadAllCoas(){
+    if(!bulkRows.length)return;
+
+    if(!bulkRows.every(row=>rowStatus(row)==="Ready")){
+      alert("Complete the product, size, and lot information for every file.");
+      return;
+    }
+
+    const button=el("uploadAllCoasButton");
+    button.disabled=true;
+    button.textContent="Uploading…";
+    el("bulkCoaMessage").textContent="";
+
+    let uploaded=0;
+    let failed=0;
+
+    for(let index=0;index<bulkRows.length;index++){
+      const row=bulkRows[index];
+
+      try{
+        await uploadOneBulkCoa(row,index,bulkRows.length);
+        uploaded++;
+      }catch(error){
+        console.error(error);
+        row.error=error.message||"Upload failed";
+        failed++;
+      }
+
+      renderBulkRows();
+    }
+
+    await loadData();
+
+    button.textContent="Upload All";
+
+    if(failed){
+      el("bulkCoaProgress").textContent=
+        `${uploaded} uploaded · ${failed} failed`;
+      el("bulkCoaMessage").textContent=
+        "Fix the failed rows and upload them again.";
+    }else{
+      el("bulkCoaProgress").textContent=
+        `${uploaded} COA${uploaded===1?"":"s"} uploaded`;
+      el("bulkCoaMessage").textContent=
+        "Bulk upload complete.";
+    }
   }
 
   async function checkSession(){
@@ -406,6 +748,11 @@
 
   el("coaAdminLoginButton").addEventListener("click",login);
   el("coaSignOutButton").addEventListener("click",signOut);
+  el("bulkCoaButton").addEventListener("click",openBulkModal);
+  el("closeBulkCoaButton").addEventListener("click",closeBulkModal);
+  el("bulkCoaFiles").addEventListener("change",loadBulkFiles);
+  el("clearBulkCoaButton").addEventListener("click",clearBulkRows);
+  el("uploadAllCoasButton").addEventListener("click",uploadAllCoas);
   el("addCoaButton").addEventListener("click",openNew);
   el("closeCoaButton").addEventListener("click",closeModal);
   el("saveCoaButton").addEventListener("click",save);
@@ -422,6 +769,7 @@
     if(del) remove(del.dataset.deleteCoa);
 
     if(event.target.id === "coaModal") closeModal();
+    if(event.target.id === "bulkCoaModal") closeBulkModal();
   });
 
   checkSession();

@@ -49,9 +49,14 @@
         <p class="muted">Add, edit, upload, publish, and remove Certificates of Analysis.</p>
       </div>
 
-      <button id="addCoaButton" class="btn green" type="button">
-        + Add COA
-      </button>
+      <div class="actions">
+        <button id="bulkCoaButton" class="btn pink" type="button">
+          Bulk Upload
+        </button>
+        <button id="addCoaButton" class="btn green" type="button">
+          + Add COA
+        </button>
+      </div>
     </section>
 
     <section class="panel">
@@ -72,6 +77,81 @@
     </section>
   </main>
 
+
+  <div id="bulkCoaModal" class="modal coa-modal">
+    <div class="modal-card bulk-coa-modal-card">
+      <button id="closeBulkCoaButton" class="modal-close" type="button">×</button>
+
+      <div class="coa-modal-head">
+        <div>
+          <div class="eyebrow">Multiple files</div>
+          <h2>Bulk COA Upload</h2>
+          <p class="muted">
+            Select PDF or image files. Product names are matched from filenames when possible.
+          </p>
+        </div>
+        <span id="bulkCoaCount" class="coa-file-badge">0 Files</span>
+      </div>
+
+      <section class="bulk-coa-settings">
+        <div class="grid three">
+          <div>
+            <label>Testing Lab (Default)</label>
+            <input id="bulkCoaLab" placeholder="Optional">
+          </div>
+          <div>
+            <label>Test Date (Default)</label>
+            <input id="bulkCoaTestDate" type="date">
+          </div>
+          <div>
+            <label>Visibility</label>
+            <select id="bulkCoaPublic">
+              <option value="true">Public</option>
+              <option value="false">Admin Only</option>
+            </select>
+          </div>
+        </div>
+
+        <label>Select COA Files</label>
+        <input
+          id="bulkCoaFiles"
+          type="file"
+          multiple
+          accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg"
+        >
+        <p class="muted">
+          PDF, PNG, JPG, or JPEG. Maximum 10 MB per file.
+        </p>
+      </section>
+
+      <div class="bulk-coa-table-wrap">
+        <div class="bulk-coa-table-head">
+          <span>File</span>
+          <span>Product</span>
+          <span>Size</span>
+          <span>Lot Number</span>
+          <span>Status</span>
+        </div>
+        <div id="bulkCoaRows">
+          <p class="muted">Choose files to begin.</p>
+        </div>
+      </div>
+
+      <div class="bulk-coa-footer">
+        <div>
+          <strong id="bulkCoaProgress">Ready</strong>
+          <div id="bulkCoaMessage" class="form-status"></div>
+        </div>
+        <div class="actions">
+          <button id="clearBulkCoaButton" class="btn" type="button">Clear</button>
+          <button id="uploadAllCoasButton" class="btn pink" type="button" disabled>
+            Upload All
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="coaModal" class="modal coa-modal">
     <div class="modal-card coa-modal-card">
       <button id="closeCoaButton" class="modal-close" type="button">×</button>
@@ -91,8 +171,8 @@
         </div>
 
         <div>
-          <label>Strength / Variant</label>
-          <input id="coaStrength" placeholder="Example: 10 mg">
+          <label>Size</label>
+          <input id="coaStrength" placeholder="Example: 10 mL">
         </div>
       </div>
 
@@ -175,6 +255,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/config.js"></script>
-  <script src="/coa-admin.js?v=17"></script>
+  <script src="/coa-admin.js?v=23.2"></script>
 </body>
 </html>
