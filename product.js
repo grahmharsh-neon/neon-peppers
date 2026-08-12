@@ -2,6 +2,7 @@ let client = null;
 let settings = {};
 let allProducts = [];
 let currentProduct = null;
+let currentVariants = [];
 
 function el(id){
   return document.getElementById(id);
@@ -126,6 +127,15 @@ async function loadData(){
       return;
     }
 
+    const variantResult = await client
+      .from("product_variants")
+      .select("*")
+      .eq("product_id",currentProduct.id)
+      .eq("visible",true)
+      .order("sort_order",{ascending:true});
+
+    currentVariants = variantResult.error ? [] : (variantResult.data || []);
+
     renderProduct(currentProduct);
     applyProductSeo(currentProduct);
     trackProductView(currentProduct.id);
@@ -204,21 +214,15 @@ function renderProduct(product){
   el("breadcrumbName").textContent = product.name;
   el("productCategory").textContent = product.category || "Research Compound";
   el("productName").textContent = product.name;
+  const optionLabel = product.option_label || "Size";
+  const optionText = currentVariants.length
+    ? currentVariants.map(item=>item.strength).filter(Boolean).join(" · ")
+    : "Not listed";
 
-    const optionsBox=el("productOptions");
-  if(optionsBox){
-    const label=String(product.option_label||"").trim();
-    const values=Array.isArray(product.option_values)?product.option_values.filter(Boolean):[];
-    if(label && values.length){
-      optionsBox.innerHTML=`<div class="product-option-label">${esc(label)}</div><div class="product-option-values">${values.map(value=>`<span class="product-option-chip">${esc(value)}</span>`).join("")}</div>`;
-      optionsBox.hidden=false;
-    }else{
-      optionsBox.hidden=true;
-      optionsBox.innerHTML="";
-    }
-  }
+  el("productOptionLabel").textContent = optionLabel;
+  el("productStrength").textContent = optionText;
 
-const priceBox=el("productPrice");
+  const priceBox=el("productPrice");
   if(priceBox){
     const price=Number(product.price||0);
     const compare=Number(product.compare_at_price||0);
@@ -244,7 +248,8 @@ const priceBox=el("productPrice");
 
   el("identityName").textContent = product.name;
   el("identityCategory").textContent = product.category || "Research Compound";
-  el("identityStrength").textContent = product.strength || "Not listed";
+  el("identityOptionLabel").textContent = optionLabel;
+  el("identityStrength").textContent = optionText;
   el("identityStatus").textContent = statusText(product);
 
   const image = el("productHeroImage");

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>V23 Diagnostics | Neon Peppers</title>
+  <link rel="stylesheet" href="/admin.css">
+</head>
+<body style="padding:30px;background:#05070b;color:#fff">
+  <h1>Neon Peppers V23 Diagnostics</h1>
+  <p>This page checks that the core browser functions loaded.</p>
+  <pre id="diagnostics" style="padding:18px;background:#0a0e14;border-radius:12px"></pre>
+
+  <script src="/js/neon-core.js?v=23"></script>
+  <script>
+    const checks={
+      NeonCore:typeof window.NeonCore==="object",
+      escapeHtml:typeof window.escapeHtml==="function"
+    };
+    document.getElementById("diagnostics").textContent=
+      JSON.stringify(checks,null,2);
+  </script>
+</body>
+</html>

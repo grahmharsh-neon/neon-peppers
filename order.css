@@ -516,3 +516,15 @@ body.gated{
   color:var(--green);
   font-size:.82rem;
 }
+
+
+/* V23 FLEXIBLE PRODUCT OPTION LABEL */
+.quick-order-option-label{
+  display:block;
+  margin-bottom:6px;
+  color:var(--muted);
+  font-size:.7rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}

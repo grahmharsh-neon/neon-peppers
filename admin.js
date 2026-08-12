@@ -1,8 +1,8 @@
-let client = null;
-let products = [];
+var client = null;
+var products = [];
 let siteSettings = null;
 let inquiries = [];
-let productVariants = [];
+var productVariants = [];
 let orderRequests = [];
 let orderRequestItems = [];
 let orderFormItems = [];
@@ -373,7 +373,9 @@ async function generateProductDescription(index){
   }
 
   const name = String(product.name || "").trim();
-  const strength = String(product.strength || "").trim();
+  const strength = product.id
+    ? variantsForProduct(product.id).map(item=>item.strength).filter(Boolean).join(", ")
+    : "";
   const category = String(product.category || "").trim();
 
   if(!name || name === "New Product"){
@@ -499,7 +501,6 @@ async function saveProduct(index){
     description:product.description || "",
     strength:"",
     option_label:product.option_label || "Size",
-    option_values:Array.isArray(product.option_values)?product.option_values:[],
     price:Number(product.price || 0),
     compare_at_price:
       product.compare_at_price === null ||
@@ -859,29 +860,29 @@ function variantsForProduct(productId){return productVariants.filter(v=>v.produc
 function renderVariantsForProduct(index){
   const product=products[index],box=el(`variants-${index}`);
   if(!product||!box)return;
-  if(!product.id){box.innerHTML='<p class="muted">Save the product before adding strengths.</p>';return}
+  if(!product.id){box.innerHTML='<p class="muted">Save the product before adding options.</p>';return}
   const list=variantsForProduct(product.id);
-  if(!list.length){box.innerHTML='<p class="muted">No strengths added yet.</p>';return}
-  box.innerHTML=list.map(v=>`<div class="variant-editor"><input data-variant-id="${escapeHtml(v.id)}" data-variant-key="strength" value="${escapeHtml(v.strength)}"><select data-variant-id="${escapeHtml(v.id)}" data-variant-key="stock_status"><option value="available" ${v.stock_status==="available"?"selected":""}>Available</option><option value="low_stock" ${v.stock_status==="low_stock"?"selected":""}>Low Stock</option><option value="out_of_stock" ${v.stock_status==="out_of_stock"?"selected":""}>Out of Stock</option><option value="coming_soon" ${v.stock_status==="coming_soon"?"selected":""}>Coming Soon</option></select><select data-variant-id="${escapeHtml(v.id)}" data-variant-key="visible"><option value="true" ${v.visible!==false?"selected":""}>Visible</option><option value="false" ${v.visible===false?"selected":""}>Hidden</option></select><button class="btn blue" onclick="saveVariant('${escapeHtml(v.id)}')">Save</button><button class="btn danger" onclick="deleteVariant('${escapeHtml(v.id)}')">Delete</button></div>`).join("");
+  if(!list.length){box.innerHTML='<p class="muted">No options added yet.</p>';return}
+  box.innerHTML=list.map(v=>`<div class="variant-editor"><input data-variant-id="${escapeHtml(v.id)}" data-variant-key="strength" value="${escapeHtml(v.strength)}" placeholder="Size / option"><select data-variant-id="${escapeHtml(v.id)}" data-variant-key="stock_status"><option value="available" ${v.stock_status==="available"?"selected":""}>Available</option><option value="low_stock" ${v.stock_status==="low_stock"?"selected":""}>Low Stock</option><option value="out_of_stock" ${v.stock_status==="out_of_stock"?"selected":""}>Out of Stock</option><option value="coming_soon" ${v.stock_status==="coming_soon"?"selected":""}>Coming Soon</option></select><select data-variant-id="${escapeHtml(v.id)}" data-variant-key="visible"><option value="true" ${v.visible!==false?"selected":""}>Visible</option><option value="false" ${v.visible===false?"selected":""}>Hidden</option></select><button class="btn blue" onclick="saveVariant('${escapeHtml(v.id)}')">Save</button><button class="btn danger" onclick="deleteVariant('${escapeHtml(v.id)}')">Delete</button></div>`).join("");
   box.querySelectorAll("[data-variant-id]").forEach(node=>{const update=e=>{const v=productVariants.find(x=>String(x.id)===e.target.dataset.variantId);if(!v)return;let value=e.target.value;if(e.target.dataset.variantKey==="visible")value=value==="true";v[e.target.dataset.variantKey]=value};node.addEventListener("input",update);node.addEventListener("change",update)})
 }
 async function addVariant(index){
   const product=products[index];
-  if(!product?.id){alert("Save the product before adding strengths.");return}
-  const {data,error}=await client.from("product_variants").insert({product_id:product.id,strength:"New strength",stock_status:"available",visible:true,sort_order:variantsForProduct(product.id).length}).select().single();
+  if(!product?.id){alert("Save the product before adding options.");return}
+  const {data,error}=await client.from("product_variants").insert({product_id:product.id,strength:"New option",stock_status:"available",visible:true,sort_order:variantsForProduct(product.id).length}).select().single();
   if(error){alert(error.message);return}
-  productVariants.push(data);renderVariantsForProduct(index);flash("Strength added")
+  productVariants.push(data);renderVariantsForProduct(index);flash("Option added")
 }
 async function saveVariant(id){
   const v=productVariants.find(x=>String(x.id)===String(id));if(!v)return;
   const {error}=await client.from("product_variants").update({strength:v.strength,stock_status:v.stock_status,visible:v.visible!==false,sort_order:v.sort_order||0,updated_at:new Date().toISOString()}).eq("id",v.id);
-  if(error){alert(error.message);return}flash("Strength saved")
+  if(error){alert(error.message);return}flash("Option saved")
 }
 async function deleteVariant(id){
-  if(!confirm("Delete this strength?"))return;
+  if(!confirm("Delete this option?"))return;
   const {error}=await client.from("product_variants").delete().eq("id",id);
   if(error){alert(error.message);return}
-  productVariants=productVariants.filter(x=>String(x.id)!==String(id));renderProducts();flash("Strength deleted")
+  productVariants=productVariants.filter(x=>String(x.id)!==String(id));renderProducts();flash("Option deleted")
 }
 
 
@@ -1617,7 +1618,7 @@ function renderOrderFormItems(){
                       </button>
                     </div>
                   `).join("")
-                : '<p class="muted">No strengths added yet.</p>'
+                : '<p class="muted">No options added yet.</p>'
             }
           </div>
         </div>
@@ -1811,7 +1812,7 @@ async function addOrderFormItemVariant(itemId){
     .from("order_form_item_variants")
     .insert({
       order_form_item_id:itemId,
-      strength:"New strength",
+      strength:"New option",
       stock_status:"available",
       visible:true,
       sort_order:orderVariantsForItem(itemId).length
@@ -1826,7 +1827,7 @@ async function addOrderFormItemVariant(itemId){
 
   orderFormItemVariants.push(data);
   renderOrderFormItems();
-  flash("Strength added");
+  flash("Option added");
 }
 
 async function saveOrderFormItemVariant(id){
@@ -1852,12 +1853,12 @@ async function saveOrderFormItemVariant(id){
     return;
   }
 
-  flash("Strength saved");
+  flash("Option saved");
   await loadOrderFormItems();
 }
 
 async function deleteOrderFormItemVariant(id){
-  if(!confirm("Delete this strength?")) return;
+  if(!confirm("Delete this option?")) return;
 
   const {error}=await client
     .from("order_form_item_variants")
@@ -1874,7 +1875,7 @@ async function deleteOrderFormItemVariant(id){
   );
 
   renderOrderFormItems();
-  flash("Strength deleted");
+  flash("Option deleted");
 }
 
 

@@ -118,19 +118,26 @@ async function loadOrderForm(){
 }
 
 function variantsForItem(itemId){
-  const saved=orderVariants.filter(variant=>String(variant.product_id)===String(itemId));
-  if(saved.length){
-    return saved.map(variant=>({...variant,option_value:variant.strength}));
+  const item=orderItems.find(
+    current=>String(current.id)===String(itemId)
+  );
+
+  const variants=orderVariants.filter(
+    variant=>String(variant.product_id)===String(itemId)
+  );
+
+  if(variants.length){
+    return variants;
   }
-  const item=orderItems.find(current=>String(current.id)===String(itemId));
-  const values=Array.isArray(item?.option_values)?item.option_values.filter(Boolean):[];
-  if(values.length){
-    return values.map((value,index)=>({
-      id:`fallback-${item.id}-${index}`,product_id:item.id,strength:value,option_value:value,
-      stock_status:item.status||"available",visible:true,sort_order:index
-    }));
-  }
-  return [{id:`fallback-${item.id}-standard`,product_id:item.id,strength:"",option_value:"",stock_status:item?.status||"available",visible:true,sort_order:0}];
+
+  return [{
+    id:`fallback-${itemId}`,
+    product_id:itemId,
+    strength:item?.strength||"Standard",
+    stock_status:item?.status||"available",
+    visible:true,
+    sort_order:0
+  }];
 }
 
 function stockLabel(status){
@@ -184,10 +191,10 @@ function renderOrderItems(){
             value="${esc(variant.id)}"
             data-status="${esc(variant.stock_status)}"
           >
-            ${esc(variant.option_value||variant.strength||"Standard")} — ${esc(stockLabel(variant.stock_status))}
+            ${esc(variant.strength)} — ${esc(stockLabel(variant.stock_status))}
           </option>
         `).join("")
-      : '<option value="">No strengths available</option>';
+      : '<option value="">No options available</option>';
 
     const imageStyle=item.image_url
       ? `style="background-image:url('${String(item.image_url).replace(/'/g,"%27")}')"`
@@ -214,6 +221,9 @@ function renderOrderItems(){
         </div>
 
         <div>
+          <label class="quick-order-option-label" for="strength-${esc(item.id)}">
+            ${esc(item.option_label||"Size")}
+          </label>
           <select
             id="strength-${esc(item.id)}"
             onchange="updateRowStatus('${esc(item.id)}')"
@@ -336,8 +346,8 @@ function syncCartFromRow(itemId){
   ){
     alert(
       variant.stock_status==="out_of_stock"
-        ? "That strength is currently out of stock."
-        : "That strength is marked coming soon."
+        ? "That option is currently out of stock."
+        : "That option is marked coming soon."
     );
 
     input.value=0;
@@ -356,8 +366,7 @@ function syncCartFromRow(itemId){
         ? null
         : variant.id,
       product_name:item.name,
-      option_label:item.option_label||"Option",
-      strength:variant.option_value || variant.strength || "Standard",
+      strength:variant.strength || item.strength || "Standard",
       quantity,
       unit_price:Number(item.price || 0)
     });
@@ -406,7 +415,7 @@ function renderCart(){
     <div class="cart-item">
       <div>
         <strong>${esc(item.product_name)}</strong>
-        <small>${esc(item.option_label||"Option")}: ${esc(item.strength||"Standard")} × ${item.quantity}</small>
+        <small>${esc(item.strength)} × ${item.quantity}</small>
         ${Number(item.unit_price||0)>0 ? `<div class="cart-price">$${(Number(item.unit_price)*Number(item.quantity)).toFixed(2)}</div>` : ""}
       </div>
 

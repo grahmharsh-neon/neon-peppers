@@ -1159,6 +1159,3 @@ header nav a{
     font-size:.78rem;
   }
 }
-
-/* FLEXIBLE PRODUCT OPTIONS V22.2 */
-.product-options{margin:16px 0 20px}.product-option-label{margin-bottom:8px;color:var(--muted);font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.product-option-values{display:flex;flex-wrap:wrap;gap:8px}.product-option-chip{padding:8px 11px;border:1px solid rgba(255,255,255,.16);border-radius:999px;background:#0a0e14;color:#fff;font-size:.8rem;font-weight:800}
