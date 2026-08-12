@@ -497,7 +497,9 @@ async function saveProduct(index){
     name:product.name.trim(),
     category:product.category || "Research Compound",
     description:product.description || "",
-    strength:product.strength || "",
+    strength:"",
+    option_label:product.option_label || "Size",
+    option_values:Array.isArray(product.option_values)?product.option_values:[],
     price:Number(product.price || 0),
     compare_at_price:
       product.compare_at_price === null ||

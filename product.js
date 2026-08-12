@@ -204,9 +204,21 @@ function renderProduct(product){
   el("breadcrumbName").textContent = product.name;
   el("productCategory").textContent = product.category || "Research Compound";
   el("productName").textContent = product.name;
-  el("productStrength").textContent = product.strength || "Not listed";
 
-  const priceBox=el("productPrice");
+    const optionsBox=el("productOptions");
+  if(optionsBox){
+    const label=String(product.option_label||"").trim();
+    const values=Array.isArray(product.option_values)?product.option_values.filter(Boolean):[];
+    if(label && values.length){
+      optionsBox.innerHTML=`<div class="product-option-label">${esc(label)}</div><div class="product-option-values">${values.map(value=>`<span class="product-option-chip">${esc(value)}</span>`).join("")}</div>`;
+      optionsBox.hidden=false;
+    }else{
+      optionsBox.hidden=true;
+      optionsBox.innerHTML="";
+    }
+  }
+
+const priceBox=el("productPrice");
   if(priceBox){
     const price=Number(product.price||0);
     const compare=Number(product.compare_at_price||0);

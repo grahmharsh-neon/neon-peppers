@@ -118,26 +118,19 @@ async function loadOrderForm(){
 }
 
 function variantsForItem(itemId){
-  const item=orderItems.find(
-    current=>String(current.id)===String(itemId)
-  );
-
-  const variants=orderVariants.filter(
-    variant=>String(variant.product_id)===String(itemId)
-  );
-
-  if(variants.length){
-    return variants;
+  const saved=orderVariants.filter(variant=>String(variant.product_id)===String(itemId));
+  if(saved.length){
+    return saved.map(variant=>({...variant,option_value:variant.strength}));
   }
-
-  return [{
-    id:`fallback-${itemId}`,
-    product_id:itemId,
-    strength:item?.strength||"Standard",
-    stock_status:item?.status||"available",
-    visible:true,
-    sort_order:0
-  }];
+  const item=orderItems.find(current=>String(current.id)===String(itemId));
+  const values=Array.isArray(item?.option_values)?item.option_values.filter(Boolean):[];
+  if(values.length){
+    return values.map((value,index)=>({
+      id:`fallback-${item.id}-${index}`,product_id:item.id,strength:value,option_value:value,
+      stock_status:item.status||"available",visible:true,sort_order:index
+    }));
+  }
+  return [{id:`fallback-${item.id}-standard`,product_id:item.id,strength:"",option_value:"",stock_status:item?.status||"available",visible:true,sort_order:0}];
 }
 
 function stockLabel(status){
@@ -191,7 +184,7 @@ function renderOrderItems(){
             value="${esc(variant.id)}"
             data-status="${esc(variant.stock_status)}"
           >
-            ${esc(variant.strength)} — ${esc(stockLabel(variant.stock_status))}
+            ${esc(variant.option_value||variant.strength||"Standard")} — ${esc(stockLabel(variant.stock_status))}
           </option>
         `).join("")
       : '<option value="">No strengths available</option>';
@@ -363,7 +356,8 @@ function syncCartFromRow(itemId){
         ? null
         : variant.id,
       product_name:item.name,
-      strength:variant.strength || item.strength || "Standard",
+      option_label:item.option_label||"Option",
+      strength:variant.option_value || variant.strength || "Standard",
       quantity,
       unit_price:Number(item.price || 0)
     });
@@ -412,7 +406,7 @@ function renderCart(){
     <div class="cart-item">
       <div>
         <strong>${esc(item.product_name)}</strong>
-        <small>${esc(item.strength)} × ${item.quantity}</small>
+        <small>${esc(item.option_label||"Option")}: ${esc(item.strength||"Standard")} × ${item.quantity}</small>
         ${Number(item.unit_price||0)>0 ? `<div class="cart-price">$${(Number(item.unit_price)*Number(item.quantity)).toFixed(2)}</div>` : ""}
       </div>
 

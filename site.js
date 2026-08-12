@@ -325,7 +325,7 @@ function renderProducts(){
           ${formatProductPrice(product)}
 
         <div class="card-actions">
-          <div class="strength">${esc(product.strength || "")}</div>
+          <div class="strength">${esc((product.option_values||[])[0] || "")}</div>
           <div class="card-view">View details</div>
         </div>
       </div>
