@@ -852,3 +852,129 @@ button.pink *{
     flex-direction:column;
   }
 }
+
+
+/* V24 PRODUCT LIFECYCLE */
+.product-lifecycle-tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:14px;
+}
+
+.lifecycle-tab{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:9px 12px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:999px;
+  background:#090d13;
+  color:#cfd5df;
+  cursor:pointer;
+  font-weight:800;
+}
+
+.lifecycle-tab span{
+  display:inline-grid;
+  min-width:22px;
+  height:22px;
+  place-items:center;
+  padding:0 5px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  font-size:.7rem;
+}
+
+.lifecycle-tab:hover,
+.lifecycle-tab.active{
+  border-color:var(--pink);
+  background:var(--pink);
+  color:#fff;
+}
+
+.lifecycle-tab.active span{
+  background:rgba(0,0,0,.18);
+}
+
+.product-title-row{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+}
+
+.product-title-row h3{
+  margin:4px 0;
+}
+
+.lifecycle-badge{
+  display:inline-flex;
+  padding:5px 8px;
+  border:1px solid;
+  border-radius:999px;
+  font-size:.67rem;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+.lifecycle-badge.draft{color:#ffd35c;border-color:#ffd35c}
+.lifecycle-badge.inventory{color:var(--blue);border-color:var(--blue)}
+.lifecycle-badge.published{color:var(--green);border-color:var(--green)}
+.lifecycle-badge.archived{color:#9ba3af;border-color:#9ba3af}
+
+.lifecycle-actions{
+  max-width:620px;
+  justify-content:flex-end;
+}
+
+.needs-attention-panel{
+  margin:18px 0;
+}
+
+.page-head.compact{
+  margin-bottom:12px;
+}
+
+.needs-attention-grid{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:10px;
+}
+
+.needs-attention-grid button{
+  padding:14px;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:10px;
+  background:#080c12;
+  color:#fff;
+  text-align:left;
+  cursor:pointer;
+}
+
+.needs-attention-grid button:hover{
+  border-color:var(--pink);
+}
+
+.needs-attention-grid span{
+  display:block;
+  color:var(--muted);
+  font-size:.7rem;
+  text-transform:uppercase;
+}
+
+.needs-attention-grid strong{
+  display:block;
+  margin-top:6px;
+  font-size:1.4rem;
+}
+
+@media(max-width:1100px){
+  .needs-attention-grid{grid-template-columns:repeat(3,1fr)}
+}
+
+@media(max-width:650px){
+  .needs-attention-grid{grid-template-columns:repeat(2,1fr)}
+  .lifecycle-actions{justify-content:flex-start}
+}

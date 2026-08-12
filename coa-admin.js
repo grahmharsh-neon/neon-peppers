@@ -173,9 +173,10 @@
         option_label:"Size",
         option_values:["5mg","10mg","20mg","30mg"],
         price:0,
-        visible:true,
+        visible:false,
         featured:false,
         status:"available",
+        lifecycle_status:"draft",
         stock_count:0,
         low_stock_threshold:5
       })

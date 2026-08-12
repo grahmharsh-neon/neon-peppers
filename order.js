@@ -74,6 +74,7 @@ async function loadOrderForm(){
     .from("products")
     .select("*")
     .eq("visible",true)
+    .eq("lifecycle_status","published")
     .order("name",{ascending:true});
 
   if(productsResult.error){

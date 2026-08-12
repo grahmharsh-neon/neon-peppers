@@ -66,6 +66,36 @@
           <article><span>Referral Credits</span><strong id="statReferralCredits">$0.00</strong></article>
         </div>
 
+        <div class="panel needs-attention-panel">
+          <div class="page-head compact">
+            <div>
+              <div class="eyebrow">Product readiness</div>
+              <h2>Needs Attention</h2>
+            </div>
+          </div>
+
+          <div class="needs-attention-grid">
+            <button type="button" data-attention-filter="image">
+              <span>Missing Image</span><strong id="attentionMissingImage">0</strong>
+            </button>
+            <button type="button" data-attention-filter="coa">
+              <span>Missing COA</span><strong id="attentionMissingCoa">0</strong>
+            </button>
+            <button type="button" data-attention-filter="price">
+              <span>Missing Price</span><strong id="attentionMissingPrice">0</strong>
+            </button>
+            <button type="button" data-attention-filter="description">
+              <span>Missing Description</span><strong id="attentionMissingDescription">0</strong>
+            </button>
+            <button type="button" data-attention-filter="sizes">
+              <span>No Sizes</span><strong id="attentionMissingSizes">0</strong>
+            </button>
+            <button type="button" data-attention-filter="low_stock">
+              <span>Low Inventory</span><strong id="attentionLowStock">0</strong>
+            </button>
+          </div>
+        </div>
+
         <div class="dashboard-grid-v22">
           <div class="panel">
             <h2>Quick Actions</h2>
@@ -162,13 +192,22 @@
         </div>
 
         <div class="panel">
+          <div class="product-lifecycle-tabs" id="productLifecycleTabs">
+            <button class="lifecycle-tab active" type="button" data-lifecycle="all">All <span id="lifeCountAll">0</span></button>
+            <button class="lifecycle-tab" type="button" data-lifecycle="draft">Draft <span id="lifeCountDraft">0</span></button>
+            <button class="lifecycle-tab" type="button" data-lifecycle="inventory">Inventory <span id="lifeCountInventory">0</span></button>
+            <button class="lifecycle-tab" type="button" data-lifecycle="published">Published <span id="lifeCountPublished">0</span></button>
+            <button class="lifecycle-tab" type="button" data-lifecycle="archived">Archived <span id="lifeCountArchived">0</span></button>
+          </div>
+
           <div class="product-toolbar">
             <input id="adminProductSearch" placeholder="Search products...">
             <select id="adminProductFilter">
               <option value="all">All products</option>
-              <option value="visible">Visible</option>
-              <option value="hidden">Hidden</option>
+              <option value="visible">Visible flag</option>
+              <option value="hidden">Hidden flag</option>
               <option value="featured">Featured</option>
+              <option value="needs_attention">Needs Attention</option>
             </select>
           </div>
 
@@ -298,7 +337,7 @@
   <script src="config.js"></script>
   <script src="/markdown.js"></script>
   <script src="/js/neon-core.js?v=23"></script>
-  <script src="/js/admin-products.js?v=23.3"></script>
-  <script src="admin.js?v=23.3"></script>
+  <script src="/js/admin-products.js?v=24"></script>
+  <script src="admin.js?v=24"></script>
 </body>
 </html>

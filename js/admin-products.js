@@ -3,6 +3,8 @@
 
   const esc=value=>window.NeonCore?window.NeonCore.esc(value):String(value||"");
   const SIZE_CHOICES=["5mg","10mg","20mg","30mg"];
+  window.productLifecycleFilter=window.productLifecycleFilter||"all";
+  window.productAttentionFilter=window.productAttentionFilter||"";
 
   window.setDescriptionGenerationStatus=function(index,message,state=""){
     const node=document.getElementById(`descriptionStatus-${index}`);
@@ -40,6 +42,7 @@
       visible:true,
       featured:false,
       status:"available",
+      lifecycle_status:"draft",
       stock_count:0,
       low_stock_threshold:5,
       tags:[],
@@ -114,6 +117,175 @@
     window.renderProducts();
   };
 
+  function lifecycleLabel(value){
+    return value==="inventory"?"Inventory":
+      value==="published"?"Published":
+      value==="archived"?"Archived":"Draft";
+  }
+
+  function lifecycleClass(value){
+    return ["draft","inventory","published","archived"].includes(value)
+      ? value
+      : "draft";
+  }
+
+  async function hasCoa(productId){
+    if(!productId)return false;
+    const {count,error}=await window.client
+      .from("product_coas")
+      .select("id",{count:"exact",head:true})
+      .eq("product_id",productId);
+
+    if(error){
+      console.warn(error);
+      return false;
+    }
+    return Number(count||0)>0;
+  }
+
+  window.setProductLifecycle=async function(index,status){
+    const product=window.products?.[index];
+    if(!product)return;
+
+    if(status==="published"){
+      await window.publishProduct(index);
+      return;
+    }
+
+    product.lifecycle_status=status;
+    product.visible=false;
+
+    if(product.id){
+      const {error}=await window.client
+        .from("products")
+        .update({
+          lifecycle_status:status,
+          visible:false,
+          updated_at:new Date().toISOString()
+        })
+        .eq("id",product.id);
+
+      if(error){
+        alert(error.message);
+        return;
+      }
+    }
+
+    window.flash?.(`Product moved to ${lifecycleLabel(status)}`);
+    if(typeof window.loadProducts==="function"){
+      await window.loadProducts();
+    }else{
+      window.renderProducts();
+    }
+  };
+
+  window.publishProduct=async function(index){
+    const product=window.products?.[index];
+    if(!product)return;
+
+    if(!product.id){
+      alert("Save the product before publishing it.");
+      return;
+    }
+
+    const coaExists=await hasCoa(product.id);
+    const checks=[
+      ["Image",Boolean(String(product.image_url||"").trim())],
+      ["Description",Boolean(String(product.description||"").trim())],
+      ["Price",Number(product.price||0)>0],
+      ["Size",Array.isArray(product.option_values)&&product.option_values.length>0],
+      ["COA",coaExists],
+      ["Category",Boolean(String(product.category||"").trim())]
+    ];
+
+    const missing=checks.filter(([,ok])=>!ok).map(([label])=>label);
+
+    if(missing.length){
+      alert(
+        "This product is not ready to publish.\\n\\nMissing:\\n• "+
+        missing.join("\\n• ")
+      );
+      return;
+    }
+
+    const {error}=await window.client
+      .from("products")
+      .update({
+        lifecycle_status:"published",
+        visible:true,
+        updated_at:new Date().toISOString()
+      })
+      .eq("id",product.id);
+
+    if(error){
+      alert(error.message);
+      return;
+    }
+
+    window.flash?.("Product published");
+    if(typeof window.loadProducts==="function"){
+      await window.loadProducts();
+    }
+  };
+
+  function matchesAttention(product){
+    const type=window.productAttentionFilter||"";
+    if(!type)return true;
+    if(type==="image")return !String(product.image_url||"").trim();
+    if(type==="price")return Number(product.price||0)<=0;
+    if(type==="description")return !String(product.description||"").trim();
+    if(type==="sizes")return !Array.isArray(product.option_values)||!product.option_values.length;
+    if(type==="low_stock")return Number(product.stock_count||0)<=Number(product.low_stock_threshold||5);
+    if(type==="coa"){
+      const ids=new Set((window.dashboardCoas||[]).map(x=>String(x.product_id)));
+      return !ids.has(String(product.id));
+    }
+    return true;
+  }
+
+  function updateLifecycleCounts(products){
+    const counts={
+      all:products.length,
+      draft:0,
+      inventory:0,
+      published:0,
+      archived:0
+    };
+
+    products.forEach(product=>{
+      const key=product.lifecycle_status||"published";
+      if(Object.prototype.hasOwnProperty.call(counts,key))counts[key]++;
+    });
+
+    const map={
+      all:"lifeCountAll",
+      draft:"lifeCountDraft",
+      inventory:"lifeCountInventory",
+      published:"lifeCountPublished",
+      archived:"lifeCountArchived"
+    };
+
+    Object.entries(map).forEach(([key,id])=>{
+      const node=document.getElementById(id);
+      if(node)node.textContent=counts[key]||0;
+    });
+  }
+
+  function bindLifecycleTabs(){
+    document.querySelectorAll("[data-lifecycle]").forEach(button=>{
+      button.onclick=()=>{
+        window.productLifecycleFilter=button.dataset.lifecycle||"all";
+        window.productAttentionFilter="";
+        document.querySelectorAll("[data-lifecycle]").forEach(item=>
+          item.classList.toggle("active",item===button)
+        );
+        const filter=document.getElementById("adminProductFilter");
+        if(filter&&filter.value==="needs_attention")filter.value="all";
+        window.renderProducts();
+      };
+    });
+  }
+
   function bindInputs(){
     document.querySelectorAll("#products [data-product-index][data-product-key]")
       .forEach(node=>{
@@ -145,6 +317,9 @@
     const products=Array.isArray(window.products)?window.products:[];
     const query=(document.getElementById("adminProductSearch")?.value||"").trim().toLowerCase();
     const filter=document.getElementById("adminProductFilter")?.value||"all";
+    const lifecycle=window.productLifecycleFilter||"all";
+
+    updateLifecycleCounts(products);
 
     const entries=products.map((product,index)=>({product,index})).filter(({product})=>{
       const searchable=[
@@ -156,7 +331,13 @@
       if(filter==="visible")matchesFilter=product.visible!==false;
       if(filter==="hidden")matchesFilter=product.visible===false;
       if(filter==="featured")matchesFilter=product.featured===true;
-      return searchable.includes(query)&&matchesFilter;
+      if(filter==="needs_attention")matchesFilter=matchesAttention(product);
+
+      const lifecycleMatch=
+        lifecycle==="all" ||
+        (product.lifecycle_status||"published")===lifecycle;
+
+      return searchable.includes(query)&&matchesFilter&&lifecycleMatch;
     });
 
     if(!entries.length){
@@ -172,19 +353,38 @@
         <div class="product-editor-head">
           <div>
             <div class="eyebrow">${esc(product.category||"Research Compound")}</div>
-            <h3>${esc(product.name||"New Product")}</h3>
+            <div class="product-title-row">
+              <h3>${esc(product.name||"New Product")}</h3>
+              <span class="lifecycle-badge ${lifecycleClass(product.lifecycle_status||"draft")}">
+                ${lifecycleLabel(product.lifecycle_status||"draft")}
+              </span>
+            </div>
             <div class="muted">${selected.length?`${esc(optionLabel)}: ${selected.map(esc).join(", ")}`:"No size selected"}</div>
           </div>
-          <div class="actions">
+          <div class="actions lifecycle-actions">
             <button class="btn pink" type="button" onclick="saveProduct(${index})">Save Product</button>
-            <button class="btn danger" type="button" onclick="deleteProduct(${index})">Delete</button>
+            ${product.lifecycle_status!=="published"
+              ? `<button class="btn green" type="button" onclick="publishProduct(${index})">Publish Product</button>`
+              : `<button class="btn" type="button" onclick="setProductLifecycle(${index},'inventory')">Unpublish</button>`
+            }
+            <button class="btn blue" type="button" onclick="setProductLifecycle(${index},'inventory')">Inventory</button>
+            <button class="btn" type="button" onclick="setProductLifecycle(${index},'draft')">Draft</button>
+            <button class="btn danger" type="button" onclick="setProductLifecycle(${index},'archived')">Archive</button>
           </div>
         </div>
 
         <div class="grid three">
           <div><label>Product Name</label><input data-product-index="${index}" data-product-key="name" value="${esc(product.name||"")}"></div>
           <div><label>Category</label><input data-product-index="${index}" data-product-key="category" value="${esc(product.category||"")}"></div>
-          <div><label>Option Label</label><input data-product-index="${index}" data-product-key="option_label" value="${esc(optionLabel)}" readonly></div>
+          <div>
+            <label>Lifecycle</label>
+            <select data-product-index="${index}" data-product-key="lifecycle_status">
+              <option value="draft" ${(product.lifecycle_status||"draft")==="draft"?"selected":""}>Draft</option>
+              <option value="inventory" ${product.lifecycle_status==="inventory"?"selected":""}>Inventory</option>
+              <option value="published" ${product.lifecycle_status==="published"?"selected":""}>Published</option>
+              <option value="archived" ${product.lifecycle_status==="archived"?"selected":""}>Archived</option>
+            </select>
+          </div>
         </div>
 
         <section class="size-selector-admin">
@@ -288,5 +488,6 @@
     }).join("");
 
     bindInputs();
+    bindLifecycleTabs();
   };
 })();

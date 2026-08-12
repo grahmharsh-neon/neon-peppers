@@ -10,7 +10,7 @@ let merchItems = [];
 let merchVariants = [];
 let dashboardInvoices = [];
 let dashboardCustomers = [];
-let dashboardCoas = [];
+var dashboardCoas = [];
 let dashboardCoupons = [];
 let dashboardReferrals = [];
 
@@ -103,6 +103,18 @@ function bindEvents(){
 
 
 
+
+  document.querySelectorAll("[data-attention-filter]").forEach(button=>{
+    button.addEventListener("click",()=>{
+      window.productAttentionFilter=button.dataset.attentionFilter;
+      window.productLifecycleFilter="all";
+      const filter=el("adminProductFilter");
+      if(filter)filter.value="needs_attention";
+      history.replaceState(null,"","#productsPanel");
+      showPanel("productsPanel");
+      renderProducts();
+    });
+  });
 
   const addMerchItemButton = el("addMerchItemButton");
   if(addMerchItemButton){
@@ -215,7 +227,7 @@ function showPanel(panelId){
   });
 }
 
-async function loadProducts(){
+window.loadProducts = async function loadProducts(){
   const { data, error } = await client
     .from("products")
     .select("*")
@@ -329,6 +341,20 @@ function updateStats(){
   if(el("statMissingCoas"))el("statMissingCoas").textContent=missingCoas;
   if(el("statActiveCoupons"))el("statActiveCoupons").textContent=dashboardCoupons.filter(x=>x.active).length;
   if(el("statReferralCredits"))el("statReferralCredits").textContent=money(credits);
+
+  const publishedOrWorking=products.filter(x=>x.lifecycle_status!=="archived");
+  const missingImage=publishedOrWorking.filter(x=>!String(x.image_url||"").trim()).length;
+  const missingPrice=publishedOrWorking.filter(x=>Number(x.price||0)<=0).length;
+  const missingDescription=publishedOrWorking.filter(x=>!String(x.description||"").trim()).length;
+  const missingSizes=publishedOrWorking.filter(x=>!Array.isArray(x.option_values)||!x.option_values.length).length;
+  const missingCoaCount=publishedOrWorking.filter(x=>!productIdsWithCoa.has(String(x.id))).length;
+
+  if(el("attentionMissingImage"))el("attentionMissingImage").textContent=missingImage;
+  if(el("attentionMissingCoa"))el("attentionMissingCoa").textContent=missingCoaCount;
+  if(el("attentionMissingPrice"))el("attentionMissingPrice").textContent=missingPrice;
+  if(el("attentionMissingDescription"))el("attentionMissingDescription").textContent=missingDescription;
+  if(el("attentionMissingSizes"))el("attentionMissingSizes").textContent=missingSizes;
+  if(el("attentionLowStock"))el("attentionLowStock").textContent=lowStock;
 
   renderDashboardActivity();
 }
@@ -481,7 +507,7 @@ async function generateProductDescription(index){
   }
 }
 
-async function saveProduct(index){
+window.saveProduct = async function saveProduct(index){
   const product = products[index];
 
   if(!product){
@@ -519,9 +545,10 @@ async function saveProduct(index){
     seo_description:product.seo_description||String(product.description||"").replace(/[#*_`]/g,"").slice(0,155),
     image_url:product.image_url || null,
     coa_url:product.coa_url || null,
-    visible:product.visible !== false,
+    visible:product.lifecycle_status==="published" ? product.visible !== false : false,
     featured:product.featured === true,
     status:product.status || "available",
+    lifecycle_status:product.lifecycle_status || "draft",
     updated_at:new Date().toISOString()
   };
 
@@ -540,7 +567,7 @@ async function saveProduct(index){
   updateStats();
 }
 
-async function deleteProduct(index){
+window.deleteProduct = async function deleteProduct(index){
   const product = products[index];
 
   if(!product){

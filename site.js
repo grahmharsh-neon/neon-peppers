@@ -141,6 +141,7 @@ async function loadProducts(client){
     .from("products")
     .select("*")
     .eq("visible", true)
+    .eq("lifecycle_status","published")
     .order("featured", { ascending:false })
     .order("created_at", { ascending:false });
 

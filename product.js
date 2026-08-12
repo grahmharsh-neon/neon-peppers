@@ -92,6 +92,8 @@ async function loadData(){
         .from("products")
         .select("*")
         .eq("id",requested.id)
+        .eq("lifecycle_status","published")
+        .eq("visible",true)
         .maybeSingle();
 
       if(exactResult.error){
@@ -104,6 +106,8 @@ async function loadData(){
     const allResult=await client
       .from("products")
       .select("*")
+      .eq("lifecycle_status","published")
+      .eq("visible",true)
       .order("created_at",{ascending:false});
 
     if(allResult.error){
