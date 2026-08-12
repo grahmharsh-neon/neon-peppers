@@ -70,19 +70,11 @@ async function loadOrderForm(){
     return;
   }
 
-  const [productsResult,variantsResult]=await Promise.all([
-    client
-      .from("products")
-      .select("*")
-      .eq("visible",true)
-      .order("name",{ascending:true}),
-
-    client
-      .from("product_variants")
-      .select("*")
-      .eq("visible",true)
-      .order("sort_order",{ascending:true})
-  ]);
+  const productsResult=await client
+    .from("products")
+    .select("*")
+    .eq("visible",true)
+    .order("name",{ascending:true});
 
   if(productsResult.error){
     console.error(productsResult.error);
@@ -98,7 +90,9 @@ async function loadOrderForm(){
     category:product.category||"Research Material",
     description:product.description||"",
     image_url:product.image_url||"",
-    strength:product.strength||"",
+    strength:"",
+    option_label:product.option_label||"Size",
+    option_values:Array.isArray(product.option_values)?product.option_values:[],
     status:Number(product.stock_count||0)<=0
       ? "out_of_stock"
       : (Number(product.stock_count||0)<=Number(product.low_stock_threshold||5)
@@ -111,33 +105,37 @@ async function loadOrderForm(){
     price_note:product.price_note||""
   }));
 
-  orderVariants=variantsResult.error?[]:(variantsResult.data||[]);
-
   renderCategories();
   renderOrderItems();
 }
 
 function variantsForItem(itemId){
-  const item=orderItems.find(
-    current=>String(current.id)===String(itemId)
-  );
+  const item=orderItems.find(current=>String(current.id)===String(itemId));
+  if(!item)return[];
 
-  const variants=orderVariants.filter(
-    variant=>String(variant.product_id)===String(itemId)
-  );
+  const values=Array.isArray(item.option_values)
+    ? item.option_values.filter(Boolean)
+    : [];
 
-  if(variants.length){
-    return variants;
+  if(!values.length){
+    return [{
+      id:`option-${itemId}-standard`,
+      product_id:itemId,
+      strength:"",
+      stock_status:item.status||"available",
+      visible:true,
+      sort_order:0
+    }];
   }
 
-  return [{
-    id:`fallback-${itemId}`,
+  return values.map((value,index)=>({
+    id:`option-${itemId}-${index}`,
     product_id:itemId,
-    strength:item?.strength||"Standard",
-    stock_status:item?.status||"available",
+    strength:value,
+    stock_status:item.status||"available",
     visible:true,
-    sort_order:0
-  }];
+    sort_order:index
+  }));
 }
 
 function stockLabel(status){

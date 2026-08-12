@@ -2,7 +2,6 @@ let client = null;
 let settings = {};
 let allProducts = [];
 let currentProduct = null;
-let currentVariants = [];
 
 function el(id){
   return document.getElementById(id);
@@ -127,14 +126,6 @@ async function loadData(){
       return;
     }
 
-    const variantResult = await client
-      .from("product_variants")
-      .select("*")
-      .eq("product_id",currentProduct.id)
-      .eq("visible",true)
-      .order("sort_order",{ascending:true});
-
-    currentVariants = variantResult.error ? [] : (variantResult.data || []);
 
     renderProduct(currentProduct);
     applyProductSeo(currentProduct);
@@ -215,8 +206,8 @@ function renderProduct(product){
   el("productCategory").textContent = product.category || "Research Compound";
   el("productName").textContent = product.name;
   const optionLabel = product.option_label || "Size";
-  const optionText = currentVariants.length
-    ? currentVariants.map(item=>item.strength).filter(Boolean).join(" · ")
+  const optionText = Array.isArray(product.option_values) && product.option_values.length
+    ? product.option_values.join(" · ")
     : "Not listed";
 
   el("productOptionLabel").textContent = optionLabel;

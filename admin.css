@@ -752,3 +752,59 @@ button.pink *{
     flex-direction:column;
   }
 }
+
+/* V23.1 SELECTABLE PRODUCT SIZES */
+.size-selector-admin{
+  margin:18px 0;
+  padding:16px;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;
+  background:#070a0f;
+}
+.size-selector-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:15px;
+  margin-bottom:14px;
+}
+.size-selector-head label{
+  margin:0 0 4px;
+  color:#fff;
+  font-weight:900;
+}
+.size-choice-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.size-choice{
+  position:relative;
+  display:flex!important;
+  align-items:center;
+  justify-content:center;
+  min-height:54px;
+  margin:0!important;
+  padding:10px;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:10px;
+  background:#0d121a;
+  color:#fff!important;
+  cursor:pointer;
+  font-weight:900;
+}
+.size-choice input{
+  position:absolute;
+  opacity:0;
+  pointer-events:none;
+}
+.size-choice.selected{
+  border-color:var(--pink);
+  background:var(--pink);
+  color:#fff!important;
+}
+.size-choice.selected *{color:#fff!important}
+@media(max-width:650px){
+  .size-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .size-selector-head{flex-direction:column}
+}
