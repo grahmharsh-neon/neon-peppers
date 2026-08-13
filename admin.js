@@ -116,6 +116,16 @@ function bindEvents(){
     });
   });
 
+  const expandAllProductsButton=el("expandAllProductsButton");
+  if(expandAllProductsButton){
+    expandAllProductsButton.addEventListener("click",()=>window.expandAllProducts?.());
+  }
+
+  const collapseAllProductsButton=el("collapseAllProductsButton");
+  if(collapseAllProductsButton){
+    collapseAllProductsButton.addEventListener("click",()=>window.collapseAllProducts?.());
+  }
+
   const addMerchItemButton = el("addMerchItemButton");
   if(addMerchItemButton){
     addMerchItemButton.addEventListener("click", addMerchItem);

@@ -5,6 +5,7 @@
   const SIZE_CHOICES=["5mg","10mg","20mg","30mg"];
   window.productLifecycleFilter=window.productLifecycleFilter||"all";
   window.productAttentionFilter=window.productAttentionFilter||"";
+  window.productExpandedState=window.productExpandedState||{};
 
   window.setDescriptionGenerationStatus=function(index,message,state=""){
     const node=document.getElementById(`descriptionStatus-${index}`);
@@ -53,6 +54,7 @@
       seo_title:"",
       seo_description:""
     });
+    window.productExpandedState["new-0"]=true;
     window.renderProducts();
     document.querySelector("#products .product-editor")
       ?.scrollIntoView({behavior:"smooth",block:"start"});
@@ -116,6 +118,44 @@
     window.products[index].option_values=[];
     window.renderProducts();
   };
+
+  function productKey(product,index){
+    return product?.id ? String(product.id) : `new-${index}`;
+  }
+
+  function isExpanded(product,index){
+    return window.productExpandedState[productKey(product,index)]===true;
+  }
+
+  window.toggleProductEditor=function(index){
+    const product=window.products?.[index];
+    if(!product)return;
+    const key=productKey(product,index);
+    window.productExpandedState[key]=!isExpanded(product,index);
+    window.renderProducts();
+  };
+
+  window.expandAllProducts=function(){
+    (window.products||[]).forEach((product,index)=>{
+      window.productExpandedState[productKey(product,index)]=true;
+    });
+    window.renderProducts();
+  };
+
+  window.collapseAllProducts=function(){
+    window.productExpandedState={};
+    window.renderProducts();
+  };
+
+  function collapsedWarnings(product){
+    const warnings=[];
+    if(!String(product.image_url||"").trim())warnings.push("Missing Image");
+    if(Number(product.price||0)<=0)warnings.push("Missing Price");
+    if(!String(product.description||"").trim())warnings.push("Missing Description");
+    if(!Array.isArray(product.option_values)||!product.option_values.length)warnings.push("No Sizes");
+    if(Number(product.stock_count||0)<=Number(product.low_stock_threshold||5))warnings.push("Low Stock");
+    return warnings;
+  }
 
   function lifecycleLabel(value){
     return value==="inventory"?"Inventory":
@@ -349,7 +389,43 @@
       const optionLabel=product.option_label||"Size";
       const selected=Array.isArray(product.option_values)?product.option_values:[];
       return `
-      <article class="product-editor">
+      <article class="product-editor ${isExpanded(product,index)?"expanded":"collapsed"}">
+        <button
+          class="product-collapse-summary"
+          type="button"
+          onclick="toggleProductEditor(${index})"
+          aria-expanded="${isExpanded(product,index)?"true":"false"}"
+        >
+          <div class="product-collapse-main">
+            <div class="product-collapse-title">
+              <h3>${esc(product.name||"New Product")}</h3>
+              <span class="lifecycle-badge ${lifecycleClass(product.lifecycle_status||"draft")}">
+                ${lifecycleLabel(product.lifecycle_status||"draft")}
+              </span>
+            </div>
+
+            <div class="product-collapse-meta">
+              <span>${selected.length?`${esc(optionLabel)}: ${selected.map(esc).join(", ")}`:"No size selected"}</span>
+              <span>${Number(product.price||0)>0?`$${Number(product.price).toFixed(2)}`:"No price"}</span>
+              <span>Stock: ${Number(product.stock_count||0)}</span>
+            </div>
+
+            <div class="product-collapse-warnings">
+              ${collapsedWarnings(product).map(warning=>`
+                <span class="product-warning-chip ${warning==="Low Stock"?"warning":""}">
+                  ${esc(warning)}
+                </span>
+              `).join("")}
+            </div>
+          </div>
+
+          <div class="product-collapse-toggle">
+            ${isExpanded(product,index)?"Collapse ▲":"Edit / Expand ▼"}
+          </div>
+        </button>
+
+        <div class="product-editor-body" ${isExpanded(product,index)?"":"hidden"}>
+
         <div class="product-editor-head">
           <div>
             <div class="eyebrow">${esc(product.category||"Research Compound")}</div>
@@ -483,6 +559,12 @@
             <label>SEO Title</label><input data-product-index="${index}" data-product-key="seo_title" value="${esc(product.seo_title||"")}">
             <label>SEO Description</label><textarea data-product-index="${index}" data-product-key="seo_description">${esc(product.seo_description||"")}</textarea>
           </div>
+        </div>
+
+        <div class="product-editor-footer">
+          <button class="btn pink" type="button" onclick="saveProduct(${index})">Save Product</button>
+          <button class="btn" type="button" onclick="toggleProductEditor(${index})">Collapse</button>
+        </div>
         </div>
       </article>`;
     }).join("");
