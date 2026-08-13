@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Supplier Pricing | Neon Peppers</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/admin.css">
+  <link rel="stylesheet" href="/supplier-pricing.css">
+</head>
+<body class="supplier-body">
+  <div id="supplierAuthGate" class="supplier-auth-gate">
+    <div class="supplier-auth-card">
+      <img src="/assets/neon-peppers-logo.jpg" alt="Neon Peppers">
+      <div class="eyebrow">Admin Access</div>
+      <h1>SUPPLIER PRICING</h1>
+      <input id="supplierEmail" type="email" placeholder="Email">
+      <input id="supplierPassword" type="password" placeholder="Password">
+      <button id="supplierLoginButton" class="btn pink" type="button">Sign In</button>
+      <div id="supplierAuthMessage" class="form-status"></div>
+    </div>
+  </div>
+
+  <aside class="supplier-sidebar unified-admin-sidebar">
+    <a class="unified-admin-logo" href="/admin.html">
+      <img src="/assets/neon-peppers-logo.jpg" alt="Neon Peppers">
+    </a>
+
+    <nav class="unified-admin-nav">
+      <a href="/admin.html">Dashboard</a>
+      <a href="/admin.html#productsPanel">Products</a>
+      <a href="/admin.html#ordersPanel">Order Requests</a>
+      <a href="/invoice-admin.html">Invoices</a>
+      <a href="/customer-crm.html">Customers</a>
+      <a href="/coa-admin.html">COAs</a>
+      <a href="/growth-admin.html">Growth</a>
+      <a class="active" href="/supplier-pricing.html">Supplier Pricing</a>
+      <a href="/admin.html#homepagePanel">Homepage</a>
+      <a href="/admin.html#settingsPanel">Settings</a>
+      <a href="/" target="_blank" rel="noopener">View Website</a>
+    </nav>
+
+    <button id="supplierLogoutButton" class="btn admin-signout-button" type="button">Sign Out</button>
+  </aside>
+
+  <main class="supplier-main">
+    <section class="supplier-head">
+      <div>
+        <div class="eyebrow">Private purchasing data</div>
+        <h1>SUPPLIER PRICING</h1>
+        <p class="muted">
+          Track supplier cost, your selling price, profit, and margin by product and size.
+        </p>
+      </div>
+
+      <button id="supplierAddButton" class="btn green" type="button">+ Add Price</button>
+    </section>
+
+    <section class="supplier-stats">
+      <article><span>Supplier Items</span><strong id="supplierStatItems">0</strong></article>
+      <article><span>Average Margin</span><strong id="supplierStatMargin">0%</strong></article>
+      <article><span>Average Profit / Vial</span><strong id="supplierStatProfit">$0.00</strong></article>
+      <article><span>Potential Retail Value</span><strong id="supplierStatRetail">$0.00</strong></article>
+    </section>
+
+    <section class="panel">
+      <div class="product-toolbar">
+        <input id="supplierSearch" placeholder="Search product, size, supplier...">
+
+        <select id="supplierFilter">
+          <option value="all">All</option>
+          <option value="matched">Matched to Product</option>
+          <option value="unmatched">Not Matched</option>
+          <option value="low_margin">Margin under 40%</option>
+        </select>
+      </div>
+
+      <div class="supplier-table-wrap">
+        <div class="supplier-table supplier-table-head">
+          <span>Product</span>
+          <span>Size</span>
+          <span>Supplier Cost</span>
+          <span>Your Price</span>
+          <span>Profit</span>
+          <span>Margin</span>
+          <span>Qty</span>
+          <span></span>
+        </div>
+
+        <div id="supplierRows">
+          <p class="muted">Loading supplier pricing…</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="supplierModal" class="modal supplier-modal">
+    <div class="modal-card supplier-modal-card">
+      <button id="supplierCloseButton" class="modal-close" type="button">×</button>
+
+      <div class="eyebrow">Supplier Price</div>
+      <h2 id="supplierModalTitle">Add Supplier Price</h2>
+
+      <div class="grid two">
+        <div>
+          <label>Match Existing Product</label>
+          <select id="supplierProductId"></select>
+        </div>
+
+        <div>
+          <label>Product Name *</label>
+          <input id="supplierProductName">
+        </div>
+
+        <div>
+          <label>Size</label>
+          <input id="supplierSize" placeholder="10mg">
+        </div>
+
+        <div>
+          <label>Supplier</label>
+          <input id="supplierName" placeholder="Supplier name">
+        </div>
+
+        <div>
+          <label>Supplier Cost *</label>
+          <input id="supplierCost" type="number" min="0" step="0.01">
+        </div>
+
+        <div>
+          <label>Your Retail Price</label>
+          <input id="supplierRetailPrice" type="number" min="0" step="0.01">
+        </div>
+
+        <div>
+          <label>Quantity</label>
+          <input id="supplierQuantity" type="number" min="0" step="1" value="0">
+        </div>
+
+        <div>
+          <label>Active</label>
+          <select id="supplierActive">
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Notes</label>
+      <textarea id="supplierNotes"></textarea>
+
+      <div class="supplier-preview">
+        <div><span>Profit / Vial</span><strong id="supplierPreviewProfit">$0.00</strong></div>
+        <div><span>Margin</span><strong id="supplierPreviewMargin">0%</strong></div>
+        <div><span>Inventory Cost</span><strong id="supplierPreviewInventory">$0.00</strong></div>
+        <div><span>Potential Retail</span><strong id="supplierPreviewRetail">$0.00</strong></div>
+      </div>
+
+      <div class="actions">
+        <button id="supplierSaveButton" class="btn pink" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/config.js"></script>
+  <script src="/js/neon-core.js?v=24.2"></script>
+  <script src="/supplier-pricing.js?v=24.2"></script>
+</body>
+</html>
