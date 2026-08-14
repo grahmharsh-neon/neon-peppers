@@ -120,7 +120,10 @@
           <span>${money(metrics.profit)}</span>
           <span class="supplier-margin ${marginClass}">${metrics.margin.toFixed(1)}%</span>
           <span>${Number(row.quantity||0)}</span>
-          <button class="btn" type="button" data-edit-supplier="${row.id}">Edit</button>
+          <div class="actions">
+            <button class="btn" type="button" data-edit-supplier="${row.id}">Edit</button>
+            <button class="btn danger" type="button" data-delete-supplier="${row.id}">Delete</button>
+          </div>
         </div>
       `;
     }).join("");
@@ -163,6 +166,27 @@
     fillModal();
   }
 
+  async function removeById(id){
+    const found=rows.find(row=>String(row.id)===String(id));
+    if(!found)return;
+
+    if(!confirm(`Delete ${found.product_name || "this supplier item"}?`)){
+      return;
+    }
+
+    const {error}=await db
+      .from("supplier_pricing")
+      .delete()
+      .eq("id",id);
+
+    if(error){
+      alert(error.message);
+      return;
+    }
+
+    await load();
+  }
+
   function openExisting(id){
     const found=rows.find(row=>String(row.id)===String(id));
     if(!found)return;
@@ -174,6 +198,7 @@
     fillProducts();
 
     el("supplierModalTitle").textContent=current.id?"Edit Supplier Price":"Add Supplier Price";
+    el("supplierDeleteButton").hidden=!current.id;
     el("supplierProductId").value=current.product_id||"";
     el("supplierProductName").value=current.product_name||"";
     el("supplierSize").value=current.size||"";
@@ -238,6 +263,27 @@
     await load();
   }
 
+  async function removeCurrent(){
+    if(!current?.id)return;
+
+    if(!confirm(`Delete ${current.product_name || "this supplier item"}?`)){
+      return;
+    }
+
+    const {error}=await db
+      .from("supplier_pricing")
+      .delete()
+      .eq("id",current.id);
+
+    if(error){
+      alert(error.message);
+      return;
+    }
+
+    close();
+    await load();
+  }
+
   el("supplierLoginButton").addEventListener("click",login);
   el("supplierLogoutButton").addEventListener("click",async()=>{
     await db.auth.signOut();
@@ -247,6 +293,7 @@
   el("supplierAddButton").addEventListener("click",openNew);
   el("supplierCloseButton").addEventListener("click",close);
   el("supplierSaveButton").addEventListener("click",save);
+  el("supplierDeleteButton").addEventListener("click",removeCurrent);
   el("supplierSearch").addEventListener("input",render);
   el("supplierFilter").addEventListener("change",render);
 
@@ -266,6 +313,10 @@
   document.addEventListener("click",event=>{
     const edit=event.target.closest("[data-edit-supplier]");
     if(edit)openExisting(edit.dataset.editSupplier);
+
+    const del=event.target.closest("[data-delete-supplier]");
+    if(del)removeById(del.dataset.deleteSupplier);
+
     if(event.target.id==="supplierModal")close();
   });
 

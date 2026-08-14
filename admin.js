@@ -584,7 +584,11 @@ window.deleteProduct = async function deleteProduct(index){
     return;
   }
 
-  if(!confirm(`Delete ${product.name || "this product"}?`)){
+  if(!confirm(
+    `Permanently delete ${product.name || "this product"}?\n\n` +
+    "This removes the product from Admin and the public catalog. " +
+    "Historical order and invoice line items will remain as text records."
+  )){
     return;
   }
 
