@@ -1289,3 +1289,46 @@ header nav a.active{
   color:#fff;
   border-bottom:2px solid var(--pink);
 }
+
+
+/* V25.2.1 RESEARCH PRODUCTS GRID FIX */
+.standalone-catalog-section .product-grid,
+.standalone-catalog-section .products-grid{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:18px!important;
+  align-items:stretch;
+}
+
+.standalone-catalog-section .product-grid > .card,
+.standalone-catalog-section .products-grid > .card{
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  margin:0!important;
+}
+
+.standalone-catalog-section .card-image{
+  width:100%;
+}
+
+@media(max-width:1200px){
+  .standalone-catalog-section .product-grid,
+  .standalone-catalog-section .products-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+}
+
+@media(max-width:900px){
+  .standalone-catalog-section .product-grid,
+  .standalone-catalog-section .products-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+
+@media(max-width:580px){
+  .standalone-catalog-section .product-grid,
+  .standalone-catalog-section .products-grid{
+    grid-template-columns:1fr!important;
+  }
+}
