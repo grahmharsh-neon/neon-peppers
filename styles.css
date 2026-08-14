@@ -1332,3 +1332,206 @@ header nav a.active{
     grid-template-columns:1fr!important;
   }
 }
+
+
+/* =========================================================
+   V25.2.2 RESEARCH PRODUCTS — FULL WIDTH CATALOG FIX
+   ========================================================= */
+
+.research-products-page{
+  overflow-x:hidden;
+}
+
+.research-products-main{
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:0!important;
+}
+
+.research-products-catalog{
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:120px clamp(24px,4vw,72px) 80px!important;
+  box-sizing:border-box!important;
+}
+
+.research-products-catalog > .section-title,
+.research-products-catalog > .products{
+  width:100%!important;
+  max-width:1600px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  box-sizing:border-box!important;
+}
+
+.research-products-catalog .products{
+  display:block!important;
+}
+
+/* Controls get their own full-width area above the cards. */
+.research-products-catalog .catalog-controls{
+  width:100%!important;
+  max-width:none!important;
+  margin:0 0 26px!important;
+  padding:16px!important;
+  box-sizing:border-box!important;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;
+  background:rgba(7,10,15,.72);
+}
+
+.research-products-catalog .catalog-search-row{
+  display:grid!important;
+  grid-template-columns:minmax(260px,1fr) 180px auto!important;
+  gap:12px!important;
+  width:100%!important;
+  align-items:center!important;
+}
+
+.research-products-catalog .catalog-search-row input,
+.research-products-catalog .catalog-search-row select{
+  width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+
+.research-products-catalog .catalog-filter-row{
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:center!important;
+  gap:16px!important;
+  flex-wrap:wrap!important;
+  width:100%!important;
+  margin-top:14px!important;
+}
+
+.research-products-catalog #filters{
+  display:flex!important;
+  gap:8px!important;
+  flex-wrap:wrap!important;
+  width:auto!important;
+  max-width:none!important;
+}
+
+/* The actual product grid owns the full catalog width. */
+.research-products-catalog #productGrid,
+.research-products-catalog .product-grid,
+.research-products-catalog .products-grid{
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(240px,1fr))!important;
+  gap:22px!important;
+  align-items:stretch!important;
+  box-sizing:border-box!important;
+}
+
+/* Remove inherited card width constraints that caused skinny cards. */
+.research-products-catalog #productGrid > *,
+.research-products-catalog .product-grid > *,
+.research-products-catalog .products-grid > *{
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+}
+
+.research-products-catalog .product-card,
+.research-products-catalog .card{
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  height:100%;
+}
+
+/* Larger, consistent image area. */
+.research-products-catalog .card-image{
+  width:100%!important;
+  min-height:280px!important;
+  height:280px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+}
+
+.research-products-catalog .card-image img{
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  object-fit:contain!important;
+}
+
+/* Keep long product names from forcing bad widths. */
+.research-products-catalog .card-body,
+.research-products-catalog .compact-product-card{
+  min-width:0!important;
+}
+
+.research-products-catalog .card-body h3{
+  overflow-wrap:anywhere;
+}
+
+/* Desktop / tablet / mobile breakpoints */
+@media(max-width:1350px){
+  .research-products-catalog #productGrid,
+  .research-products-catalog .product-grid,
+  .research-products-catalog .products-grid{
+    grid-template-columns:repeat(3,minmax(230px,1fr))!important;
+  }
+}
+
+@media(max-width:950px){
+  .research-products-catalog{
+    padding-left:24px!important;
+    padding-right:24px!important;
+  }
+
+  .research-products-catalog #productGrid,
+  .research-products-catalog .product-grid,
+  .research-products-catalog .products-grid{
+    grid-template-columns:repeat(2,minmax(220px,1fr))!important;
+  }
+
+  .research-products-catalog .catalog-search-row{
+    grid-template-columns:1fr 160px!important;
+  }
+
+  .research-products-catalog #clearSearch{
+    grid-column:1 / -1;
+    justify-self:start;
+  }
+}
+
+@media(max-width:600px){
+  .research-products-catalog{
+    padding:100px 16px 60px!important;
+  }
+
+  .research-products-catalog #productGrid,
+  .research-products-catalog .product-grid,
+  .research-products-catalog .products-grid{
+    grid-template-columns:1fr!important;
+    gap:16px!important;
+  }
+
+  .research-products-catalog .catalog-search-row{
+    grid-template-columns:1fr!important;
+  }
+
+  .research-products-catalog #clearSearch{
+    grid-column:auto;
+    width:100%;
+  }
+
+  .research-products-catalog .card-image{
+    height:260px!important;
+    min-height:260px!important;
+  }
+}
