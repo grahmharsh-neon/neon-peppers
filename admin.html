@@ -204,17 +204,41 @@
 
           <div class="product-toolbar">
             <input id="adminProductSearch" placeholder="Search products...">
+            <select id="adminProductSort">
+              <option value="updated_desc">Recently Updated</option>
+              <option value="name_asc">Name A-Z</option>
+              <option value="name_desc">Name Z-A</option>
+              <option value="price_desc">Highest Price</option>
+              <option value="price_asc">Lowest Price</option>
+              <option value="stock_desc">Highest Stock</option>
+              <option value="stock_asc">Lowest Stock</option>
+            </select>
             <div class="product-collapse-actions">
               <button id="expandAllProductsButton" class="btn" type="button">Expand All</button>
               <button id="collapseAllProductsButton" class="btn" type="button">Collapse All</button>
             </div>
             <select id="adminProductFilter">
               <option value="all">All products</option>
-              <option value="visible">Visible flag</option>
-              <option value="hidden">Hidden flag</option>
               <option value="featured">Featured</option>
-              <option value="needs_attention">Needs Attention</option>
+              <option value="missing_coa">Missing COA</option>
+              <option value="missing_image">Missing Image</option>
+              <option value="missing_price">Missing Price</option>
+              <option value="low_stock">Low Stock</option>
             </select>
+          </div>
+
+          <div class="product-bulk-toolbar">
+            <label><input id="selectAllProductsCheckbox" type="checkbox"> Select All</label>
+            <select id="bulkProductAction">
+              <option value="">Bulk Action</option>
+              <option value="draft">Move to Draft</option>
+              <option value="inventory">Move to Inventory</option>
+              <option value="published">Publish</option>
+              <option value="archived">Archive</option>
+              <option value="delete">Delete</option>
+            </select>
+            <button id="applyBulkProductActionButton" class="btn pink" type="button">Apply</button>
+            <span id="selectedProductCount" class="muted">0 selected</span>
           </div>
 
           <div id="products"></div>
@@ -343,7 +367,7 @@
   <script src="config.js"></script>
   <script src="/markdown.js"></script>
   <script src="/js/neon-core.js?v=23"></script>
-  <script src="/js/admin-products.js?v=24.2"></script>
-  <script src="admin.js?v=24.2"></script>
+  <script src="/js/admin-products.js?v=24.4"></script>
+  <script src="admin.js?v=24.4"></script>
 </body>
 </html>

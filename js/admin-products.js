@@ -6,6 +6,7 @@
   window.productLifecycleFilter=window.productLifecycleFilter||"all";
   window.productAttentionFilter=window.productAttentionFilter||"";
   window.productExpandedState=window.productExpandedState||{};
+  window.selectedProductIds=window.selectedProductIds||new Set();
 
   window.setDescriptionGenerationStatus=function(index,message,state=""){
     const node=document.getElementById(`descriptionStatus-${index}`);
@@ -147,9 +148,48 @@
     window.renderProducts();
   };
 
+  function productHasCoa(product){
+    return new Set((window.dashboardCoas||[]).map(x=>String(x.product_id))).has(String(product.id));
+  }
+
+  function refreshSelectedCount(){
+    const node=document.getElementById("selectedProductCount");
+    if(node)node.textContent=`${window.selectedProductIds.size} selected`;
+  }
+
+  window.toggleProductSelection=function(id,checked){
+    if(!id)return;
+    if(checked)window.selectedProductIds.add(String(id));
+    else window.selectedProductIds.delete(String(id));
+    refreshSelectedCount();
+  };
+
+  window.quickSaveProductField=async function(index,field,value){
+    const product=window.products?.[index];
+    if(!product?.id)return;
+    const clean=Number(value||0);
+    const {error}=await window.client
+      .from("products")
+      .update({[field]:clean,updated_at:new Date().toISOString()})
+      .eq("id",product.id);
+    if(error){alert(error.message);return}
+    product[field]=clean;
+    window.flash?.(field==="price"?"Price updated":"Stock updated");
+  };
+
+  window.duplicateProduct=function(index){
+    const product=window.products?.[index];
+    if(!product)return;
+    const copy={...product,id:null,name:`${product.name||"Product"} Copy`,lifecycle_status:"draft",visible:false,featured:false};
+    window.products.unshift(copy);
+    window.productExpandedState["new-0"]=true;
+    window.renderProducts();
+  };
+
   function collapsedWarnings(product){
     const warnings=[];
     if(!String(product.image_url||"").trim())warnings.push("Missing Image");
+    if(product.id&&!productHasCoa(product))warnings.push("Missing COA");
     if(Number(product.price||0)<=0)warnings.push("Missing Price");
     if(!String(product.description||"").trim())warnings.push("Missing Description");
     if(!Array.isArray(product.option_values)||!product.option_values.length)warnings.push("No Sizes");
@@ -368,16 +408,29 @@
       ].filter(Boolean).join(" ").toLowerCase();
 
       let matchesFilter=true;
-      if(filter==="visible")matchesFilter=product.visible!==false;
-      if(filter==="hidden")matchesFilter=product.visible===false;
       if(filter==="featured")matchesFilter=product.featured===true;
-      if(filter==="needs_attention")matchesFilter=matchesAttention(product);
+      if(filter==="missing_coa")matchesFilter=product.id?!productHasCoa(product):true;
+      if(filter==="missing_image")matchesFilter=!String(product.image_url||"").trim();
+      if(filter==="missing_price")matchesFilter=Number(product.price||0)<=0;
+      if(filter==="low_stock")matchesFilter=Number(product.stock_count||0)<=Number(product.low_stock_threshold||5);
 
       const lifecycleMatch=
         lifecycle==="all" ||
         (product.lifecycle_status||"published")===lifecycle;
 
       return searchable.includes(query)&&matchesFilter&&lifecycleMatch;
+    });
+
+    const sort=document.getElementById("adminProductSort")?.value||"updated_desc";
+    entries.sort((a,b)=>{
+      const A=a.product,B=b.product;
+      if(sort==="name_asc")return String(A.name||"").localeCompare(String(B.name||""));
+      if(sort==="name_desc")return String(B.name||"").localeCompare(String(A.name||""));
+      if(sort==="price_desc")return Number(B.price||0)-Number(A.price||0);
+      if(sort==="price_asc")return Number(A.price||0)-Number(B.price||0);
+      if(sort==="stock_desc")return Number(B.stock_count||0)-Number(A.stock_count||0);
+      if(sort==="stock_asc")return Number(A.stock_count||0)-Number(B.stock_count||0);
+      return new Date(B.updated_at||B.created_at||0)-new Date(A.updated_at||A.created_at||0);
     });
 
     if(!entries.length){
@@ -571,5 +624,6 @@
 
     bindInputs();
     bindLifecycleTabs();
+    refreshSelectedCount();
   };
 })();

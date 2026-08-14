@@ -116,6 +116,46 @@ function bindEvents(){
     });
   });
 
+  const adminProductSort=el("adminProductSort");
+  if(adminProductSort)adminProductSort.addEventListener("change",()=>renderProducts());
+
+  const selectAllProductsCheckbox=el("selectAllProductsCheckbox");
+  if(selectAllProductsCheckbox){
+    selectAllProductsCheckbox.addEventListener("change",()=>{
+      document.querySelectorAll("[data-product-select]").forEach(cb=>{
+        if(cb.disabled)return;
+        cb.checked=selectAllProductsCheckbox.checked;
+        window.toggleProductSelection?.(cb.dataset.productSelect,cb.checked);
+      });
+    });
+  }
+
+  const applyBulkProductActionButton=el("applyBulkProductActionButton");
+  if(applyBulkProductActionButton){
+    applyBulkProductActionButton.addEventListener("click",async()=>{
+      const action=el("bulkProductAction")?.value||"";
+      const ids=[...(window.selectedProductIds||[])];
+      if(!action){alert("Choose a bulk action.");return}
+      if(!ids.length){alert("Select at least one product.");return}
+
+      if(action==="delete"){
+        if(!confirm(`Permanently delete ${ids.length} selected product(s)?`))return;
+        const {error}=await client.from("products").delete().in("id",ids);
+        if(error){alert(error.message);return}
+      }else{
+        const {error}=await client
+          .from("products")
+          .update({lifecycle_status:action,visible:action==="published",updated_at:new Date().toISOString()})
+          .in("id",ids);
+        if(error){alert(error.message);return}
+      }
+
+      window.selectedProductIds.clear();
+      await loadProducts();
+      flash("Bulk action complete");
+    });
+  }
+
   const expandAllProductsButton=el("expandAllProductsButton");
   if(expandAllProductsButton){
     expandAllProductsButton.addEventListener("click",()=>window.expandAllProducts?.());
