@@ -8,6 +8,10 @@
   window.productExpandedState=window.productExpandedState||{};
   window.selectedProductIds=window.selectedProductIds||new Set();
 
+  window.resetProductCollapseState=function(){
+    window.productExpandedState={};
+  };
+
   window.setDescriptionGenerationStatus=function(index,message,state=""){
     const node=document.getElementById(`descriptionStatus-${index}`);
     if(!node)return;
@@ -443,39 +447,53 @@
       const selected=Array.isArray(product.option_values)?product.option_values:[];
       return `
       <article class="product-editor ${isExpanded(product,index)?"expanded":"collapsed"}">
-        <button
-          class="product-collapse-summary"
-          type="button"
-          onclick="toggleProductEditor(${index})"
-          aria-expanded="${isExpanded(product,index)?"true":"false"}"
-        >
-          <div class="product-collapse-main">
-            <div class="product-collapse-title">
-              <h3>${esc(product.name||"New Product")}</h3>
-              <span class="lifecycle-badge ${lifecycleClass(product.lifecycle_status||"draft")}">
-                ${lifecycleLabel(product.lifecycle_status||"draft")}
-              </span>
-            </div>
-
-            <div class="product-collapse-meta">
-              <span>${selected.length?`${esc(optionLabel)}: ${selected.map(esc).join(", ")}`:"No size selected"}</span>
-              <span>${Number(product.price||0)>0?`$${Number(product.price).toFixed(2)}`:"No price"}</span>
-              <span>Stock: ${Number(product.stock_count||0)}</span>
-            </div>
-
-            <div class="product-collapse-warnings">
-              ${collapsedWarnings(product).map(warning=>`
-                <span class="product-warning-chip ${warning==="Low Stock"?"warning":""}">
-                  ${esc(warning)}
+        <div class="product-collapse-summary">
+          <button
+            class="product-summary-open"
+            type="button"
+            onclick="toggleProductEditor(${index})"
+            aria-expanded="${isExpanded(product,index)?"true":"false"}"
+          >
+            <div class="product-collapse-main">
+              <div class="product-collapse-title">
+                <h3>${esc(product.name||"New Product")}</h3>
+                <span class="lifecycle-badge ${lifecycleClass(product.lifecycle_status||"draft")}">
+                  ${lifecycleLabel(product.lifecycle_status||"draft")}
                 </span>
-              `).join("")}
-            </div>
-          </div>
+              </div>
 
-          <div class="product-collapse-toggle">
-            ${isExpanded(product,index)?"Collapse ▲":"Edit / Expand ▼"}
+              <div class="product-collapse-meta">
+                <span>${selected.length?`${esc(optionLabel)}: ${selected.map(esc).join(", ")}`:"No size selected"}</span>
+                <span>${Number(product.price||0)>0?`$${Number(product.price).toFixed(2)}`:"No price"}</span>
+                <span>Stock: ${Number(product.stock_count||0)}</span>
+              </div>
+
+              <div class="product-collapse-warnings">
+                ${collapsedWarnings(product).map(warning=>`
+                  <span class="product-warning-chip ${warning==="Low Stock"?"warning":""}">
+                    ${esc(warning)}
+                  </span>
+                `).join("")}
+              </div>
+            </div>
+
+            <div class="product-collapse-toggle">
+              ${isExpanded(product,index)?"Collapse ▲":"Edit / Expand ▼"}
+            </div>
+          </button>
+
+          <div class="product-row-actions">
+            <button class="btn" type="button" onclick="toggleProductEditor(${index})">
+              ${isExpanded(product,index)?"Collapse":"Edit"}
+            </button>
+            <button class="btn blue" type="button" onclick="duplicateProduct(${index})">
+              Duplicate
+            </button>
+            <button class="btn danger" type="button" onclick="deleteProduct(${index})">
+              Delete
+            </button>
           </div>
-        </button>
+        </div>
 
         <div class="product-editor-body" ${isExpanded(product,index)?"":"hidden"}>
 
@@ -492,6 +510,7 @@
           </div>
           <div class="actions lifecycle-actions">
             <button class="btn pink" type="button" onclick="saveProduct(${index})">Save Product</button>
+          <button class="btn danger" type="button" onclick="deleteProduct(${index})">Delete Product</button>
             ${product.lifecycle_status!=="published"
               ? `<button class="btn green" type="button" onclick="publishProduct(${index})">Publish Product</button>`
               : `<button class="btn" type="button" onclick="setProductLifecycle(${index},'inventory')">Unpublish</button>`

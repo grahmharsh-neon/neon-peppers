@@ -289,6 +289,9 @@ window.loadProducts = async function loadProducts(){
   }
 
   products = data || [];
+  if(typeof window.resetProductCollapseState==="function"){
+    window.resetProductCollapseState();
+  }
   renderProducts();
 }
 
