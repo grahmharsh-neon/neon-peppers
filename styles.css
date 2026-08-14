@@ -1159,3 +1159,112 @@ header nav a{
     font-size:.78rem;
   }
 }
+
+
+/* V25 PRODUCT CATALOG CLEANUP */
+.compact-product-card{
+  padding:18px!important;
+}
+
+.compact-product-card .card-topline{
+  margin-bottom:7px;
+}
+
+.compact-product-card h3{
+  margin:5px 0 12px;
+  font-size:1.22rem;
+}
+
+.compact-featured{
+  color:var(--pink);
+  font-size:.65rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+
+.compact-product-sizes{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  min-height:24px;
+  margin-bottom:8px;
+}
+
+.compact-product-sizes span{
+  color:var(--muted);
+  font-size:.68rem;
+  text-transform:uppercase;
+  font-weight:800;
+}
+
+.compact-product-sizes strong{
+  color:#fff;
+  font-size:.82rem;
+}
+
+.compact-product-card .product-price-wrap{
+  margin-top:9px;
+}
+
+.compact-product-card .card-actions{
+  margin-top:15px;
+  padding-top:12px;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+
+.stock-copy{
+  font-size:.7rem;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+.stock-copy.in-stock{
+  color:var(--green);
+}
+
+.stock-copy.not-in-stock{
+  color:#ff6572;
+}
+
+.product-status.available{
+  color:var(--green);
+  border:1px solid var(--green);
+}
+
+.out-of-stock-card{
+  opacity:.72;
+}
+
+.out-of-stock-card:hover{
+  opacity:1;
+}
+
+.out-of-stock-card .card-image{
+  filter:saturate(.65);
+}
+
+.card-view{
+  color:#fff;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+/* Product descriptions belong on the individual product page, not catalog cards. */
+.compact-product-card > p,
+.compact-product-card .product-tags,
+.compact-product-card .card-category-icon{
+  display:none!important;
+}
+
+@media(max-width:650px){
+  .compact-product-card{
+    padding:15px!important;
+  }
+
+  .compact-product-card .card-actions{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:8px;
+  }
+}

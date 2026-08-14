@@ -194,13 +194,24 @@ function getFilteredProducts(){
     return categoryMatch && text.includes(query);
   });
 
+  const isInStock=product=>
+    Number(product.stock_count||0)>0 &&
+    product.status!=="out_of_stock" &&
+    product.status!=="coming_soon";
+
   filtered = [...filtered].sort((a, b) => {
+    // V25 rule: anything actually in stock ALWAYS appears first.
+    const stockDiff=Number(isInStock(b))-Number(isInStock(a));
+    if(stockDiff!==0)return stockDiff;
+
+    // Within the in-stock or unavailable group, honor the selected sort.
     if(sort === "name-asc") return String(a.name || "").localeCompare(String(b.name || ""));
     if(sort === "name-desc") return String(b.name || "").localeCompare(String(a.name || ""));
     if(sort === "newest") return new Date(b.created_at || 0) - new Date(a.created_at || 0);
 
+    // Default Featured sorting still respects stock priority.
     if(Boolean(a.featured) !== Boolean(b.featured)) return a.featured ? -1 : 1;
-    return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+    return String(a.name || "").localeCompare(String(b.name || ""));
   });
 
   return filtered;
@@ -282,13 +293,18 @@ function renderProducts(){
       ? `style="background-image:url('${String(product.image_url).replace(/'/g,"%27")}')"`
       : "";
 
+    const inStock=
+      Number(product.stock_count||0)>0 &&
+      product.status!=="out_of_stock" &&
+      product.status!=="coming_soon";
+
     let status = "";
-    if(Number(product.stock_count||0)<=0 || product.status === "out_of_stock"){
+    if(product.status==="coming_soon"){
       status = '<div class="product-status coming">Coming Soon</div>';
-    }else if(product.status === "coming_soon"){
+    }else if(!inStock){
       status = '<div class="product-status out">Out of Stock</div>';
     }else{
-      status = '<div class="product-status available">Available</div>';
+      status = '<div class="product-status available">In Stock</div>';
     }
 
     const featured = product.featured
@@ -299,7 +315,7 @@ function renderProducts(){
       ? '<div class="product-status low">Low Stock</div>'
       : "";
 
-    const tags=(product.tags||[]).slice(0,3).map(tag=>`<span class="product-tag">${esc(tag)}</span>`).join("");
+    card.classList.toggle("out-of-stock-card",!inStock);
 
     card.innerHTML = `
       <div class="card-image" ${image}>
@@ -310,24 +326,29 @@ function renderProducts(){
         <div class="card-glow"></div>
       </div>
 
-      <div class="card-body">
-        <div class="product-tags">${tags}</div>
+      <div class="card-body compact-product-card">
         <div class="card-topline">
-          <div>
-            <div class="category">${esc(product.category || "Research Compound")}</div>
-          </div>
-          <div class="card-category-icon ${product.featured ? "pink-text" : "blue-text"}">
-            ${categoryIcon(product.category)}
-          </div>
+          <div class="category">${esc(product.category || "Research Compound")}</div>
+          ${product.featured?'<span class="compact-featured">Featured</span>':""}
         </div>
 
         <h3>${esc(product.name)}</h3>
-        <p>${esc(productCardSummary(product.description))}</p>
-          ${formatProductPrice(product)}
+
+        <div class="compact-product-sizes">
+          ${Array.isArray(product.option_values)&&product.option_values.length
+            ? `<span>Sizes</span><strong>${esc(product.option_values.join(" · "))}</strong>`
+            : `<span>Size</span><strong>See details</strong>`
+          }
+        </div>
+
+        ${formatProductPrice(product)}
 
         <div class="card-actions">
-          <div class="strength">${esc((product.option_values||[]).join(" · "))}</div>
-          <div class="card-view">View details</div>
+          <div class="stock-copy ${inStock?"in-stock":"not-in-stock"}">
+            ${inStock?`In Stock${Number(product.stock_count||0)>0?` · ${Number(product.stock_count)} available`:""}`:
+              product.status==="coming_soon"?"Coming Soon":"Out of Stock"}
+          </div>
+          <div class="card-view">View Product →</div>
         </div>
       </div>
     `;
