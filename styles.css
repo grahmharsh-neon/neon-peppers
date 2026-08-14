@@ -1268,3 +1268,24 @@ header nav a{
     gap:8px;
   }
 }
+
+
+/* V25.2 DEDICATED RESEARCH PRODUCTS PAGE */
+.standalone-catalog-section{
+  min-height:70vh;
+  padding-top:120px;
+  padding-bottom:80px;
+}
+
+.standalone-catalog-section .section-title{
+  margin-bottom:28px;
+}
+
+.standalone-catalog-section .section-title.left::after{
+  display:none;
+}
+
+header nav a.active{
+  color:#fff;
+  border-bottom:2px solid var(--pink);
+}

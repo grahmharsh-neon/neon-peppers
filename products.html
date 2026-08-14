@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Neon Peppers research materials for qualified laboratory and analytical applications.">
+  <title>Neon Peppers Research</title>
+  <link rel="stylesheet" href="styles.css">
+
+  <title>Research Products | Neon Peppers</title>
+</head>
+<body>
+<header>
+    <div class="header-inner">
+      <a class="brand" href="#home">
+        <img src="assets/neon-peppers-logo.jpg" alt="Neon Peppers">
+      </a>
+
+      <button class="menu" id="menuBtn" aria-label="Open navigation">☰</button>
+
+      <nav id="navLinks">
+        <a class="active" href="/#home">Home</a>
+        <a class="active" href="/products.html">Research Products</a>
+        <a href="/coa.html">COAs</a>
+        <a href="/merch.html">Merch</a>
+        <a href="/order.html">Order Request</a>
+        <a href="/customer-portal.html">Customer Portal</a>
+        <a class="admin-link" href="/admin.html">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="catalog-section standalone-catalog-section">
+      <div class="section-title left">
+        <div>
+          <div class="eyebrow">Research Catalog</div>
+          <h1>Research Products</h1>
+          <p class="muted">Browse current research products. In-stock products always appear first.</p>
+        </div>
+      </div>
+
+      <div class="products">
+        <div class="catalog-controls">
+          <div class="catalog-search-row">
+            <input id="searchInput" type="search" placeholder="Search products...">
+
+            <select id="sortProducts">
+              <option value="featured">Featured</option>
+              <option value="name-asc">Name A–Z</option>
+              <option value="name-desc">Name Z–A</option>
+              <option value="newest">Newest</option>
+            </select>
+
+            <button id="clearSearch" class="btn" type="button">Clear</button>
+          </div>
+
+          <div class="catalog-filter-row">
+            <div id="filters" class="filters"></div>
+            <div id="productCount" class="product-count"></div>
+          </div>
+        </div>
+
+        <div id="productGrid" class="product-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/config.js"></script>
+  <script src="/site.js?v=25.2"></script>
+</body>
+</html>
